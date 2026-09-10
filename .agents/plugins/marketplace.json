@@ -1,14 +1,14 @@
 {
-  "name": "int-practice-community",
+  "name": "int-helper-community",
   "interface": {
-    "displayName": "INT Practice Helper"
+    "displayName": "INT Helper"
   },
   "plugins": [
     {
-      "name": "int-practice-helper",
+      "name": "int-helper",
       "source": {
         "source": "local",
-        "path": "./int-practice-helper"
+        "path": "./int-helper"
       },
       "policy": {
         "installation": "AVAILABLE",

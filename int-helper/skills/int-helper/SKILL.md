@@ -1,11 +1,11 @@
 ---
-name: int-practice-helper
-description: Inspect and answer authorized Virtual School and INT Project practice questions within an explicit chapter or subject scope through the INT Practice Bridge, including text and image questions, without an external model API.
+name: int-helper
+description: Inspect and answer authorized Virtual School and INT Project practice questions within an explicit chapter or subject scope through the INT INT Helper, including text and image questions, without an external model API.
 ---
 
-# INT Practice Helper
+# INT Helper
 
-Use the active Codex model for reasoning. Use only the `int-practice-bridge` MCP tools for the website; never use Computer Use, generic Chrome DevTools, or an external model API unless the user explicitly authorizes an exception.
+Use the active Codex model for reasoning. Use only the `int-helper-bridge` MCP tools for the website; never use Computer Use, generic Chrome DevTools, or an external model API unless the user explicitly authorizes an exception.
 
 ## Inspect and scope
 

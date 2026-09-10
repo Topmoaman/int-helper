@@ -63,7 +63,7 @@ const createBridge = async (name) => {
 };
 
 const startBridge = async () => {
-  ({ client, transport } = await createBridge("int-practice-bridge-demo"));
+  ({ client, transport } = await createBridge("int-helper-bridge-demo"));
   state.bridge = "connected";
 };
 
@@ -136,8 +136,9 @@ const check = async () => {
   execFileSync(process.execPath, ["test/review-fast.mjs"], { stdio: "inherit" });
   execFileSync(process.execPath, ["test/resync.mjs"], { stdio: "inherit" });
   execFileSync(process.execPath, ["test/bank-batch.mjs"], { stdio: "inherit" });
-  const firstBridge = await createBridge("int-practice-bridge-demo-1");
-  const secondBridge = await createBridge("int-practice-bridge-demo-2");
+  execFileSync(process.execPath, ["test/updater.mjs"], { stdio: "inherit" });
+  const firstBridge = await createBridge("int-helper-bridge-demo-1");
+  const secondBridge = await createBridge("int-helper-bridge-demo-2");
   ({ client, transport } = firstBridge);
   await connectMockExtension(port);
   try {
@@ -232,7 +233,7 @@ const check = async () => {
 
 const render = () => {
   console.clear();
-  console.log("\x1b[1mINT Practice Bridge prototype\x1b[0m");
+  console.log("\x1b[1mINT INT Helper prototype\x1b[0m");
   console.log(`\x1b[1mbridge\x1b[0m: ${state.bridge}`);
   console.log(`\x1b[1mextension\x1b[0m: ${state.extension}`);
   console.log(`\x1b[1mlast action\x1b[0m: ${state.lastAction || "—"}`);

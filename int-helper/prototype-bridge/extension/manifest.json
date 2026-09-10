@@ -1,23 +1,26 @@
 {
   "manifest_version": 3,
-  "name": "INT Practice Bridge Prototype",
-  "version": "0.12.0",
+  "name": "INT Helper",
+  "version": "0.13.0",
   "description": "Connects supported authorized practice tabs to the local Codex MCP bridge.",
   "minimum_chrome_version": "116",
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Practice Bridge status"
+    "default_title": "INT Helper status"
   },
   "permissions": [
     "scripting",
-    "tabs"
+    "tabs",
+    "storage",
+    "alarms"
   ],
   "host_permissions": [
     "https://int-project.com/*",
     "https://www.int-project.com/*",
     "https://main.virtualschool.club/*",
     "https://www.virtualschool.club/admin/question_pic/*",
-    "https://www.virtualschool.club/admin/answers_pic/*"
+    "https://www.virtualschool.club/admin/answers_pic/*",
+    "https://api.github.com/*"
   ],
   "background": {
     "service_worker": "service-worker.js"

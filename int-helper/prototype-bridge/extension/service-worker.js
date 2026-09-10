@@ -11,18 +11,25 @@ const sessions = new Map();
 const subjectLists = new Map();
 // ponytail: one mutation at a time across tabs; use per-tab locks if parallel courses are needed.
 let mutationInFlight = false;
+if (typeof importScripts === "function") importScripts("updates.js");
+const helperUpdates = globalThis.createHelperUpdates?.({
+  chrome, sockets, connectedPorts: () => connectedPorts(),
+  isBusy: () => mutationInFlight || [...sessions.values()].some(session => !session.completed),
+  onChange: () => updateBadge(),
+});
 const connectedPorts = () => [...sockets].filter(([port, socket]) =>
   socket.readyState === WebSocket.OPEN && Date.now() - (heartbeats.get(port) || 0) < 45_000,
 ).map(([port]) => port);
 const updateBadge = () => {
   const connected = connectedPorts().length > 0;
-  chrome.action.setBadgeText({ text: connected ? "ON" : "OFF" });
+  chrome.action.setBadgeText({ text: helperUpdates?.available ? "UP" : connected ? "ON" : "OFF" });
   chrome.action.setBadgeBackgroundColor({ color: connected ? "#16734A" : "#656C78" });
-  chrome.action.setTitle({ title: connected ? "Practice Bridge connected — click for page status" : "Practice Bridge disconnected — open a Codex task with INT Practice Helper" });
+  chrome.action.setTitle({ title: connected ? "INT Helper connected — click for page status" : "INT Helper disconnected — open a Codex task with INT Helper" });
 };
 
 const getStatus = async () => {
-  const status = { ports: connectedPorts(), version: chrome.runtime.getManifest().version, page: "unsupported" };
+  const status = { ports: connectedPorts(), version: chrome.runtime.getManifest().version, page: "unsupported",
+    update: typeof helperUpdates === "undefined" ? undefined : await helperUpdates?.status() };
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id || !/^https:\/\/(?:(?:www\.)?int-project\.com\/student\/virtual_school(?:\/|$)|main\.virtualschool\.club(?:\/|$))/u.test(tab.url || "")) return status;
   const live = [...sessions.entries()].filter(([port]) => status.ports.includes(port));
@@ -66,6 +73,7 @@ const connect = (port) => {
     } catch {
       return;
     }
+    helperUpdates?.receive(port, message);
     if (message.type === "pong") {
       heartbeats.set(port, Date.now());
       updateBadge();
@@ -468,6 +476,8 @@ const navigateReview = async (tabId, session, payload, assertSession = () => {})
 };
 
 const handleRequest = async (action, payload, port) => {
+  if (action === "update_guard") return { safe: !!helperUpdates?.busy && await helperUpdates.idle() };
+  if (helperUpdates?.busy) throw new Error("INT Helper is updating; open a new task after it finishes");
   if (action === "read_exam_result" || action === "open_answer_review") {
     const session = sessions.get(port);
     const tab = session ? { id: session.tabId } : await findTab(SUBJECT_URLS, "Open the submitted result page");
@@ -521,6 +531,7 @@ const handleRequest = async (action, payload, port) => {
     if (typeof payload.enabled !== "boolean") throw new Error("enabled must be boolean");
     if (payload.enabled && (session.scope.mode !== "final" || !/^https:\/\/(?:www\.)?int-project\.com$/u.test(session.scope.origin))) throw new Error("Perfect-score looping requires INT final-only scope");
     session.scope = { ...session.scope, retryUntilPerfect: payload.enabled };
+    session.completed = false;
     return { scope: session.scope, loopMode: payload.enabled ? "loop_until_50" : "normal", tabId: session.tabId };
   }
   if (action === "set_scope") return setScope(port, payload);
@@ -531,8 +542,11 @@ const handleRequest = async (action, payload, port) => {
     mutationInFlight = true;
     try {
       if (action === "answer_and_next") return await answerAndNext(payload, port);
-      if (action === "advance_subject") return await advanceSubject(port);
-      if (action === "complete_current_lesson") return await completeCurrentLesson(port);
+      if (action === "advance_subject" || action === "complete_current_lesson") {
+        const result = action === "advance_subject" ? await advanceSubject(port) : await completeCurrentLesson(port);
+        configuredSession(port).completed = ["complete", "chapter_complete"].includes(result.mode);
+        return result;
+      }
       return await submitCurrentExam(payload, port);
     } finally {
       mutationInFlight = false;

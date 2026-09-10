@@ -4,6 +4,10 @@ import { WebSocketServer } from "ws";
 import { z } from "zod";
 import { createHistory } from "./history.mjs";
 import { answerKnownQuestions } from "./known-answers.mjs";
+import { createUpdater } from "./updater.mjs";
+
+const updater = createUpdater();
+let updateInFlight = false;
 
 let history = null;
 let currentQuestion = null;
@@ -43,7 +47,7 @@ const attachBridge = (bridge) => bridge.on("connection", (socket) => {
   browser?.close(1012, "A newer extension connection replaced this one");
   browser = socket;
 
-  socket.on("message", (raw) => {
+  socket.on("message", async (raw) => {
     let message;
     try {
       message = JSON.parse(raw.toString());
@@ -51,7 +55,26 @@ const attachBridge = (bridge) => bridge.on("connection", (socket) => {
       return;
     }
     if (message.type === "ping") {
-      socket.send(JSON.stringify({ type: "pong" }));
+      socket.send(JSON.stringify({ type: "pong", updaterProtocol: 1 }));
+      return;
+    }
+    if (message.type === "update_request") {
+      const reply = result => { if (socket.readyState === socket.OPEN) socket.send(JSON.stringify({ type: "update_response", id: message.id, ...result })); };
+      let ownsUpdate = false;
+      try {
+        await updater.authenticate(message.token);
+        if (socket !== browser || message.action !== "install") throw new Error("Unsupported update request");
+        if (updateInFlight || pending.size) throw new Error("An action is still running; finish it before updating");
+        updateInFlight = true; ownsUpdate = true;
+        const ensureIdle = async () => {
+          if (socket !== browser || socket.readyState !== socket.OPEN || pending.size) throw new Error("Update connection changed or an action is still running");
+          const guard = await requestBrowser("update_guard");
+          if (!guard.safe) throw new Error("Finish the current task and leave the exam page before updating");
+        };
+        const result = await updater.installLatest({ ensureIdle });
+        reply({ ok: true, result });
+      } catch (error) { reply({ ok: false, error: error.message }); }
+      finally { if (ownsUpdate) updateInFlight = false; }
       return;
     }
     if (message.type !== "response" || !pending.has(message.id)) return;
@@ -64,7 +87,7 @@ const attachBridge = (bridge) => bridge.on("connection", (socket) => {
 
   socket.on("close", () => {
     if (browser === socket) browser = null;
-    rejectPending("INT Practice Bridge extension disconnected");
+    rejectPending("INT INT Helper extension disconnected");
   });
 });
 
@@ -90,19 +113,23 @@ const startBridge = async () => {
   for (let port = basePort; port < basePort + portCount; port += 1) {
     try {
       const bridge = await listen(port);
-      bridge.on("error", (error) => console.error(`INT Practice Bridge WebSocket error: ${error.message}`));
+      bridge.on("error", (error) => console.error(`INT INT Helper WebSocket error: ${error.message}`));
       return { bridge, port };
     } catch (error) {
       if (error.code !== "EADDRINUSE") throw error;
     }
   }
-  throw new Error(`No free INT Practice Bridge port in ${basePort}-${basePort + portCount - 1}`);
+  throw new Error(`No free INT INT Helper port in ${basePort}-${basePort + portCount - 1}`);
 };
 
 const requestBrowser = (action, payload = {}) =>
   new Promise((resolve, reject) => {
+    if (updateInFlight && action !== "update_guard") {
+      reject(new Error("INT Helper is updating; open a new task after it finishes"));
+      return;
+    }
     if (!browser || browser.readyState !== browser.OPEN) {
-      reject(new Error("INT Practice Bridge extension is not connected"));
+      reject(new Error("INT INT Helper extension is not connected"));
       return;
     }
     const id = String(++sequence);
@@ -127,7 +154,7 @@ const toolResult = (question) => {
   return { content, structuredContent: data };
 };
 
-const server = new McpServer({ name: "int-practice-bridge", version: "0.1.0" });
+const server = new McpServer({ name: "int-helper-bridge", version: "0.1.0" });
 
 server.registerTool(
   "set_question_history",
@@ -345,11 +372,11 @@ server.registerTool(
 
 const main = async () => {
   const { port } = await startBridge();
-  console.error(`INT Practice Bridge listening on ws://127.0.0.1:${port}`);
+  console.error(`INT INT Helper listening on ws://127.0.0.1:${port}`);
   await server.connect(new StdioServerTransport());
 };
 
 main().catch((error) => {
-  console.error(`INT Practice Bridge MCP error: ${error.message}`);
+  console.error(`INT INT Helper MCP error: ${error.message}`);
   process.exitCode = 1;
 });

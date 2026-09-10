@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "int-practice-bridge": {
+    "int-helper-bridge": {
       "command": "node",
       "args": ["./prototype-bridge/dist/server.cjs"],
       "cwd": ".",

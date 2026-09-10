@@ -8,3 +8,6 @@ node_modules/
 answer-bank.json
 history/
 *.zip
+release/
+updater-config.json
+installation.json

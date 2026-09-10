@@ -1,8 +1,8 @@
-# INT Practice Helper
+# INT Helper
 
 A Codex plugin and local Chrome extension for authorized practice on INT Project and Virtual School. It uses the active Codex model; no separate model API key is required. This is an unofficial local prototype, not affiliated with either learning platform.
 
-Shared version: **0.17.0+codex.20260910** · Chrome extension: **0.12.0**.
+Shared version: **0.18.0** · Chrome extension: **0.13.0**.
 
 ## What works
 
@@ -27,39 +27,46 @@ You need Chrome, Node.js 20 or newer, Codex with plugin support, and your own si
 Download and extract this repository using **Code → Download ZIP**, or clone it:
 
 ```sh
-git clone https://github.com/Topmoaman/int-practice-helper.git
-cd int-practice-helper
+git clone https://github.com/Topmoaman/int-helper.git
+cd int-helper
 ```
 
 Keep this folder: Chrome loads the extension from it. Prebuilt MCP bundles are included, so normal installation does not require npm install.
 
-### 2. Install the Codex plugin
+### 2. Run the one-time installer
 
-From the extracted repository folder:
-
-```sh
-codex plugin marketplace add .
-codex plugin add int-practice-helper@int-practice-community
-```
-
-Alternatively, register the GitHub marketplace directly:
+Close any active practice tasks, then run this command from the extracted repository folder:
 
 ```sh
-codex plugin marketplace add Topmoaman/int-practice-helper --ref main
-codex plugin add int-practice-helper@int-practice-community
+node install.mjs
 ```
 
-You still need a local copy of the extension folder for Chrome. Enable the installed plugin in Codex and open a new task so its tools load.
+It installs the plugin through Codex into a stable directory under `~/.local/share/int-helper/install/current/` and prints the extension path. Node.js and the `codex` command must be on PATH. The installer registers the `int-helper-community` marketplace and installs `int-helper`. It does not alter your saved question history.
 
-### 3. Load the Chrome extension
+### 3. Load the installed extension once
 
 1. Open Chrome's extension manager (`chrome://extensions`).
-2. Enable **Developer mode**.
-3. Choose **Load unpacked**.
-4. Select `int-practice-helper/prototype-bridge/extension` inside this repository.
-5. Open your signed-in practice page and reload it.
+2. Disable the old Practice Bridge extension if you already installed it.
+3. Enable **Developer mode** and choose **Load unpacked**.
+4. Select the exact extension folder printed by the installer, normally `~/.local/share/int-helper/install/current/int-helper/prototype-bridge/extension` (expand `~` to your home directory).
+5. Reload the practice page and open a new Codex task with **INT Helper** enabled. Disable the older INT Practice Helper plugin in that task if it is still installed.
 
-When Codex starts this plugin's MCP server, the extension connects over localhost. Its popup shows connection and page status. A connection alone does not start answering anything.
+Load the installed folder, not the downloaded source folder, to enable the update button.
+
+## Updates
+
+The extension checks public GitHub Releases at startup and approximately every four hours while Chrome is running. A new stable release shows **UP** on the extension icon and **มีรุ่นใหม่** in its popup. You can also press **ตรวจรุ่นใหม่**. Checking never installs an update or sends practice questions to GitHub.
+
+When an update is available:
+
+1. Finish the current practice task and leave the exam page. Open an idle Codex task with INT Helper connected if needed.
+2. Click **อัปเดตตอนนี้** in the popup.
+3. The local bridge downloads the release, validates file checksums, keeps a previous copy, installs the new Codex plugin and reloads the extension.
+4. Reload the practice page and open a new Codex task to load the new tools.
+
+The update button requires the one-time installer above and a connected compatible bridge. It stays disabled while a practice scope is unfinished or any supported exam page is open. Internet/installation failures are shown in the popup; an already known update remains visible while offline. Local edits stop an update rather than being overwritten. Failed installation restores the previous files and attempts to restore the previous Codex plugin. Saved history is outside the install directory and is preserved.
+
+This is a user-triggered updater for an unpacked extension, not Chrome Web Store auto-update. Old 0.17 installations need the one-time setup to receive this capability. Merely pushing commits does not notify users: publish a stable GitHub Release containing the update asset.
 
 ## Use
 
@@ -98,7 +105,7 @@ The bridge binds to `127.0.0.1` on ports 17373–17388. This prototype checks Ch
 ## Development
 
 ```sh
-cd int-practice-helper/prototype-bridge
+cd int-helper/prototype-bridge
 npm ci
 npm run build
 npm run check
@@ -106,4 +113,14 @@ npm run check
 
 The checks use local simulated pages and mock extension connections. They do not answer or submit a live website exam. Test coverage includes scope, submission, review, duplicate history, exact answer reuse, stale codes and multiple MCP sessions. A full live Virtual School review/retry cycle has not been implemented.
 
-Runtime code in this shared snapshot matches the working plugin. Sharing changes are limited to packaging, documentation and removing the original user's standing instructions. Third-party dependency notices are in `THIRD_PARTY_NOTICES.md`.
+This release adds a managed updater and renames the shared plugin to INT Helper. Virtual School review/Loop parity remains planned. Third-party dependency notices are in `THIRD_PARTY_NOTICES.md`.
+
+## Publishing a release
+
+Bump the plugin version, the `VERSION` constant in `extension/updates.js`, the extension manifest/content versions and test expectations together. Build and test, then generate the asset from the repository root:
+
+```sh
+node scripts/build-release.mjs release
+```
+
+Publish a stable tag such as `v0.18.0` with `release/int-helper-update.json` attached. The tag and plugin version must match exactly. Update sources are restricted to this repository; file paths are allowlisted and local pairing credentials are excluded from release packages. Checksums detect damaged content; trust in the publisher comes from GitHub HTTPS and repository ownership, not a separate signing key.

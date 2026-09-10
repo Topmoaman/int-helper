@@ -32,9 +32,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/codegen/code.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/codegen/code.js
 var require_code = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/codegen/code.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/codegen/code.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.regexpCode = exports2.getEsmExportName = exports2.getProperty = exports2.safeStringify = exports2.stringify = exports2.strConcat = exports2.addCodeArg = exports2.str = exports2._ = exports2.nil = exports2._Code = exports2.Name = exports2.IDENTIFIER = exports2._CodeOrName = void 0;
@@ -186,9 +186,9 @@ var require_code = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/codegen/scope.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/codegen/scope.js
 var require_scope = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/codegen/scope.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/codegen/scope.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ValueScope = exports2.ValueScopeName = exports2.Scope = exports2.varKinds = exports2.UsedValueState = void 0;
@@ -331,9 +331,9 @@ var require_scope = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/codegen/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/codegen/index.js
 var require_codegen = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/codegen/index.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/codegen/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.or = exports2.and = exports2.not = exports2.CodeGen = exports2.operators = exports2.varKinds = exports2.ValueScopeName = exports2.ValueScope = exports2.Scope = exports2.Name = exports2.regexpCode = exports2.stringify = exports2.getProperty = exports2.nil = exports2.strConcat = exports2.str = exports2._ = void 0;
@@ -1051,9 +1051,9 @@ var require_codegen = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/util.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/util.js
 var require_util = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/util.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/util.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.checkStrictMode = exports2.getErrorPath = exports2.Type = exports2.useFunc = exports2.setEvaluated = exports2.evaluatedPropsToName = exports2.mergeEvaluated = exports2.eachItem = exports2.unescapeJsonPointer = exports2.escapeJsonPointer = exports2.escapeFragment = exports2.unescapeFragment = exports2.schemaRefOrVal = exports2.schemaHasRulesButRef = exports2.schemaHasRules = exports2.checkUnknownRules = exports2.alwaysValidSchema = exports2.toHash = void 0;
@@ -1218,9 +1218,9 @@ var require_util = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/names.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/names.js
 var require_names = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/names.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/names.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -1257,9 +1257,9 @@ var require_names = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/errors.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/errors.js
 var require_errors = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/errors.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/errors.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.extendErrors = exports2.resetErrorsCount = exports2.reportExtraError = exports2.reportError = exports2.keyword$DataError = exports2.keywordError = void 0;
@@ -1379,9 +1379,9 @@ var require_errors = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/boolSchema.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/boolSchema.js
 var require_boolSchema = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/boolSchema.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/boolSchema.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.boolOrEmptySchema = exports2.topBoolOrEmptySchema = void 0;
@@ -1430,9 +1430,9 @@ var require_boolSchema = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/rules.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/rules.js
 var require_rules = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/rules.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/rules.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getRules = exports2.isJSONType = void 0;
@@ -1461,9 +1461,9 @@ var require_rules = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/applicability.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/applicability.js
 var require_applicability = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/applicability.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/applicability.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.shouldUseRule = exports2.shouldUseGroup = exports2.schemaHasRulesForType = void 0;
@@ -1484,9 +1484,9 @@ var require_applicability = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/dataType.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/dataType.js
 var require_dataType = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/dataType.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/dataType.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.reportTypeError = exports2.checkDataTypes = exports2.checkDataType = exports2.coerceAndCheckDataType = exports2.getJSONTypes = exports2.getSchemaTypes = exports2.DataType = void 0;
@@ -1668,9 +1668,9 @@ var require_dataType = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/defaults.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/defaults.js
 var require_defaults = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/defaults.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/defaults.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.assignDefaults = void 0;
@@ -1705,9 +1705,9 @@ var require_defaults = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/code.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/code.js
 var require_code2 = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/code.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/code.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateUnion = exports2.validateArray = exports2.usePattern = exports2.callValidateCode = exports2.schemaProperties = exports2.allSchemaProperties = exports2.noPropertyInData = exports2.propertyInData = exports2.isOwnProperty = exports2.hasPropFunc = exports2.reportMissingProp = exports2.checkMissingProp = exports2.checkReportMissingProp = void 0;
@@ -1838,9 +1838,9 @@ var require_code2 = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/keyword.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/keyword.js
 var require_keyword = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/keyword.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/keyword.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateKeywordUsage = exports2.validSchemaType = exports2.funcKeywordCode = exports2.macroKeywordCode = void 0;
@@ -1956,9 +1956,9 @@ var require_keyword = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/subschema.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/subschema.js
 var require_subschema = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/subschema.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/subschema.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.extendSubschemaMode = exports2.extendSubschemaData = exports2.getSubschema = void 0;
@@ -2039,9 +2039,9 @@ var require_subschema = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-deep-equal/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-deep-equal/index.js
 var require_fast_deep_equal = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-deep-equal/index.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-deep-equal/index.js"(exports2, module2) {
     "use strict";
     module2.exports = function equal(a, b) {
       if (a === b) return true;
@@ -2074,9 +2074,9 @@ var require_fast_deep_equal = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/json-schema-traverse/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/json-schema-traverse/index.js
 var require_json_schema_traverse = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/json-schema-traverse/index.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/json-schema-traverse/index.js"(exports2, module2) {
     "use strict";
     var traverse = module2.exports = function(schema, opts, cb) {
       if (typeof opts == "function") {
@@ -2162,9 +2162,9 @@ var require_json_schema_traverse = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/resolve.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/resolve.js
 var require_resolve = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/resolve.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/resolve.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getSchemaRefs = exports2.resolveUrl = exports2.normalizeId = exports2._getFullPath = exports2.getFullPath = exports2.inlineRef = void 0;
@@ -2318,9 +2318,9 @@ var require_resolve = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/index.js
 var require_validate = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/index.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/validate/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getData = exports2.KeywordCxt = exports2.validateFunctionCode = void 0;
@@ -2826,9 +2826,9 @@ var require_validate = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/validation_error.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/validation_error.js
 var require_validation_error = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/validation_error.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/validation_error.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var ValidationError = class extends Error {
@@ -2842,9 +2842,9 @@ var require_validation_error = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/ref_error.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/ref_error.js
 var require_ref_error = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/ref_error.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/ref_error.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var resolve_1 = require_resolve();
@@ -2859,9 +2859,9 @@ var require_ref_error = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/index.js
 var require_compile = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/index.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/compile/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.resolveSchema = exports2.getCompilingSchema = exports2.resolveRef = exports2.compileSchema = exports2.SchemaEnv = void 0;
@@ -3083,9 +3083,9 @@ var require_compile = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/refs/data.json
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/refs/data.json
 var require_data = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/refs/data.json"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/refs/data.json"(exports2, module2) {
     module2.exports = {
       $id: "https://raw.githubusercontent.com/ajv-validator/ajv/master/lib/refs/data.json#",
       description: "Meta-schema for $data reference (JSON AnySchema extension proposal)",
@@ -3102,9 +3102,9 @@ var require_data = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-uri/lib/utils.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-uri/lib/utils.js
 var require_utils = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-uri/lib/utils.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-uri/lib/utils.js"(exports2, module2) {
     "use strict";
     var isUUID = RegExp.prototype.test.bind(/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/iu);
     var isIPv4 = RegExp.prototype.test.bind(/^(?:(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)$/u);
@@ -3599,9 +3599,9 @@ var require_utils = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-uri/lib/schemes.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-uri/lib/schemes.js
 var require_schemes = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-uri/lib/schemes.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-uri/lib/schemes.js"(exports2, module2) {
     "use strict";
     var { isUUID } = require_utils();
     var URN_REG = /^([\da-z][\d\-a-z]{0,31}):((?:[\w!$'()*+,\-./:;=@]|%[\da-f]{2})+)$/iu;
@@ -3810,9 +3810,9 @@ var require_schemes = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-uri/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-uri/index.js
 var require_fast_uri = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-uri/index.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/fast-uri/index.js"(exports2, module2) {
     "use strict";
     var { normalizeIPv6, removeDotSegments, recomposeAuthority, normalizePercentEncoding, normalizePathEncoding, serializePathEncoding, normalizeQueryFragmentEncoding, encodeQuery, encodeFragment, reescapeHostDelimiters, isIPv4, nonSimpleDomain } = require_utils();
     var { SCHEMES, getSchemeHandler } = require_schemes();
@@ -4209,9 +4209,9 @@ var require_fast_uri = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/uri.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/uri.js
 var require_uri = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/uri.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/uri.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var uri = require_fast_uri();
@@ -4220,9 +4220,9 @@ var require_uri = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/core.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/core.js
 var require_core = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/core.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/core.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.CodeGen = exports2.Name = exports2.nil = exports2.stringify = exports2.str = exports2._ = exports2.KeywordCxt = void 0;
@@ -4831,9 +4831,9 @@ var require_core = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/core/id.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/core/id.js
 var require_id = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/core/id.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/core/id.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var def = {
@@ -4846,9 +4846,9 @@ var require_id = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/core/ref.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/core/ref.js
 var require_ref = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/core/ref.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/core/ref.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.callRef = exports2.getValidate = void 0;
@@ -4968,9 +4968,9 @@ var require_ref = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/core/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/core/index.js
 var require_core2 = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/core/index.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/core/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var id_1 = require_id();
@@ -4989,9 +4989,9 @@ var require_core2 = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitNumber.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitNumber.js
 var require_limitNumber = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitNumber.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitNumber.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -5021,9 +5021,9 @@ var require_limitNumber = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/multipleOf.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/multipleOf.js
 var require_multipleOf = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/multipleOf.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/multipleOf.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -5049,9 +5049,9 @@ var require_multipleOf = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/ucs2length.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/ucs2length.js
 var require_ucs2length = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/ucs2length.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/ucs2length.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     function ucs2length(str) {
@@ -5075,9 +5075,9 @@ var require_ucs2length = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitLength.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitLength.js
 var require_limitLength = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitLength.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitLength.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -5107,9 +5107,9 @@ var require_limitLength = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/pattern.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/pattern.js
 var require_pattern = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/pattern.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/pattern.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var code_1 = require_code2();
@@ -5144,9 +5144,9 @@ var require_pattern = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitProperties.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitProperties.js
 var require_limitProperties = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitProperties.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitProperties.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -5173,9 +5173,9 @@ var require_limitProperties = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/required.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/required.js
 var require_required = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/required.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/required.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var code_1 = require_code2();
@@ -5255,9 +5255,9 @@ var require_required = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitItems.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitItems.js
 var require_limitItems = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitItems.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/limitItems.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -5284,9 +5284,9 @@ var require_limitItems = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/equal.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/equal.js
 var require_equal = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/equal.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/runtime/equal.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var equal = require_fast_deep_equal();
@@ -5295,9 +5295,9 @@ var require_equal = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/uniqueItems.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/uniqueItems.js
 var require_uniqueItems = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/uniqueItems.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/uniqueItems.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var dataType_1 = require_dataType();
@@ -5362,9 +5362,9 @@ var require_uniqueItems = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/const.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/const.js
 var require_const = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/const.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/const.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -5391,9 +5391,9 @@ var require_const = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/enum.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/enum.js
 var require_enum = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/enum.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/enum.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -5440,9 +5440,9 @@ var require_enum = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/index.js
 var require_validation = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/index.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/validation/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var limitNumber_1 = require_limitNumber();
@@ -5478,9 +5478,9 @@ var require_validation = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/additionalItems.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/additionalItems.js
 var require_additionalItems = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/additionalItems.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/additionalItems.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateAdditionalItems = void 0;
@@ -5531,9 +5531,9 @@ var require_additionalItems = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/items.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/items.js
 var require_items = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/items.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/items.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateTuple = void 0;
@@ -5588,9 +5588,9 @@ var require_items = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/prefixItems.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/prefixItems.js
 var require_prefixItems = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/prefixItems.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/prefixItems.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var items_1 = require_items();
@@ -5605,9 +5605,9 @@ var require_prefixItems = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/items2020.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/items2020.js
 var require_items2020 = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/items2020.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/items2020.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -5640,9 +5640,9 @@ var require_items2020 = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/contains.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/contains.js
 var require_contains = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/contains.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/contains.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -5734,9 +5734,9 @@ var require_contains = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/dependencies.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/dependencies.js
 var require_dependencies = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/dependencies.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/dependencies.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateSchemaDeps = exports2.validatePropertyDeps = exports2.error = void 0;
@@ -5828,9 +5828,9 @@ var require_dependencies = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/propertyNames.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/propertyNames.js
 var require_propertyNames = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/propertyNames.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/propertyNames.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -5871,9 +5871,9 @@ var require_propertyNames = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js
 var require_additionalProperties = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var code_1 = require_code2();
@@ -5977,9 +5977,9 @@ var require_additionalProperties = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/properties.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/properties.js
 var require_properties = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/properties.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/properties.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var validate_1 = require_validate();
@@ -6035,9 +6035,9 @@ var require_properties = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/patternProperties.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/patternProperties.js
 var require_patternProperties = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/patternProperties.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/patternProperties.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var code_1 = require_code2();
@@ -6109,9 +6109,9 @@ var require_patternProperties = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/not.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/not.js
 var require_not = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/not.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/not.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var util_1 = require_util();
@@ -6140,9 +6140,9 @@ var require_not = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/anyOf.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/anyOf.js
 var require_anyOf = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/anyOf.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/anyOf.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var code_1 = require_code2();
@@ -6157,9 +6157,9 @@ var require_anyOf = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/oneOf.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/oneOf.js
 var require_oneOf = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/oneOf.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/oneOf.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -6215,9 +6215,9 @@ var require_oneOf = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/allOf.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/allOf.js
 var require_allOf = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/allOf.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/allOf.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var util_1 = require_util();
@@ -6242,9 +6242,9 @@ var require_allOf = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/if.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/if.js
 var require_if = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/if.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/if.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -6311,9 +6311,9 @@ var require_if = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/thenElse.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/thenElse.js
 var require_thenElse = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/thenElse.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/thenElse.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var util_1 = require_util();
@@ -6329,9 +6329,9 @@ var require_thenElse = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/index.js
 var require_applicator = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/index.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/applicator/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var additionalItems_1 = require_additionalItems();
@@ -6377,9 +6377,9 @@ var require_applicator = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/format/format.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/format/format.js
 var require_format = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/format/format.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/format/format.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -6467,9 +6467,9 @@ var require_format = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/format/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/format/index.js
 var require_format2 = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/format/index.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/format/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var format_1 = require_format();
@@ -6478,9 +6478,9 @@ var require_format2 = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/metadata.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/metadata.js
 var require_metadata = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/metadata.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/metadata.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.contentVocabulary = exports2.metadataVocabulary = void 0;
@@ -6501,9 +6501,9 @@ var require_metadata = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/draft7.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/draft7.js
 var require_draft7 = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/draft7.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/draft7.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var core_1 = require_core2();
@@ -6523,9 +6523,9 @@ var require_draft7 = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/discriminator/types.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/discriminator/types.js
 var require_types = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/discriminator/types.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/discriminator/types.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DiscrError = void 0;
@@ -6537,9 +6537,9 @@ var require_types = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/discriminator/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/discriminator/index.js
 var require_discriminator = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/discriminator/index.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/vocabularies/discriminator/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -6642,9 +6642,9 @@ var require_discriminator = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/refs/json-schema-draft-07.json
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/refs/json-schema-draft-07.json
 var require_json_schema_draft_07 = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/refs/json-schema-draft-07.json"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/refs/json-schema-draft-07.json"(exports2, module2) {
     module2.exports = {
       $schema: "http://json-schema.org/draft-07/schema#",
       $id: "http://json-schema.org/draft-07/schema#",
@@ -6799,9 +6799,9 @@ var require_json_schema_draft_07 = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/ajv.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/ajv.js
 var require_ajv = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/ajv.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv/dist/ajv.js"(exports2, module2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.MissingRefError = exports2.ValidationError = exports2.CodeGen = exports2.Name = exports2.nil = exports2.stringify = exports2.str = exports2._ = exports2.KeywordCxt = exports2.Ajv = void 0;
@@ -6869,9 +6869,9 @@ var require_ajv = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv-formats/dist/formats.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv-formats/dist/formats.js
 var require_formats = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv-formats/dist/formats.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv-formats/dist/formats.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.formatNames = exports2.fastFormats = exports2.fullFormats = void 0;
@@ -7072,9 +7072,9 @@ var require_formats = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv-formats/dist/limit.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv-formats/dist/limit.js
 var require_limit = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv-formats/dist/limit.js"(exports2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv-formats/dist/limit.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.formatLimitDefinition = void 0;
@@ -7144,9 +7144,9 @@ var require_limit = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv-formats/dist/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv-formats/dist/index.js
 var require_dist = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv-formats/dist/index.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ajv-formats/dist/index.js"(exports2, module2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var formats_1 = require_formats();
@@ -7173,12 +7173,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name}"`);
       return f;
     };
-    function addFormats(ajv, list, fs, exportName) {
+    function addFormats(ajv, list, fs2, exportName) {
       var _a3;
       var _b;
       (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs[f]);
+        ajv.addFormat(f, fs2[f]);
     }
     module2.exports = exports2 = formatsPlugin;
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -7186,9 +7186,9 @@ var require_dist = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/constants.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/constants.js
 var require_constants = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/constants.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/constants.js"(exports2, module2) {
     "use strict";
     var BINARY_TYPES = ["nodebuffer", "arraybuffer", "fragments"];
     var hasBlob = typeof Blob !== "undefined";
@@ -7209,9 +7209,9 @@ var require_constants = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/buffer-util.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/buffer-util.js
 var require_buffer_util = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/buffer-util.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/buffer-util.js"(exports2, module2) {
     "use strict";
     var { EMPTY_BUFFER } = require_constants();
     var FastBuffer = Buffer[Symbol.species];
@@ -7284,9 +7284,9 @@ var require_buffer_util = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/limiter.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/limiter.js
 var require_limiter = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/limiter.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/limiter.js"(exports2, module2) {
     "use strict";
     var kDone = /* @__PURE__ */ Symbol("kDone");
     var kRun = /* @__PURE__ */ Symbol("kRun");
@@ -7334,9 +7334,9 @@ var require_limiter = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/permessage-deflate.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/permessage-deflate.js
 var require_permessage_deflate = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/permessage-deflate.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/permessage-deflate.js"(exports2, module2) {
     "use strict";
     var zlib = require("zlib");
     var bufferUtil = require_buffer_util();
@@ -7717,9 +7717,9 @@ var require_permessage_deflate = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/validation.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/validation.js
 var require_validation2 = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/validation.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/validation.js"(exports2, module2) {
     "use strict";
     var { isUtf8 } = require("buffer");
     var { hasBlob } = require_constants();
@@ -7918,9 +7918,9 @@ var require_validation2 = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/receiver.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/receiver.js
 var require_receiver = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/receiver.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/receiver.js"(exports2, module2) {
     "use strict";
     var { Writable } = require("stream");
     var PerMessageDeflate2 = require_permessage_deflate();
@@ -8550,9 +8550,9 @@ var require_receiver = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/sender.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/sender.js
 var require_sender = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/sender.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/sender.js"(exports2, module2) {
     "use strict";
     var { Duplex } = require("stream");
     var { randomFillSync } = require("crypto");
@@ -9043,9 +9043,9 @@ var require_sender = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/event-target.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/event-target.js
 var require_event_target = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/event-target.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/event-target.js"(exports2, module2) {
     "use strict";
     var { kForOnEventAttribute, kListener } = require_constants();
     var kCode = /* @__PURE__ */ Symbol("kCode");
@@ -9272,9 +9272,9 @@ var require_event_target = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/extension.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/extension.js
 var require_extension = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/extension.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/extension.js"(exports2, module2) {
     "use strict";
     var { tokenChars } = require_validation2();
     function push(dest, name, elem) {
@@ -9425,16 +9425,16 @@ var require_extension = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/websocket.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/websocket.js
 var require_websocket = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/websocket.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/websocket.js"(exports2, module2) {
     "use strict";
     var EventEmitter = require("events");
     var https = require("https");
     var http = require("http");
     var net = require("net");
     var tls = require("tls");
-    var { randomBytes, createHash: createHash2 } = require("crypto");
+    var { randomBytes: randomBytes2, createHash: createHash3 } = require("crypto");
     var { Duplex, Readable } = require("stream");
     var { URL: URL2 } = require("url");
     var PerMessageDeflate2 = require_permessage_deflate();
@@ -9972,7 +9972,7 @@ var require_websocket = __commonJS({
         }
       }
       const defaultPort = isSecure ? 443 : 80;
-      const key = randomBytes(16).toString("base64");
+      const key = randomBytes2(16).toString("base64");
       const request = isSecure ? https.request : http.request;
       const protocolSet = /* @__PURE__ */ new Set();
       let perMessageDeflate;
@@ -10102,8 +10102,8 @@ var require_websocket = __commonJS({
           abortHandshake(websocket, socket, "Invalid Upgrade header");
           return;
         }
-        const digest = createHash2("sha1").update(key + GUID).digest("base64");
-        if (res.headers["sec-websocket-accept"] !== digest) {
+        const digest2 = createHash3("sha1").update(key + GUID).digest("base64");
+        if (res.headers["sec-websocket-accept"] !== digest2) {
           abortHandshake(websocket, socket, "Invalid Sec-WebSocket-Accept header");
           return;
         }
@@ -10321,9 +10321,9 @@ var require_websocket = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/stream.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/stream.js
 var require_stream = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/stream.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/stream.js"(exports2, module2) {
     "use strict";
     var WebSocket2 = require_websocket();
     var { Duplex } = require("stream");
@@ -10419,9 +10419,9 @@ var require_stream = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/subprotocol.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/subprotocol.js
 var require_subprotocol = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/subprotocol.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/subprotocol.js"(exports2, module2) {
     "use strict";
     var { tokenChars } = require_validation2();
     function parse3(header) {
@@ -10464,14 +10464,14 @@ var require_subprotocol = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/websocket-server.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/websocket-server.js
 var require_websocket_server = __commonJS({
-  "../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/websocket-server.js"(exports2, module2) {
+  "../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/lib/websocket-server.js"(exports2, module2) {
     "use strict";
     var EventEmitter = require("events");
     var http = require("http");
     var { Duplex } = require("stream");
-    var { createHash: createHash2 } = require("crypto");
+    var { createHash: createHash3 } = require("crypto");
     var extension2 = require_extension();
     var PerMessageDeflate2 = require_permessage_deflate();
     var subprotocol2 = require_subprotocol();
@@ -10778,12 +10778,12 @@ var require_websocket_server = __commonJS({
           );
         }
         if (this._state > RUNNING) return abortHandshake(socket, 503);
-        const digest = createHash2("sha1").update(key + GUID).digest("base64");
+        const digest2 = createHash3("sha1").update(key + GUID).digest("base64");
         const headers = [
           "HTTP/1.1 101 Switching Protocols",
           "Upgrade: websocket",
           "Connection: Upgrade",
-          `Sec-WebSocket-Accept: ${digest}`
+          `Sec-WebSocket-Accept: ${digest2}`
         ];
         const ws = new this.options.WebSocket(null, void 0, this.options);
         if (protocols.size) {
@@ -10865,7 +10865,7 @@ var require_websocket_server = __commonJS({
   }
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/helpers/util.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/helpers/util.js
 var util;
 (function(util2) {
   util2.assertEqual = (_) => {
@@ -10999,7 +10999,7 @@ var getParsedType = (data) => {
   }
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/ZodError.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/ZodError.js
 var ZodIssueCode = util.arrayToEnum([
   "invalid_type",
   "invalid_literal",
@@ -11113,7 +11113,7 @@ ZodError.create = (issues) => {
   return error51;
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/locales/en.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/locales/en.js
 var errorMap = (issue2, _ctx) => {
   let message;
   switch (issue2.code) {
@@ -11216,13 +11216,13 @@ var errorMap = (issue2, _ctx) => {
 };
 var en_default = errorMap;
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/errors.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/errors.js
 var overrideErrorMap = en_default;
 function getErrorMap() {
   return overrideErrorMap;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/helpers/parseUtil.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
   const { data, path, errorMaps, issueData } = params;
   const fullPath = [...path, ...issueData.path || []];
@@ -11331,14 +11331,14 @@ var isDirty = (x) => x.status === "dirty";
 var isValid = (x) => x.status === "valid";
 var isAsync = (x) => typeof Promise !== "undefined" && x instanceof Promise;
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/helpers/errorUtil.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/helpers/errorUtil.js
 var errorUtil;
 (function(errorUtil2) {
   errorUtil2.errToObj = (message) => typeof message === "string" ? { message } : message || {};
   errorUtil2.toString = (message) => typeof message === "string" ? message : message?.message;
 })(errorUtil || (errorUtil = {}));
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/types.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
   constructor(parent, value, path, key) {
     this._cachedPath = [];
@@ -14741,7 +14741,7 @@ var nullableType = ZodNullable.create;
 var preprocessType = ZodEffects.createWithPreprocess;
 var pipelineType = ZodPipeline.create;
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/index.js
 var core_exports2 = {};
 __export(core_exports2, {
   $ZodAny: () => $ZodAny,
@@ -15020,7 +15020,7 @@ __export(core_exports2, {
   version: () => version
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/core.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/core.js
 var _a;
 var NEVER = /* @__PURE__ */ Object.freeze({
   status: "aborted"
@@ -15097,7 +15097,7 @@ function config(newConfig) {
   return globalConfig;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/util.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/util.js
 var util_exports = {};
 __export(util_exports, {
   BIGINT_FORMAT_RANGES: () => BIGINT_FORMAT_RANGES,
@@ -15793,7 +15793,7 @@ var Class = class {
   }
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/errors.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/errors.js
 var initializer = (inst, def) => {
   inst.name = "$ZodError";
   Object.defineProperty(inst, "_zod", {
@@ -15932,7 +15932,7 @@ function prettifyError(error51) {
   return lines.join("\n");
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/parse.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/parse.js
 var _parse = (_Err) => (schema, value, _ctx, _params) => {
   const ctx = _ctx ? { ..._ctx, async: false } : { async: false };
   const result = schema._zod.run({ value, issues: [] }, ctx);
@@ -16020,7 +16020,7 @@ var _safeDecodeAsync = (_Err) => async (schema, value, _ctx) => {
 };
 var safeDecodeAsync = /* @__PURE__ */ _safeDecodeAsync($ZodRealError);
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/regexes.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/regexes.js
 var regexes_exports = {};
 __export(regexes_exports, {
   base64: () => base64,
@@ -16179,7 +16179,7 @@ var sha512_hex = /^[0-9a-fA-F]{128}$/;
 var sha512_base64 = /* @__PURE__ */ fixedBase64(86, "==");
 var sha512_base64url = /* @__PURE__ */ fixedBase64url(86);
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/checks.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/checks.js
 var $ZodCheck = /* @__PURE__ */ $constructor("$ZodCheck", (inst, def) => {
   var _a3;
   inst._zod ?? (inst._zod = {});
@@ -16727,7 +16727,7 @@ var $ZodCheckOverwrite = /* @__PURE__ */ $constructor("$ZodCheckOverwrite", (ins
   };
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/doc.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/doc.js
 var Doc = class {
   constructor(args = []) {
     this.content = [];
@@ -16763,14 +16763,14 @@ var Doc = class {
   }
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/versions.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/versions.js
 var version = {
   major: 4,
   minor: 4,
   patch: 3
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/schemas.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/schemas.js
 var $ZodType = /* @__PURE__ */ $constructor("$ZodType", (inst, def) => {
   var _a3;
   inst ?? (inst = {});
@@ -18863,7 +18863,7 @@ function handleRefineResult(result, payload, input, inst) {
   }
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/index.js
 var locales_exports = {};
 __export(locales_exports, {
   ar: () => ar_default,
@@ -18920,7 +18920,7 @@ __export(locales_exports, {
   zhTW: () => zh_TW_default
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ar.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ar.js
 var error = () => {
   const Sizable = {
     string: { unit: "\u062D\u0631\u0641", verb: "\u0623\u0646 \u064A\u062D\u0648\u064A" },
@@ -19027,7 +19027,7 @@ function ar_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/az.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/az.js
 var error2 = () => {
   const Sizable = {
     string: { unit: "simvol", verb: "olmal\u0131d\u0131r" },
@@ -19133,7 +19133,7 @@ function az_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/be.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/be.js
 function getBelarusianPlural(count, one, few, many) {
   const absCount = Math.abs(count);
   const lastDigit = absCount % 10;
@@ -19290,7 +19290,7 @@ function be_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/bg.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/bg.js
 var error4 = () => {
   const Sizable = {
     string: { unit: "\u0441\u0438\u043C\u0432\u043E\u043B\u0430", verb: "\u0434\u0430 \u0441\u044A\u0434\u044A\u0440\u0436\u0430" },
@@ -19411,7 +19411,7 @@ function bg_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ca.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ca.js
 var error5 = () => {
   const Sizable = {
     string: { unit: "car\xE0cters", verb: "contenir" },
@@ -19520,7 +19520,7 @@ function ca_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/cs.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/cs.js
 var error6 = () => {
   const Sizable = {
     string: { unit: "znak\u016F", verb: "m\xEDt" },
@@ -19632,7 +19632,7 @@ function cs_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/da.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/da.js
 var error7 = () => {
   const Sizable = {
     string: { unit: "tegn", verb: "havde" },
@@ -19748,7 +19748,7 @@ function da_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/de.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/de.js
 var error8 = () => {
   const Sizable = {
     string: { unit: "Zeichen", verb: "zu haben" },
@@ -19857,7 +19857,7 @@ function de_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/el.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/el.js
 var error9 = () => {
   const Sizable = {
     string: { unit: "\u03C7\u03B1\u03C1\u03B1\u03BA\u03C4\u03AE\u03C1\u03B5\u03C2", verb: "\u03BD\u03B1 \u03AD\u03C7\u03B5\u03B9" },
@@ -19967,7 +19967,7 @@ function el_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/en.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/en.js
 var error10 = () => {
   const Sizable = {
     string: { unit: "characters", verb: "to have" },
@@ -20080,7 +20080,7 @@ function en_default2() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/eo.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/eo.js
 var error11 = () => {
   const Sizable = {
     string: { unit: "karaktrojn", verb: "havi" },
@@ -20190,7 +20190,7 @@ function eo_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/es.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/es.js
 var error12 = () => {
   const Sizable = {
     string: { unit: "caracteres", verb: "tener" },
@@ -20323,7 +20323,7 @@ function es_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/fa.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/fa.js
 var error13 = () => {
   const Sizable = {
     string: { unit: "\u06A9\u0627\u0631\u0627\u06A9\u062A\u0631", verb: "\u062F\u0627\u0634\u062A\u0647 \u0628\u0627\u0634\u062F" },
@@ -20438,7 +20438,7 @@ function fa_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/fi.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/fi.js
 var error14 = () => {
   const Sizable = {
     string: { unit: "merkki\xE4", subject: "merkkijonon" },
@@ -20551,7 +20551,7 @@ function fi_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/fr.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/fr.js
 var error15 = () => {
   const Sizable = {
     string: { unit: "caract\xE8res", verb: "avoir" },
@@ -20677,7 +20677,7 @@ function fr_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/fr-CA.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/fr-CA.js
 var error16 = () => {
   const Sizable = {
     string: { unit: "caract\xE8res", verb: "avoir" },
@@ -20785,7 +20785,7 @@ function fr_CA_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/he.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/he.js
 var error17 = () => {
   const TypeNames = {
     string: { label: "\u05DE\u05D7\u05E8\u05D5\u05D6\u05EA", gender: "f" },
@@ -20980,7 +20980,7 @@ function he_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/hr.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/hr.js
 var error18 = () => {
   const Sizable = {
     string: { unit: "znakova", verb: "imati" },
@@ -21103,7 +21103,7 @@ function hr_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/hu.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/hu.js
 var error19 = () => {
   const Sizable = {
     string: { unit: "karakter", verb: "legyen" },
@@ -21212,7 +21212,7 @@ function hu_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/hy.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/hy.js
 function getArmenianPlural(count, one, many) {
   return Math.abs(count) === 1 ? one : many;
 }
@@ -21360,7 +21360,7 @@ function hy_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/id.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/id.js
 var error21 = () => {
   const Sizable = {
     string: { unit: "karakter", verb: "memiliki" },
@@ -21467,7 +21467,7 @@ function id_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/is.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/is.js
 var error22 = () => {
   const Sizable = {
     string: { unit: "stafi", verb: "a\xF0 hafa" },
@@ -21577,7 +21577,7 @@ function is_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/it.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/it.js
 var error23 = () => {
   const Sizable = {
     string: { unit: "caratteri", verb: "avere" },
@@ -21686,7 +21686,7 @@ function it_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ja.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ja.js
 var error24 = () => {
   const Sizable = {
     string: { unit: "\u6587\u5B57", verb: "\u3067\u3042\u308B" },
@@ -21794,7 +21794,7 @@ function ja_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ka.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ka.js
 var error25 = () => {
   const Sizable = {
     string: { unit: "\u10E1\u10D8\u10DB\u10D1\u10DD\u10DA\u10DD", verb: "\u10E3\u10DC\u10D3\u10D0 \u10E8\u10D4\u10D8\u10EA\u10D0\u10D5\u10D3\u10D4\u10E1" },
@@ -21907,7 +21907,7 @@ function ka_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/km.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/km.js
 var error26 = () => {
   const Sizable = {
     string: { unit: "\u178F\u17BD\u17A2\u1780\u17D2\u179F\u179A", verb: "\u1782\u17BD\u179A\u1798\u17B6\u1793" },
@@ -22018,12 +22018,12 @@ function km_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/kh.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/kh.js
 function kh_default() {
   return km_default();
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ko.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ko.js
 var error27 = () => {
   const Sizable = {
     string: { unit: "\uBB38\uC790", verb: "to have" },
@@ -22135,7 +22135,7 @@ function ko_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/lt.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/lt.js
 var capitalizeFirstCharacter = (text) => {
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
@@ -22339,7 +22339,7 @@ function lt_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/mk.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/mk.js
 var error29 = () => {
   const Sizable = {
     string: { unit: "\u0437\u043D\u0430\u0446\u0438", verb: "\u0434\u0430 \u0438\u043C\u0430\u0430\u0442" },
@@ -22449,7 +22449,7 @@ function mk_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ms.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ms.js
 var error30 = () => {
   const Sizable = {
     string: { unit: "aksara", verb: "mempunyai" },
@@ -22557,7 +22557,7 @@ function ms_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/nl.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/nl.js
 var error31 = () => {
   const Sizable = {
     string: { unit: "tekens", verb: "heeft" },
@@ -22668,7 +22668,7 @@ function nl_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/no.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/no.js
 var error32 = () => {
   const Sizable = {
     string: { unit: "tegn", verb: "\xE5 ha" },
@@ -22777,7 +22777,7 @@ function no_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ota.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ota.js
 var error33 = () => {
   const Sizable = {
     string: { unit: "harf", verb: "olmal\u0131d\u0131r" },
@@ -22887,7 +22887,7 @@ function ota_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ps.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ps.js
 var error34 = () => {
   const Sizable = {
     string: { unit: "\u062A\u0648\u06A9\u064A", verb: "\u0648\u0644\u0631\u064A" },
@@ -23002,7 +23002,7 @@ function ps_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/pl.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/pl.js
 var error35 = () => {
   const Sizable = {
     string: { unit: "znak\xF3w", verb: "mie\u0107" },
@@ -23112,7 +23112,7 @@ function pl_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/pt.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/pt.js
 var error36 = () => {
   const Sizable = {
     string: { unit: "caracteres", verb: "ter" },
@@ -23221,7 +23221,7 @@ function pt_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ro.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ro.js
 var error37 = () => {
   const Sizable = {
     string: { unit: "caractere", verb: "s\u0103 aib\u0103" },
@@ -23341,7 +23341,7 @@ function ro_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ru.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ru.js
 function getRussianPlural(count, one, few, many) {
   const absCount = Math.abs(count);
   const lastDigit = absCount % 10;
@@ -23498,7 +23498,7 @@ function ru_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/sl.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/sl.js
 var error39 = () => {
   const Sizable = {
     string: { unit: "znakov", verb: "imeti" },
@@ -23608,7 +23608,7 @@ function sl_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/sv.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/sv.js
 var error40 = () => {
   const Sizable = {
     string: { unit: "tecken", verb: "att ha" },
@@ -23719,7 +23719,7 @@ function sv_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ta.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ta.js
 var error41 = () => {
   const Sizable = {
     string: { unit: "\u0B8E\u0BB4\u0BC1\u0BA4\u0BCD\u0BA4\u0BC1\u0B95\u0BCD\u0B95\u0BB3\u0BCD", verb: "\u0B95\u0BCA\u0BA3\u0BCD\u0B9F\u0BBF\u0BB0\u0BC1\u0B95\u0BCD\u0B95 \u0BB5\u0BC7\u0BA3\u0BCD\u0B9F\u0BC1\u0BAE\u0BCD" },
@@ -23830,7 +23830,7 @@ function ta_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/th.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/th.js
 var error42 = () => {
   const Sizable = {
     string: { unit: "\u0E15\u0E31\u0E27\u0E2D\u0E31\u0E01\u0E29\u0E23", verb: "\u0E04\u0E27\u0E23\u0E21\u0E35" },
@@ -23941,7 +23941,7 @@ function th_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/tr.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/tr.js
 var error43 = () => {
   const Sizable = {
     string: { unit: "karakter", verb: "olmal\u0131" },
@@ -24047,7 +24047,7 @@ function tr_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/uk.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/uk.js
 var error44 = () => {
   const Sizable = {
     string: { unit: "\u0441\u0438\u043C\u0432\u043E\u043B\u0456\u0432", verb: "\u043C\u0430\u0442\u0438\u043C\u0435" },
@@ -24156,12 +24156,12 @@ function uk_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ua.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ua.js
 function ua_default() {
   return uk_default();
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ur.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/ur.js
 var error45 = () => {
   const Sizable = {
     string: { unit: "\u062D\u0631\u0648\u0641", verb: "\u06C1\u0648\u0646\u0627" },
@@ -24272,7 +24272,7 @@ function ur_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/uz.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/uz.js
 var error46 = () => {
   const Sizable = {
     string: { unit: "belgi", verb: "bo\u2018lishi kerak" },
@@ -24383,7 +24383,7 @@ function uz_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/vi.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/vi.js
 var error47 = () => {
   const Sizable = {
     string: { unit: "k\xFD t\u1EF1", verb: "c\xF3" },
@@ -24492,7 +24492,7 @@ function vi_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/zh-CN.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/zh-CN.js
 var error48 = () => {
   const Sizable = {
     string: { unit: "\u5B57\u7B26", verb: "\u5305\u542B" },
@@ -24602,7 +24602,7 @@ function zh_CN_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/zh-TW.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/zh-TW.js
 var error49 = () => {
   const Sizable = {
     string: { unit: "\u5B57\u5143", verb: "\u64C1\u6709" },
@@ -24710,7 +24710,7 @@ function zh_TW_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/yo.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/locales/yo.js
 var error50 = () => {
   const Sizable = {
     string: { unit: "\xE0mi", verb: "n\xED" },
@@ -24818,7 +24818,7 @@ function yo_default() {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/registries.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/registries.js
 var _a2;
 var $output = /* @__PURE__ */ Symbol("ZodOutput");
 var $input = /* @__PURE__ */ Symbol("ZodInput");
@@ -24868,7 +24868,7 @@ function registry() {
 (_a2 = globalThis).__zod_globalRegistry ?? (_a2.__zod_globalRegistry = registry());
 var globalRegistry = globalThis.__zod_globalRegistry;
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/api.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/api.js
 // @__NO_SIDE_EFFECTS__
 function _string(Class2, params) {
   return new Class2({
@@ -25907,7 +25907,7 @@ function _stringFormat(Class2, format, fnOrRegex, _params = {}) {
   return inst;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/to-json-schema.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/to-json-schema.js
 function initializeContext(params) {
   let target = params?.target ?? "draft-2020-12";
   if (target === "draft-4")
@@ -26266,7 +26266,7 @@ var createStandardJSONSchemaMethod = (schema, io, processors = {}) => (params) =
   return finalize(ctx, schema);
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/json-schema-processors.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/json-schema-processors.js
 var formatMap = {
   guid: "uuid",
   url: "uri",
@@ -26810,7 +26810,7 @@ function toJSONSchema(input, params) {
   return finalize(ctx, input);
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/json-schema-generator.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/json-schema-generator.js
 var JSONSchemaGenerator = class {
   /** @deprecated Access via ctx instead */
   get metadataRegistry() {
@@ -26885,10 +26885,10 @@ var JSONSchemaGenerator = class {
   }
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/json-schema.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/core/json-schema.js
 var json_schema_exports = {};
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/mini/schemas.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/mini/schemas.js
 var ZodMiniType = /* @__PURE__ */ $constructor("ZodMiniType", (inst, def) => {
   if (!inst._zod)
     throw new Error("Uninitialized schema in ZodMiniType.");
@@ -26934,7 +26934,7 @@ function object(shape, params) {
   return new ZodMiniObject(def);
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js
 function isZ4Schema(s) {
   const schema = s;
   return !!schema._zod;
@@ -27094,7 +27094,7 @@ function getLiteralValue(schema) {
   return void 0;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/external.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/external.js
 var external_exports = {};
 __export(external_exports, {
   $brand: () => $brand,
@@ -27337,7 +27337,7 @@ __export(external_exports, {
   xor: () => xor
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/schemas.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/schemas.js
 var schemas_exports2 = {};
 __export(schemas_exports2, {
   ZodAny: () => ZodAny2,
@@ -27508,7 +27508,7 @@ __export(schemas_exports2, {
   xor: () => xor
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/checks.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/checks.js
 var checks_exports2 = {};
 __export(checks_exports2, {
   endsWith: () => _endsWith,
@@ -27542,7 +27542,7 @@ __export(checks_exports2, {
   uppercase: () => _uppercase
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/iso.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/iso.js
 var iso_exports2 = {};
 __export(iso_exports2, {
   ZodISODate: () => ZodISODate,
@@ -27583,7 +27583,7 @@ function duration2(params) {
   return _isoDuration(ZodISODuration, params);
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/errors.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/errors.js
 var initializer2 = (inst, issues) => {
   $ZodError.init(inst, issues);
   inst.name = "ZodError";
@@ -27623,7 +27623,7 @@ var ZodRealError = /* @__PURE__ */ $constructor("ZodError", initializer2, {
   Parent: Error
 });
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/parse.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/parse.js
 var parse2 = /* @__PURE__ */ _parse(ZodRealError);
 var parseAsync2 = /* @__PURE__ */ _parseAsync(ZodRealError);
 var safeParse3 = /* @__PURE__ */ _safeParse(ZodRealError);
@@ -27637,7 +27637,7 @@ var safeDecode2 = /* @__PURE__ */ _safeDecode(ZodRealError);
 var safeEncodeAsync2 = /* @__PURE__ */ _safeEncodeAsync(ZodRealError);
 var safeDecodeAsync2 = /* @__PURE__ */ _safeDecodeAsync(ZodRealError);
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/schemas.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/schemas.js
 var _installedGroups = /* @__PURE__ */ new WeakMap();
 function _installLazyMethods(inst, group, methods) {
   const proto = Object.getPrototypeOf(inst);
@@ -28927,7 +28927,7 @@ function preprocess(fn, schema) {
   });
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/compat.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/compat.js
 var ZodIssueCode2 = {
   invalid_type: "invalid_type",
   too_big: "too_big",
@@ -28953,7 +28953,7 @@ var ZodFirstPartyTypeKind2;
 /* @__PURE__ */ (function(ZodFirstPartyTypeKind3) {
 })(ZodFirstPartyTypeKind2 || (ZodFirstPartyTypeKind2 = {}));
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/from-json-schema.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/from-json-schema.js
 var z = {
   ...schemas_exports2,
   ...checks_exports2,
@@ -29433,7 +29433,7 @@ function fromJSONSchema(schema, params) {
   return convertSchema(normalized, ctx);
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/coerce.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/coerce.js
 var coerce_exports2 = {};
 __export(coerce_exports2, {
   bigint: () => bigint3,
@@ -29458,10 +29458,10 @@ function date4(params) {
   return _coercedDate(ZodDate2, params);
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/external.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod/v4/classic/external.js
 config(en_default2());
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/types.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/types.js
 var LATEST_PROTOCOL_VERSION = "2025-11-25";
 var SUPPORTED_PROTOCOL_VERSIONS = [LATEST_PROTOCOL_VERSION, "2025-06-18", "2025-03-26", "2024-11-05", "2024-10-07"];
 var RELATED_TASK_META_KEY = "io.modelcontextprotocol/related-task";
@@ -30992,12 +30992,12 @@ var UrlElicitationRequiredError = class extends McpError {
   }
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/interfaces.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/interfaces.js
 function isTerminal(status) {
   return status === "completed" || status === "failed" || status === "cancelled";
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/Options.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/Options.js
 var ignoreOverride = /* @__PURE__ */ Symbol("Let zodToJsonSchema decide on which parser to use");
 var defaultOptions = {
   name: void 0,
@@ -31031,7 +31031,7 @@ var getDefaultOptions = (options) => typeof options === "string" ? {
   ...options
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/Refs.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/Refs.js
 var getRefs = (options) => {
   const _options = getDefaultOptions(options);
   const currentPath = _options.name !== void 0 ? [..._options.basePath, _options.definitionPath, _options.name] : _options.basePath;
@@ -31052,7 +31052,7 @@ var getRefs = (options) => {
   };
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/errorMessages.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/errorMessages.js
 function addErrorMessage(res, key, errorMessage, refs) {
   if (!refs?.errorMessages)
     return;
@@ -31068,7 +31068,7 @@ function setResponseValueAndErrors(res, key, value, errorMessage, refs) {
   addErrorMessage(res, key, errorMessage, refs);
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/getRelativePath.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/getRelativePath.js
 var getRelativePath = (pathA, pathB) => {
   let i = 0;
   for (; i < pathA.length && i < pathB.length; i++) {
@@ -31078,7 +31078,7 @@ var getRelativePath = (pathA, pathB) => {
   return [(pathA.length - i).toString(), ...pathB.slice(i)].join("/");
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/any.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/any.js
 function parseAnyDef(refs) {
   if (refs.target !== "openAi") {
     return {};
@@ -31094,7 +31094,7 @@ function parseAnyDef(refs) {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/array.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/array.js
 function parseArrayDef(def, refs) {
   const res = {
     type: "array"
@@ -31118,7 +31118,7 @@ function parseArrayDef(def, refs) {
   return res;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/bigint.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/bigint.js
 function parseBigintDef(def, refs) {
   const res = {
     type: "integer",
@@ -31164,24 +31164,24 @@ function parseBigintDef(def, refs) {
   return res;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/boolean.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/boolean.js
 function parseBooleanDef() {
   return {
     type: "boolean"
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/branded.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/branded.js
 function parseBrandedDef(_def, refs) {
   return parseDef(_def.type._def, refs);
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/catch.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/catch.js
 var parseCatchDef = (def, refs) => {
   return parseDef(def.innerType._def, refs);
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/date.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/date.js
 function parseDateDef(def, refs, overrideDateStrategy) {
   const strategy = overrideDateStrategy ?? refs.dateStrategy;
   if (Array.isArray(strategy)) {
@@ -31240,7 +31240,7 @@ var integerDateParser = (def, refs) => {
   return res;
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/default.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/default.js
 function parseDefaultDef(_def, refs) {
   return {
     ...parseDef(_def.innerType._def, refs),
@@ -31248,12 +31248,12 @@ function parseDefaultDef(_def, refs) {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/effects.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/effects.js
 function parseEffectsDef(_def, refs) {
   return refs.effectStrategy === "input" ? parseDef(_def.schema._def, refs) : parseAnyDef(refs);
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/enum.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/enum.js
 function parseEnumDef(def) {
   return {
     type: "string",
@@ -31261,7 +31261,7 @@ function parseEnumDef(def) {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/intersection.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/intersection.js
 var isJsonSchema7AllOfType = (type) => {
   if ("type" in type && type.type === "string")
     return false;
@@ -31303,7 +31303,7 @@ function parseIntersectionDef(def, refs) {
   } : void 0;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/literal.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/literal.js
 function parseLiteralDef(def, refs) {
   const parsedType2 = typeof def.value;
   if (parsedType2 !== "bigint" && parsedType2 !== "number" && parsedType2 !== "boolean" && parsedType2 !== "string") {
@@ -31323,7 +31323,7 @@ function parseLiteralDef(def, refs) {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/string.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/string.js
 var emojiRegex2 = void 0;
 var zodPatterns = {
   /**
@@ -31648,7 +31648,7 @@ function stringifyRegExpWithFlags(regex, refs) {
   return pattern;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/record.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/record.js
 function parseRecordDef(def, refs) {
   if (refs.target === "openAi") {
     console.warn("Warning: OpenAI may not support records in schemas! Try an array of key-value pairs instead.");
@@ -31700,7 +31700,7 @@ function parseRecordDef(def, refs) {
   return schema;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/map.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/map.js
 function parseMapDef(def, refs) {
   if (refs.mapStrategy === "record") {
     return parseRecordDef(def, refs);
@@ -31725,7 +31725,7 @@ function parseMapDef(def, refs) {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/nativeEnum.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/nativeEnum.js
 function parseNativeEnumDef(def) {
   const object3 = def.values;
   const actualKeys = Object.keys(def.values).filter((key) => {
@@ -31739,7 +31739,7 @@ function parseNativeEnumDef(def) {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/never.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/never.js
 function parseNeverDef(refs) {
   return refs.target === "openAi" ? void 0 : {
     not: parseAnyDef({
@@ -31749,7 +31749,7 @@ function parseNeverDef(refs) {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/null.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/null.js
 function parseNullDef(refs) {
   return refs.target === "openApi3" ? {
     enum: ["null"],
@@ -31759,7 +31759,7 @@ function parseNullDef(refs) {
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/union.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/union.js
 var primitiveMappings = {
   ZodString: "string",
   ZodNumber: "number",
@@ -31827,7 +31827,7 @@ var asAnyOf = (def, refs) => {
   return anyOf.length ? { anyOf } : void 0;
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/nullable.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/nullable.js
 function parseNullableDef(def, refs) {
   if (["ZodString", "ZodNumber", "ZodBigInt", "ZodBoolean", "ZodNull"].includes(def.innerType._def.typeName) && (!def.innerType._def.checks || !def.innerType._def.checks.length)) {
     if (refs.target === "openApi3") {
@@ -31859,7 +31859,7 @@ function parseNullableDef(def, refs) {
   return base && { anyOf: [base, { type: "null" }] };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/number.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/number.js
 function parseNumberDef(def, refs) {
   const res = {
     type: "number"
@@ -31908,7 +31908,7 @@ function parseNumberDef(def, refs) {
   return res;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/object.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/object.js
 function parseObjectDef(def, refs) {
   const forceOptionalIntoNullable = refs.target === "openAi";
   const result = {
@@ -31978,7 +31978,7 @@ function safeIsOptional(schema) {
   }
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/optional.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/optional.js
 var parseOptionalDef = (def, refs) => {
   if (refs.currentPath.toString() === refs.propertyPath?.toString()) {
     return parseDef(def.innerType._def, refs);
@@ -31997,7 +31997,7 @@ var parseOptionalDef = (def, refs) => {
   } : parseAnyDef(refs);
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/pipeline.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/pipeline.js
 var parsePipelineDef = (def, refs) => {
   if (refs.pipeStrategy === "input") {
     return parseDef(def.in._def, refs);
@@ -32017,12 +32017,12 @@ var parsePipelineDef = (def, refs) => {
   };
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/promise.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/promise.js
 function parsePromiseDef(def, refs) {
   return parseDef(def.type._def, refs);
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/set.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/set.js
 function parseSetDef(def, refs) {
   const items = parseDef(def.valueType._def, {
     ...refs,
@@ -32042,7 +32042,7 @@ function parseSetDef(def, refs) {
   return schema;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/tuple.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/tuple.js
 function parseTupleDef(def, refs) {
   if (def.rest) {
     return {
@@ -32070,24 +32070,24 @@ function parseTupleDef(def, refs) {
   }
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/undefined.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/undefined.js
 function parseUndefinedDef(refs) {
   return {
     not: parseAnyDef(refs)
   };
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/unknown.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/unknown.js
 function parseUnknownDef(refs) {
   return parseAnyDef(refs);
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/readonly.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parsers/readonly.js
 var parseReadonlyDef = (def, refs) => {
   return parseDef(def.innerType._def, refs);
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/selectParser.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/selectParser.js
 var selectParser = (def, typeName, refs) => {
   switch (typeName) {
     case ZodFirstPartyTypeKind.ZodString:
@@ -32163,7 +32163,7 @@ var selectParser = (def, typeName, refs) => {
   }
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parseDef.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/parseDef.js
 function parseDef(def, refs, forceResolution = false) {
   const seenItem = refs.seen.get(def);
   if (refs.override) {
@@ -32219,7 +32219,7 @@ var addMeta = (def, refs, jsonSchema) => {
   return jsonSchema;
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/zodToJsonSchema.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/zod-to-json-schema/dist/esm/zodToJsonSchema.js
 var zodToJsonSchema = (schema, options) => {
   const refs = getRefs(options);
   let definitions = typeof options === "object" && options.definitions ? Object.entries(options.definitions).reduce((acc, [name2, schema2]) => ({
@@ -32281,7 +32281,7 @@ var zodToJsonSchema = (schema, options) => {
   return combined;
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js
 function mapMiniTarget(t) {
   if (!t)
     return "draft-7";
@@ -32323,7 +32323,7 @@ function parseWithCompat(schema, data) {
   return result.data;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js
 var DEFAULT_REQUEST_TIMEOUT_MSEC = 6e4;
 var Protocol = class {
   constructor(_options) {
@@ -33277,7 +33277,7 @@ function mergeCapabilities(base, additional) {
   return result;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/validation/ajv-provider.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/validation/ajv-provider.js
 var import_ajv = __toESM(require_ajv(), 1);
 var import_ajv_formats = __toESM(require_dist(), 1);
 function createDefaultAjvInstance() {
@@ -33345,7 +33345,7 @@ var AjvJsonSchemaValidator = class {
   }
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/server.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/server.js
 var ExperimentalServerTasks = class {
   constructor(_server) {
     this._server = _server;
@@ -33558,7 +33558,7 @@ var ExperimentalServerTasks = class {
   }
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/helpers.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/helpers.js
 function assertToolsCallTaskCapability(requests, method, entityName) {
   if (!requests) {
     throw new Error(`${entityName} does not support task creation (required for ${method})`);
@@ -33593,7 +33593,7 @@ function assertClientRequestTaskCapability(requests, method, entityName) {
   }
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/index.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/index.js
 var Server = class extends Protocol {
   /**
    * Initializes this server with the given name and version information.
@@ -33964,7 +33964,7 @@ var Server = class extends Protocol {
   }
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/completable.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/completable.js
 var COMPLETABLE_SYMBOL = /* @__PURE__ */ Symbol.for("mcp.completable");
 function isCompletable(schema) {
   return !!schema && typeof schema === "object" && COMPLETABLE_SYMBOL in schema;
@@ -33978,7 +33978,7 @@ var McpZodTypeKind;
   McpZodTypeKind2["Completable"] = "McpCompletable";
 })(McpZodTypeKind || (McpZodTypeKind = {}));
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/toolNameValidation.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/toolNameValidation.js
 var TOOL_NAME_REGEX = /^[A-Za-z0-9._-]{1,128}$/;
 function validateToolName(name) {
   const warnings = [];
@@ -34036,7 +34036,7 @@ function validateAndWarnToolName(name) {
   return result.isValid;
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/mcp-server.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/mcp-server.js
 var ExperimentalMcpServerTasks = class {
   constructor(_mcpServer) {
     this._mcpServer = _mcpServer;
@@ -34051,7 +34051,7 @@ var ExperimentalMcpServerTasks = class {
   }
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/mcp.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/mcp.js
 var McpServer = class {
   constructor(serverInfo, options) {
     this._registeredResources = {};
@@ -34843,10 +34843,10 @@ var EMPTY_COMPLETION_RESULT = {
   }
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js
 var import_node_process = __toESM(require("node:process"), 1);
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/stdio.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/stdio.js
 var STDIO_DEFAULT_MAX_BUFFER_SIZE = 10 * 1024 * 1024;
 var ReadBuffer = class {
   constructor(options) {
@@ -34883,7 +34883,7 @@ function serializeMessage(message) {
   return JSON.stringify(message) + "\n";
 }
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js
 var StdioServerTransport = class {
   constructor(_stdin = import_node_process.default.stdin, _stdout = import_node_process.default.stdout, options) {
     this._stdin = _stdin;
@@ -34950,7 +34950,7 @@ var StdioServerTransport = class {
   }
 };
 
-// ../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/wrapper.mjs
+// ../../../../../../2026-08-30/chrome-native-host-codex-chrome-plugin/outputs/int-practice-helper/prototype-bridge/node_modules/ws/wrapper.mjs
 var import_stream = __toESM(require_stream(), 1);
 var import_extension = __toESM(require_extension(), 1);
 var import_permessage_deflate = __toESM(require_permessage_deflate(), 1);
@@ -35067,7 +35067,7 @@ var createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR || (0, imp
     for (const name2 of files) {
       const path = (0, import_node_path.join)(directory, name2), stat = (0, import_node_fs.statSync)(path), signature = `${stat.size}:${stat.mtimeMs}`;
       if (cache.get(name2)?.signature === signature) continue;
-      const records2 = [], types = {}, observed = /* @__PURE__ */ new Set(), digest = (0, import_node_crypto.createHash)("sha256");
+      const records2 = [], types = {}, observed = /* @__PURE__ */ new Set(), digest2 = (0, import_node_crypto.createHash)("sha256");
       for (const line of (0, import_node_fs.readFileSync)(path, "utf8").split("\n")) {
         let r;
         try {
@@ -35079,10 +35079,10 @@ var createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR || (0, imp
         types[r.type] = (types[r.type] || 0) + 1;
         if (r.type === "question" && r.question?.choices?.length) observed.add(questionKey(r.question));
         if (!["verified_answer", "rejected_answer"].includes(r.type)) continue;
-        digest.update(line);
+        digest2.update(line);
         records2.push({ ...r, matchKey: r.question ? questionKey(r.question) : r.questionKey });
       }
-      const evidenceSignature = digest.digest("hex");
+      const evidenceSignature = digest2.digest("hex");
       if (cache.get(name2)?.evidenceSignature !== evidenceSignature) changed = true;
       cache.set(name2, { signature, evidenceSignature, records: records2, types, observed });
     }
@@ -35159,7 +35159,193 @@ var answerKnownQuestions = async ({ read, answer, maxQuestions = 10, stillAuthor
   return finish(result.done ? "exam_answered" : "batch_limit");
 };
 
+// src/updater.mjs
+var import_node_crypto2 = require("node:crypto");
+var import_node_fs2 = require("node:fs");
+var import_node_os2 = require("node:os");
+var import_node_path2 = require("node:path");
+var import_node_child_process = require("node:child_process");
+var import_node_util = require("node:util");
+var REPOSITORY = "Topmoaman/int-helper";
+var ASSET_NAME = "int-helper-update.json";
+var INSTALL_HOME = (0, import_node_path2.join)((0, import_node_os2.homedir)(), ".local/share/int-helper/install");
+var CONFIG_FILE = "installation.json";
+var EXTENSION_CONFIG = "int-helper/prototype-bridge/extension/updater-config.json";
+var MAX_BYTES = 15 * 1024 * 1024;
+var runFile = (0, import_node_util.promisify)(import_node_child_process.execFile);
+var digest = (bytes) => (0, import_node_crypto2.createHash)("sha256").update(bytes).digest("hex");
+var versionParts = (value) => {
+  if (!/^\d+\.\d+\.\d+(?:\+codex\.\d+)?$/.test(value || "")) throw new Error("Invalid release version");
+  return value.split("+")[0].split(".").map(Number);
+};
+var isNewer = (next, current) => {
+  const a = versionParts(next), b = versionParts(current);
+  for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] > b[i];
+  return false;
+};
+var allowedPath = (path) => typeof path === "string" && !path.includes("\\") && path.split("/").every((part) => part && part !== "." && part !== "..") && path !== EXTENSION_CONFIG && (/^(README\.md|ROADMAP\.md|THIRD_PARTY_NOTICES\.md|\.gitignore|install\.mjs|scripts\/build-release\.mjs|\.agents\/plugins\/marketplace\.json)$/.test(path) || /^int-helper\/(?:\.codex-plugin\/plugin\.json|\.mcp\.json|skills\/int-helper\/(?:SKILL\.md|agents\/openai\.yaml)|prototype-bridge\/(?:package(?:-lock)?\.json|(?:src|test|demo)\/[\w-]+\.mjs|dist\/[\w-]+\.cjs|extension\/[\w-]+\.(?:js|html|json)))$/.test(path));
+var validatePackage = (payload, expectedVersion) => {
+  if (payload?.format !== 1 || payload.repository !== REPOSITORY || !Array.isArray(payload.files) || !payload.files.length || payload.files.length > 100) throw new Error("Invalid update package");
+  versionParts(payload.version);
+  if (expectedVersion && payload.version !== expectedVersion) throw new Error("Release version does not match package");
+  const files = /* @__PURE__ */ new Map();
+  let total = 0;
+  for (const item of payload.files) {
+    if (!allowedPath(item.path) || files.has(item.path) || !/^[a-f0-9]{64}$/.test(item.sha256 || "") || typeof item.base64 !== "string") throw new Error("Unsafe or duplicate update file");
+    const bytes = Buffer.from(item.base64, "base64");
+    if (bytes.toString("base64") !== item.base64 || bytes.length !== item.size || digest(bytes) !== item.sha256) throw new Error("Update file checksum mismatch");
+    total += bytes.length;
+    if (total > MAX_BYTES) throw new Error("Update package is too large");
+    files.set(item.path, bytes);
+  }
+  const readJSON = (path) => JSON.parse(files.get(path)?.toString() || "null");
+  const plugin = readJSON("int-helper/.codex-plugin/plugin.json");
+  const extension2 = readJSON("int-helper/prototype-bridge/extension/manifest.json");
+  const marketplace = readJSON(".agents/plugins/marketplace.json");
+  if (plugin?.name !== "int-helper" || plugin.version !== payload.version || extension2?.version !== payload.extensionVersion || marketplace?.name !== "int-helper-community" || marketplace.plugins?.[0]?.source?.path !== "./int-helper") throw new Error("Package manifests do not match");
+  versionParts(payload.extensionVersion);
+  for (const path of ["install.mjs", "int-helper/.mcp.json", "int-helper/prototype-bridge/dist/server.cjs", "int-helper/prototype-bridge/extension/service-worker.js", "int-helper/prototype-bridge/extension/content-script.js"]) if (!files.has(path)) throw new Error("Update package is incomplete");
+  return files;
+};
+var fetchJSON = async (url2, fetcher, limit = MAX_BYTES * 2) => {
+  const response = await fetcher(url2, { headers: { Accept: "application/vnd.github+json", "User-Agent": "int-helper-updater" }, signal: AbortSignal.timeout(6e4) });
+  if (!response.ok) throw new Error("GitHub update request failed (" + response.status + ")");
+  if (Number(response.headers.get("content-length")) > limit) throw new Error("Update response is too large");
+  let size = 0;
+  const chunks = [];
+  for await (const chunk of response.body) {
+    size += chunk.length;
+    if (size > limit) throw new Error("Update response is too large");
+    chunks.push(Buffer.from(chunk));
+  }
+  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+};
+var latestRelease = async (fetcher = fetch) => {
+  const release = await fetchJSON("https://api.github.com/repos/" + REPOSITORY + "/releases/latest", fetcher, 256 * 1024);
+  if (release.draft || release.prerelease || !/^v\d+\.\d+\.\d+$/.test(release.tag_name || "")) throw new Error("No supported stable release");
+  const version2 = release.tag_name.slice(1);
+  const url2 = "https://github.com/" + REPOSITORY + "/releases/download/" + release.tag_name + "/" + ASSET_NAME;
+  const asset = release.assets?.find((asset2) => asset2.name === ASSET_NAME && asset2.browser_download_url === url2);
+  if (!asset || asset.size > MAX_BYTES * 2) throw new Error("Release does not have an update package");
+  return { version: version2, url: url2, htmlUrl: "https://github.com/" + REPOSITORY + "/releases/tag/" + release.tag_name };
+};
+var readConfig = async (root) => {
+  try {
+    return JSON.parse(await import_node_fs2.promises.readFile((0, import_node_path2.join)(root, CONFIG_FILE), "utf8"));
+  } catch (error51) {
+    if (error51.code === "ENOENT") return null;
+    throw error51;
+  }
+};
+var writeJSON = async (path, value) => {
+  await import_node_fs2.promises.mkdir((0, import_node_path2.dirname)(path), { recursive: true, mode: 448 });
+  await import_node_fs2.promises.writeFile(path + ".tmp", JSON.stringify(value, null, 2) + "\n", { mode: 384 });
+  await import_node_fs2.promises.rename(path + ".tmp", path);
+};
+var installCodex = async (current, runner) => {
+  await runner("codex", ["plugin", "marketplace", "add", current, "--json"]);
+  await runner("codex", ["plugin", "add", "int-helper@int-helper-community", "--json"]);
+};
+var defaultRunner = (command, args) => runFile(command, args, { timeout: 9e4, maxBuffer: 1024 * 1024, windowsHide: true });
+var createUpdater = ({ root = INSTALL_HOME, fetcher = fetch, runner = defaultRunner } = {}) => {
+  const current = (0, import_node_path2.join)(root, "current"), previous = (0, import_node_path2.join)(root, "previous");
+  const status = async () => {
+    const config2 = await readConfig(root);
+    return { managed: !!config2, version: config2?.version || null, extensionVersion: config2?.extensionVersion || null };
+  };
+  const authenticate = async (token) => {
+    const config2 = await readConfig(root);
+    if (!config2 || typeof token !== "string" || !/^[a-f0-9]{64}$/.test(token)) throw new Error("Run the one-time installer and load its extension folder first");
+    const expected = Buffer.from(config2.token, "hex"), actual = Buffer.from(token, "hex");
+    if (expected.length !== actual.length || !(0, import_node_crypto2.timingSafeEqual)(expected, actual)) throw new Error("This extension is not paired with the managed installation");
+  };
+  const apply = async (payload, { initial = false, ensureIdle = async () => {
+  } } = {}) => {
+    const files = validatePackage(payload);
+    await import_node_fs2.promises.mkdir(root, { recursive: true, mode: 448 });
+    let lock;
+    try {
+      lock = await import_node_fs2.promises.open((0, import_node_path2.join)(root, "update.lock"), "wx", 384);
+    } catch (error51) {
+      if (error51.code === "EEXIST") throw new Error("Another update is running; do not start a second update");
+      throw error51;
+    }
+    const stage = (0, import_node_path2.join)(root, "staging-" + (0, import_node_crypto2.randomBytes)(6).toString("hex"));
+    let old, movedOld = false, activated = false;
+    try {
+      old = await readConfig(root);
+      if (!initial && !old) throw new Error("Run the one-time installer first");
+      if (old && !isNewer(payload.version, old.version)) return { updated: false, version: old.version };
+      await ensureIdle();
+      if (old) {
+        for (const [path, hash2] of Object.entries(old.hashes)) {
+          const stat = await import_node_fs2.promises.lstat((0, import_node_path2.join)(current, path));
+          if (!stat.isFile() || stat.isSymbolicLink() || digest(await import_node_fs2.promises.readFile((0, import_node_path2.join)(current, path))) !== hash2) throw new Error("Installed files have local changes; update stopped to preserve them");
+        }
+      }
+      for (const [path, bytes] of files) {
+        await import_node_fs2.promises.mkdir((0, import_node_path2.dirname)((0, import_node_path2.join)(stage, path)), { recursive: true, mode: 448 });
+        await import_node_fs2.promises.writeFile((0, import_node_path2.join)(stage, path), bytes, { mode: 384 });
+      }
+      const config2 = { version: payload.version, extensionVersion: payload.extensionVersion, token: old?.token || (0, import_node_crypto2.randomBytes)(32).toString("hex"), hashes: Object.fromEntries(payload.files.map((file2) => [file2.path, file2.sha256])) };
+      await writeJSON((0, import_node_path2.join)(stage, EXTENSION_CONFIG), { token: config2.token });
+      await ensureIdle();
+      if (old) {
+        await import_node_fs2.promises.rm(previous, { recursive: true, force: true });
+        await import_node_fs2.promises.rename(current, previous);
+        movedOld = true;
+      } else {
+        try {
+          await import_node_fs2.promises.access(current);
+          throw new Error("An unmanaged install folder already exists");
+        } catch (error51) {
+          if (error51.code !== "ENOENT") throw error51;
+        }
+      }
+      await import_node_fs2.promises.rename(stage, current);
+      activated = true;
+      await installCodex(current, runner);
+      await writeJSON((0, import_node_path2.join)(root, CONFIG_FILE), config2);
+      return {
+        updated: true,
+        version: payload.version,
+        extensionVersion: payload.extensionVersion,
+        extensionPath: (0, import_node_path2.join)(current, "int-helper/prototype-bridge/extension"),
+        restartTask: true
+      };
+    } catch (error51) {
+      if (activated) await import_node_fs2.promises.rm(current, { recursive: true, force: true });
+      if (movedOld) {
+        await import_node_fs2.promises.rename(previous, current);
+        try {
+          await installCodex(current, runner);
+        } catch {
+          throw new Error("Update failed. Previous files were restored, but Codex reinstall failed; rerun the installer before use.");
+        }
+      }
+      throw error51;
+    } finally {
+      await import_node_fs2.promises.rm(stage, { recursive: true, force: true });
+      await lock.close();
+      await import_node_fs2.promises.unlink((0, import_node_path2.join)(root, "update.lock"));
+    }
+  };
+  const installLatest = async ({ ensureIdle }) => {
+    await ensureIdle();
+    const release = await latestRelease(fetcher);
+    const config2 = await readConfig(root);
+    if (!config2) throw new Error("Run the one-time installer first");
+    if (!isNewer(release.version, config2.version)) return { updated: false, version: config2.version };
+    const payload = await fetchJSON(release.url, fetcher);
+    validatePackage(payload, release.version);
+    return apply(payload, { ensureIdle });
+  };
+  return { status, authenticate, apply, installLatest };
+};
+
 // src/server.mjs
+var updater = createUpdater();
+var updateInFlight = false;
 var history = null;
 var currentQuestion = null;
 var historyScope = null;
@@ -35194,7 +35380,7 @@ var attachBridge = (bridge) => bridge.on("connection", (socket) => {
   setHistoryScope(null);
   browser?.close(1012, "A newer extension connection replaced this one");
   browser = socket;
-  socket.on("message", (raw) => {
+  socket.on("message", async (raw) => {
     let message;
     try {
       message = JSON.parse(raw.toString());
@@ -35202,7 +35388,32 @@ var attachBridge = (bridge) => bridge.on("connection", (socket) => {
       return;
     }
     if (message.type === "ping") {
-      socket.send(JSON.stringify({ type: "pong" }));
+      socket.send(JSON.stringify({ type: "pong", updaterProtocol: 1 }));
+      return;
+    }
+    if (message.type === "update_request") {
+      const reply = (result) => {
+        if (socket.readyState === socket.OPEN) socket.send(JSON.stringify({ type: "update_response", id: message.id, ...result }));
+      };
+      let ownsUpdate = false;
+      try {
+        await updater.authenticate(message.token);
+        if (socket !== browser || message.action !== "install") throw new Error("Unsupported update request");
+        if (updateInFlight || pending.size) throw new Error("An action is still running; finish it before updating");
+        updateInFlight = true;
+        ownsUpdate = true;
+        const ensureIdle = async () => {
+          if (socket !== browser || socket.readyState !== socket.OPEN || pending.size) throw new Error("Update connection changed or an action is still running");
+          const guard = await requestBrowser("update_guard");
+          if (!guard.safe) throw new Error("Finish the current task and leave the exam page before updating");
+        };
+        const result = await updater.installLatest({ ensureIdle });
+        reply({ ok: true, result });
+      } catch (error51) {
+        reply({ ok: false, error: error51.message });
+      } finally {
+        if (ownsUpdate) updateInFlight = false;
+      }
       return;
     }
     if (message.type !== "response" || !pending.has(message.id)) return;
@@ -35214,7 +35425,7 @@ var attachBridge = (bridge) => bridge.on("connection", (socket) => {
   });
   socket.on("close", () => {
     if (browser === socket) browser = null;
-    rejectPending("INT Practice Bridge extension disconnected");
+    rejectPending("INT INT Helper extension disconnected");
   });
 });
 var listen = (port) => new Promise((resolve, reject) => {
@@ -35237,17 +35448,21 @@ var startBridge = async () => {
   for (let port = basePort; port < basePort + portCount; port += 1) {
     try {
       const bridge = await listen(port);
-      bridge.on("error", (error51) => console.error(`INT Practice Bridge WebSocket error: ${error51.message}`));
+      bridge.on("error", (error51) => console.error(`INT INT Helper WebSocket error: ${error51.message}`));
       return { bridge, port };
     } catch (error51) {
       if (error51.code !== "EADDRINUSE") throw error51;
     }
   }
-  throw new Error(`No free INT Practice Bridge port in ${basePort}-${basePort + portCount - 1}`);
+  throw new Error(`No free INT INT Helper port in ${basePort}-${basePort + portCount - 1}`);
 };
 var requestBrowser = (action, payload = {}) => new Promise((resolve, reject) => {
+  if (updateInFlight && action !== "update_guard") {
+    reject(new Error("INT Helper is updating; open a new task after it finishes"));
+    return;
+  }
   if (!browser || browser.readyState !== browser.OPEN) {
-    reject(new Error("INT Practice Bridge extension is not connected"));
+    reject(new Error("INT INT Helper extension is not connected"));
     return;
   }
   const id = String(++sequence);
@@ -35270,7 +35485,7 @@ var toolResult = (question) => {
   }
   return { content: content2, structuredContent: data };
 };
-var server = new McpServer({ name: "int-practice-bridge", version: "0.1.0" });
+var server = new McpServer({ name: "int-helper-bridge", version: "0.1.0" });
 server.registerTool(
   "set_question_history",
   {
@@ -35501,10 +35716,10 @@ server.registerTool(
 );
 var main = async () => {
   const { port } = await startBridge();
-  console.error(`INT Practice Bridge listening on ws://127.0.0.1:${port}`);
+  console.error(`INT INT Helper listening on ws://127.0.0.1:${port}`);
   await server.connect(new StdioServerTransport());
 };
 main().catch((error51) => {
-  console.error(`INT Practice Bridge MCP error: ${error51.message}`);
+  console.error(`INT INT Helper MCP error: ${error51.message}`);
   process.exitCode = 1;
 });

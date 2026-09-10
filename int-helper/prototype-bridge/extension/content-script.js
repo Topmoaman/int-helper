@@ -726,7 +726,7 @@
     origin: pageUrl().origin,
     course: courseIdentity(),
     chapters: chapterCards().map(({ number, title }) => ({ number, title })),
-    contentVersion: "0.12.0",
+    contentVersion: "0.13.0",
     controls: [...document.querySelectorAll("button, a")]
       .filter((element) => !element.getClientRects || element.getClientRects().length > 0)
       .slice(0, 40)
@@ -736,7 +736,7 @@
   const advanceSubject = ({ scope }) => {
     const path = location.pathname;
     const result = location.hostname === "main.virtualschool.club" ? advanceVirtualSubject(scope) : advanceIntSubject(scope);
-    return { ...result, path, contentVersion: "0.12.0" };
+    return { ...result, path, contentVersion: "0.13.0" };
   };
 
   const submitCurrentExam = (message) => {
@@ -810,7 +810,7 @@
       if (message.scope || ["apply_answer", "navigate_next", "advance_subject", "submit_exam"].includes(message.action)) assertScope(message.scope);
       const result =
         message.action === "page_version"
-          ? { contentVersion: "0.12.0" }
+          ? { contentVersion: "0.13.0" }
           : message.action === "read_question"
           ? readQuestion()
           : message.action === "apply_answer"
