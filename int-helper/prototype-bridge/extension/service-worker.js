@@ -27,6 +27,38 @@ const updateBadge = () => {
   chrome.action.setTitle({ title: connected ? "INT Helper connected — click for page status" : "INT Helper disconnected — open a Codex task with INT Helper" });
 };
 
+const isVirtualScope = (scope) => scope?.origin === "https://main.virtualschool.club";
+const resetAttemptState = (session) => {
+  session.attemptAnswers = new Map();
+  session.submitted = false;
+  session.submissionConfirmed = false;
+  session.submissionExamCode = null;
+  session.submittedMarker = null;
+  session.reviewOpened = null;
+  session.reviewSheet = null;
+  session.rejectedQuestions = new Set();
+};
+const markVirtualSubmitted = (session, marker = "submitted") => {
+  if (!session || !isVirtualScope(session.scope)) return false;
+  // A result banner can be read more than once after this bridge has already
+  // claimed the marker.  Keep that read idempotent for the same attempt while
+  // refusing a different marker or a marker from a fresh, unconfirmed attempt.
+  if (session.submitted && session.submittedMarker && (!marker || marker === session.submittedMarker)) return true;
+  if (!session.submissionConfirmed) return false;
+  const activity = session.scope.virtualActivity;
+  const total = Number(activity?.totalQuestions);
+  const hasConfirmedCode = typeof session.submissionExamCode === "string" &&
+    [...(session.attemptAnswers?.values() || [])].some(answer => answer.examCode === session.submissionExamCode);
+  if (!activity || !Number.isInteger(total) || total < 1 || session.attemptAnswers?.size !== total || !hasConfirmedCode) return false;
+  session.submitted = true;
+  session.submissionConfirmed = false;
+  session.submissionExamCode = session.submissionExamCode || null;
+  session.submittedMarker = marker || "submitted";
+  session.scope = { ...session.scope, virtualActivity: { ...activity,
+    submitted: true, submittedAt: activity.submittedAt || Date.now() } };
+  return true;
+};
+
 const getStatus = async () => {
   const status = { ports: connectedPorts(), version: chrome.runtime.getManifest().version, page: "unsupported",
     update: typeof helperUpdates === "undefined" ? undefined : await helperUpdates?.status() };
@@ -143,16 +175,39 @@ const sendScoped = async (session, message) => {
   ensureSession();
   await requireCurrentPage(session.tabId);
   ensureSession();
-  const result = await sendToPage(session.tabId, { ...message, scope: session.scope });
+  const scopedMessage = { ...message };
+  if (message.action === "advance_subject" && isVirtualScope(session.scope) && !scopedMessage.virtualAttemptId) {
+    scopedMessage.virtualAttemptId = crypto.randomUUID();
+    scopedMessage.virtualAttemptEnteredAt = Date.now();
+  }
+  let result = await sendToPage(session.tabId, { ...scopedMessage, scope: session.scope });
   ensureSession();
+  if (isVirtualScope(session.scope) && (result.submittedMarker || (result.submitted && result.terminalStatus))) {
+    markVirtualSubmitted(session, result.marker || result.submittedMarker);
+  }
   if (message.action === "advance_subject" && result.intActivity) {
     if (result.intActivity.enteredAt && result.intActivity.enteredAt !== session.scope.intActivity?.enteredAt) {
-      session.attemptAnswers = new Map();
-      session.submitted = false;
-      session.reviewSheet = null;
-      session.rejectedQuestions = new Set();
+      resetAttemptState(session);
     }
     session.scope = { ...session.scope, intActivity: result.intActivity };
+  }
+  if (message.action === "advance_subject" && isVirtualScope(session.scope) && result.virtualFinalOpened) {
+    const previous = session.scope.virtualActivity;
+    const virtualActivity = {
+      kind: "exam", examType: "F", attempt: (previous?.attempt || 0) + 1,
+      attemptId: result.virtualAttemptId || scopedMessage.virtualAttemptId || crypto.randomUUID(),
+      enteredAt: result.virtualAttemptEnteredAt || scopedMessage.virtualAttemptEnteredAt || Date.now(), submitted: false,
+      reviewBound: false,
+    };
+    resetAttemptState(session);
+    session.scope = { ...session.scope, virtualActivity };
+    // New content adapters clear their page-local ledger before clicking and return
+    // the identity. Keep the message for older adapters and isolated reload recovery.
+    if (result.virtualAttemptId !== virtualActivity.attemptId) {
+      await sendToPage(session.tabId, { action: "begin_virtual_attempt", attemptId: virtualActivity.attemptId, scope: session.scope });
+      ensureSession();
+    }
+    result = { ...result, virtualActivity };
   }
   return result;
 };
@@ -171,12 +226,193 @@ const inspectActivePage = async () => {
 
 const inspectPage = async () => (await inspectActivePage()).page;
 
+// Virtual School's /Course cards do not expose the course code.  Keep the
+// selected-level context and the opaque card identity until the card has
+// opened its real /StudyCourse route.  Progress and the route's focus flags
+// are deliberately excluded from this identity: completing another card can
+// change those values while the queued card token remains valid.
+const VIRTUAL_ORIGIN = "https://main.virtualschool.club";
+const normalizeSubjectValue = (value) => String(value ?? "").normalize("NFC").replace(/\s+/gu, " ").trim();
+const firstSubjectValue = (sources, keys) => {
+  for (const source of sources) {
+    if (!source || typeof source !== "object") continue;
+    for (const key of keys) {
+      const value = normalizeSubjectValue(source[key]);
+      if (value) return value;
+    }
+  }
+  return null;
+};
+const virtualSubjectCards = (result) => Array.isArray(result?.cards)
+  ? result.cards
+  : Array.isArray(result?.subjects) ? result.subjects : [];
+const virtualCardToken = (card) => {
+  const value = card?.cardToken;
+  return typeof value === "string" && value.trim() ? value : null;
+};
+const virtualCardCaption = (card) => firstSubjectValue([card], ["caption"]);
+const virtualCardProgress = (card) => {
+  const raw = card?.progress;
+  if (typeof raw === "number") return Number.isFinite(raw) && raw >= 0 && raw <= 100 ? raw : null;
+  const match = String(raw ?? "").trim().match(/^(\d+(?:\.\d+)?)\s*%$/u);
+  if (!match) return null;
+  const value = Number(match[1]);
+  return Number.isFinite(value) && value >= 0 && value <= 100 ? value : null;
+};
+const virtualCardAction = (card) => normalizeSubjectValue(card?.action);
+const virtualCardDisabled = (card, action) => card?.disabled === true || card?.isDisabled === true ||
+  card?.actionDisabled === true ||
+  card?.ariaDisabled === true || String(card?.ariaDisabled || "").toLowerCase() === "true" ||
+  /^(?:disabled|ล็อก|ไม่พร้อม)/iu.test(action);
+const normalizeVirtualCard = (card, index) => {
+  const cardToken = virtualCardToken(card);
+  const caption = virtualCardCaption(card);
+  const progress = virtualCardProgress(card);
+  const action = virtualCardAction(card);
+  const disabled = virtualCardDisabled(card, action);
+  const finished = card?.finished === true || progress === 100 || /^(?:finished|completed|เสร็จสิ้น|ผ่านแล้ว)/iu.test(action);
+  return { cardToken, caption, progress, action, disabled, finished, index };
+};
+const virtualListContext = (result) => {
+  // The Virtual adapter's listContext is the authoritative course-list
+  // identity.  Read its actual fields directly so a stale/ambiguous alias on
+  // the surrounding result cannot silently change the selected list.
+  if (result?.listContext && typeof result.listContext === "object") {
+    return {
+      path: normalizeSubjectValue(result.listContext.path),
+      level: normalizeSubjectValue(result.listContext.level),
+      term: normalizeSubjectValue(result.listContext.term),
+      year: normalizeSubjectValue(result.listContext.year),
+    };
+  }
+  const sources = [result?.listContext, result, result?.listIdentity, result?.identity, result?.course, result?.scope];
+  return {
+    path: firstSubjectValue(sources, ["path"]),
+    level: firstSubjectValue(sources, ["selectedLevel", "selectedLevelId", "levelId", "level"]),
+    term: firstSubjectValue(sources, ["termId", "selectedTerm", "selectedTermId", "term"]),
+    year: firstSubjectValue(sources, ["year"]),
+  };
+};
+const virtualListIdentity = (result, origin, cards) => JSON.stringify({
+  origin,
+  ...virtualListContext(result),
+  cards: cards.map(({ cardToken, caption }) => ({ cardToken, caption })),
+});
+const normalizeVirtualSubjectList = (result, tabId, fallbackOrigin = null) => {
+  const origin = normalizeSubjectValue(result?.origin || fallbackOrigin);
+  if (origin !== VIRTUAL_ORIGIN) throw new Error("Virtual subject list origin is missing or changed");
+  const rawCards = virtualSubjectCards(result);
+  if (!rawCards.length) throw new Error("Virtual subject list is empty");
+  const cards = rawCards.map(normalizeVirtualCard);
+  if (cards.some(card => !card.cardToken || !card.caption)) throw new Error("Virtual subject list card identity is incomplete");
+  if (new Set(cards.map(card => card.cardToken)).size !== cards.length ||
+      new Set(cards.map(card => card.caption)).size !== cards.length) {
+    throw new Error("Virtual subject list card identity is ambiguous");
+  }
+  const context = virtualListContext(result);
+  if (!context.level || !context.term) throw new Error("Virtual subject list level or term is missing");
+  if (cards.some(card => (Object.prototype.hasOwnProperty.call(rawCards[card.index] || {}, "subjectCode") &&
+      normalizeSubjectValue(rawCards[card.index]?.subjectCode)) ||
+      Object.prototype.hasOwnProperty.call(rawCards[card.index] || {}, "code") ||
+      Object.prototype.hasOwnProperty.call(rawCards[card.index] || {}, "subject"))) {
+    throw new Error("Virtual subject list must use opaque cardToken values until StudyCourse opens");
+  }
+  const listToken = typeof result?.listToken === "string" && result.listToken ? result.listToken : null;
+  if (!listToken) throw new Error("Virtual subject list token is missing");
+  return {
+    tabId, origin, virtual: true, listToken, cards, context,
+    identity: virtualListIdentity(result, origin, cards),
+    result,
+  };
+};
+const virtualOpenableCard = (card) => {
+  if (!card) throw new Error("Virtual subject card is missing from the current list");
+  if (card.progress === null) throw new Error("Virtual subject progress is unknown; refusing to open it");
+  if (card.finished || card.progress >= 100) throw new Error("Virtual subject is already finished");
+  if (card.disabled || !/^(?:start|continue|เริ่มเรียน|ดำเนินการต่อ)$/iu.test(card.action)) {
+    throw new Error("Virtual subject card is disabled or has no ordinary open action");
+  }
+};
+const virtualCourseValues = (page) => {
+  const course = page?.course || {};
+  const params = virtualPageParams(page);
+  return { course,
+    code: firstSubjectValue([course], ["subjectCode"]),
+    caption: firstSubjectValue([course], ["subjectName"]) || normalizeSubjectValue(params.get("title")) || firstSubjectValue([page], ["title", "caption"]),
+    level: firstSubjectValue([course], ["level"]),
+    selectedLevel: firstSubjectValue([course, page], ["selectedLevel"]),
+    term: firstSubjectValue([course], ["term"]),
+    year: firstSubjectValue([course], ["year"]),
+  };
+};
+const virtualPageParams = (page) => {
+  try {
+    const url = new URL(page?.url || `${VIRTUAL_ORIGIN}${page?.path || "/"}`);
+    return url.searchParams;
+  } catch { return new URLSearchParams(); }
+};
+const virtualStudyCourseReady = (page, list, card) => {
+  if (!page || normalizeSubjectValue(page.origin) !== VIRTUAL_ORIGIN || !/^\/StudyCourse\/?$/iu.test(page.path || "")) return null;
+  const actual = virtualCourseValues(page);
+  if (!actual.code || !actual.caption || !actual.level || !actual.term || !actual.year) return null;
+  if (actual.caption !== card.caption) throw new Error("Opened Virtual subject title does not match the selected card");
+  if (actual.term !== list.context.term) throw new Error("Opened Virtual subject term does not match the selected list");
+  if (list.context.year && actual.year !== list.context.year) throw new Error("Opened Virtual subject year does not match the selected list");
+  const params = virtualPageParams(page);
+  const selectedLevel = actual.selectedLevel || normalizeSubjectValue(params.get("selectedLevel"));
+  // Virtual's list route uses the displayed level (for example 6), while the
+  // StudyCourse `level` query value is an opaque course level (for example J).
+  // Compare the list level only with the route's selectedLevel when exposed.
+  if (selectedLevel && selectedLevel !== list.context.level) throw new Error("Opened Virtual subject level does not match the selected list");
+  if (!selectedLevel) throw new Error("Opened Virtual subject route does not expose its selected list level");
+  return { ...page, course: { ...actual.course, subjectCode: actual.code, subjectName: actual.caption,
+    level: actual.level, term: actual.term, year: actual.year } };
+};
+const waitForVirtualStudyCourse = async (tabId, list, card, opened, assertContext = () => {}) => {
+  let lastPage = opened?.path ? opened : null;
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    assertContext();
+    if (lastPage) {
+      const ready = virtualStudyCourseReady(lastPage, list, card);
+      if (ready) return ready;
+    }
+    await delay(150);
+    assertContext();
+    lastPage = await sendToPage(tabId, { action: "inspect_page" });
+    assertContext();
+  }
+  throw new Error("Timed out waiting for the selected Virtual subject overview");
+};
+const waitForVirtualSubjectList = async (tabId, list, returned, assertContext = () => {}) => {
+  let page = returned?.path ? returned : null;
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    assertContext();
+    if (!page) page = await sendToPage(tabId, { action: "inspect_page" });
+    assertContext();
+    const origin = normalizeSubjectValue(page.origin);
+    const path = page.path || "";
+    if (origin === VIRTUAL_ORIGIN && /^\/Course\/?$/iu.test(path)) {
+      const params = virtualPageParams(page);
+      const level = params.get("level") || firstSubjectValue([page], ["selectedLevel", "level"]);
+      const term = params.get("term") || firstSubjectValue([page], ["term"]);
+      const year = params.get("year") || firstSubjectValue([page], ["year"]);
+      if (level === list.context.level && term === list.context.term && (!list.context.year || year === list.context.year)) return page;
+      throw new Error("Returned Virtual subject list level, term or year does not match the saved list");
+    }
+    await delay(150);
+    page = null;
+  }
+  throw new Error("Timed out waiting for the Virtual subject list");
+};
+
 const setCurrentExamScope = async (port, { examCode, allowSubmit }) => {
   if (mutationInFlight) throw new Error("Cannot change scope during a running action");
   if (typeof examCode !== "string" || !examCode) throw new Error("Read the current question to obtain examCode first");
   const { tab } = await inspectActivePage();
   const scope = await sendToPage(tab.id, { action: "bind_current_exam", expectedExamCode: examCode, examBinding: crypto.randomUUID(), allowSubmit: allowSubmit === true });
-  sessions.set(port, { scope, tabId: tab.id, port });
+  const session = { scope, tabId: tab.id, port };
+  resetAttemptState(session);
+  sessions.set(port, session);
   return { scope, tabId: tab.id };
 };
 
@@ -185,7 +421,8 @@ const setScope = async (port, { subjectCode, mode, chapter, allowEmptyPretest, r
   if (!["chapter", "subject", "final"].includes(mode) || (mode === "chapter" && (!Number.isInteger(chapter) || chapter < 1))) throw new Error("Invalid scope");
   const { tab, page } = await inspectActivePage();
   const int = /^https:\/\/(?:www\.)?int-project\.com$/u.test(page.origin);
-  if (retryUntilPerfect && (!int || mode !== "final")) throw new Error("Perfect-score looping requires INT final-only scope");
+  const virtual = page.origin === "https://main.virtualschool.club";
+  if (retryUntilPerfect && ((!int && !virtual) || mode !== "final")) throw new Error("Perfect-score looping requires a supported final-only scope");
   if (mode === "final" && !int && !/^\/StudyCourse\/?$/iu.test(page.path)) throw new Error("Set final scope from the course overview");
   if (!int && page.origin !== "https://main.virtualschool.club") throw new Error("Unsupported practice origin");
   if (int && !/^\/student\/virtual_school\/(?:index\.php)?$/u.test(page.path)) {
@@ -206,7 +443,9 @@ const setScope = async (port, { subjectCode, mode, chapter, allowEmptyPretest, r
     }
   }
   const scope = { ...course, origin: page.origin, mode, chapter, chapterTitle, allowEmptyPretest, retryUntilPerfect: retryUntilPerfect === true };
-  sessions.set(port, { scope, tabId: tab.id, port });
+  const session = { scope, tabId: tab.id, port };
+  resetAttemptState(session);
+  sessions.set(port, session);
   return { scope, tabId: tab.id };
 };
 
@@ -277,11 +516,21 @@ const pacingWait = async (session, examCode, submitting = false) => {
   if (!minutes) return null;
   const question = await sendScoped(session, { action: "read_question" });
   if (question.examCode !== examCode) throw new Error("Stale exam code; read the current question again");
-  if (question.totalQuestions !== 50 || !Number.isInteger(question.questionNumber) || question.questionNumber < 1 || question.questionNumber > 50) throw new Error("Timed pacing requires exactly 50 questions");
-  const startedAt = session.scope.intActivity?.enteredAt;
+  const virtual = session.scope?.origin === "https://main.virtualschool.club";
+  const total = Number(question.totalQuestions);
+  if (!Number.isInteger(total) || total < 1 || total > 1000 || !Number.isInteger(question.questionNumber) || question.questionNumber < 1 || question.questionNumber > total) {
+    throw new Error(virtual ? "Timed pacing requires an observed positive Virtual School question total" : "Timed pacing requires exactly 50 questions");
+  }
+  if (!virtual && total !== 50) throw new Error("Timed pacing requires exactly 50 questions");
+  const activity = virtual ? session.scope.virtualActivity : session.scope.intActivity;
+  const startedAt = activity?.enteredAt;
   if (!Number.isFinite(startedAt)) throw new Error("Timed pacing requires entering the final through the scoped overview");
+  if (virtual && activity.totalQuestions && activity.totalQuestions !== total) throw new Error("Virtual School question total changed during this attempt");
+  if (virtual && !activity.totalQuestions) {
+    session.scope = { ...session.scope, virtualActivity: { ...activity, totalQuestions: total } };
+  }
   const durationMs = minutes * 60_000;
-  const dueAt = startedAt + durationMs * (submitting ? 1 : (question.questionNumber - 1) / 50);
+  const dueAt = startedAt + durationMs * (submitting ? 1 : (question.questionNumber - 1) / total);
   const waitMs = Math.max(0, Math.ceil(dueAt - Date.now()));
   return waitMs ? { ok: true, mode: "pacing", action: "waiting", answerApplied: false, done: false,
     examCode, questionNumber: question.questionNumber, waitMs, waitUntil: new Date(dueAt).toISOString(),
@@ -301,7 +550,10 @@ const answerAndNext = async ({ choiceIndex, examCode, save }, port) => {
   try { waiting = await pacingWait(session, examCode); }
   catch (error) { if (isStaleQuestion(error)) return resyncQuestion(session, "answer_and_next"); throw error; }
   if (waiting) return waiting;
-  const question = session.scope.retryUntilPerfect ? await sendScoped(session, { action: "read_question" }) : null;
+  const captureAttempt = (session.scope?.origin === "https://main.virtualschool.club" && session.scope.virtualActivity?.examType === "F") ||
+    session.scope.mode === "final" || session.scope.retryUntilPerfect;
+  const question = captureAttempt
+    ? await sendScoped(session, { action: "read_question" }) : null;
   if (question && question.examCode !== examCode) return resyncQuestion(session, "answer_and_next");
   let selected;
   try { selected = await sendScoped(session, {
@@ -311,6 +563,14 @@ const answerAndNext = async ({ choiceIndex, examCode, save }, port) => {
     save: save === true,
   }); } catch (error) { if (isStaleQuestion(error)) return resyncQuestion(session, "answer_and_next"); throw error; }
   if (question) {
+    if (session.scope?.origin === "https://main.virtualschool.club" && session.scope.virtualActivity) {
+      const total = Number(question.totalQuestions);
+      if (!Number.isInteger(total) || total < 1 || total > 1000) throw new Error("Virtual School question total is missing or invalid");
+      if (session.scope.virtualActivity.totalQuestions && session.scope.virtualActivity.totalQuestions !== total) {
+        throw new Error("Virtual School question total changed during this attempt");
+      }
+      session.scope = { ...session.scope, virtualActivity: { ...session.scope.virtualActivity, totalQuestions: total } };
+    }
     session.attemptAnswers ||= new Map();
     session.attemptAnswers.set(question.questionNumber, { ...question, selectedChoiceIndex: selected.selected });
   }
@@ -362,6 +622,17 @@ const completeCurrentLesson = async (port) => {
 const submitCurrentExam = async ({ examCode }, port) => {
   if (typeof examCode !== "string" || !examCode) throw new Error("An exact examCode is required for submission");
   const session = configuredSession(port);
+  const virtual = session.scope?.origin === "https://main.virtualschool.club";
+  if (virtual) {
+    const status = await sendScoped(session, { action: "read_submission_status" });
+    if (status.submitted) {
+      const ownedAttempt = markVirtualSubmitted(session, status.marker);
+      return { ...status, mode: "result", action: "already_submitted", submitted: true, ownedAttempt };
+    }
+    if (session.submissionConfirmed && !session.submitted) {
+      return { ok: true, mode: "submission", action: "confirmation_pending", submitted: false, examCode };
+    }
+  }
   const current = await sendScoped(session, { action: "read_question" });
   let submittedCode = examCode;
   if (current.examCode !== examCode) {
@@ -377,7 +648,21 @@ const submitCurrentExam = async ({ examCode }, port) => {
     if (waiting) return waiting;
     result = await sendScoped(session, { action: "submit_exam", expectedExamCode: submittedCode });
   } catch (error) { if (isStaleQuestion(error)) return resyncQuestion(session, "submit_current_exam"); throw error; }
-  if (result.action === "confirmed") session.submitted = true;
+  if (result.action === "confirmed") {
+    if (virtual) {
+      session.submissionConfirmed = true;
+      session.submissionExamCode = submittedCode;
+    }
+    else session.submitted = true;
+  }
+  if (result.submitted || result.action === "already_submitted") {
+    if (virtual) {
+      const ownedAttempt = markVirtualSubmitted(session, result.marker);
+      if (!ownedAttempt) return { ...result, examCode: submittedCode, submitted: true, ownedAttempt: false,
+        ...(submittedCode !== examCode ? { codeRefreshed: true } : {}) };
+    }
+    else session.submitted = true;
+  }
   return { ...result, examCode: submittedCode, ...(submittedCode !== examCode ? { codeRefreshed: true } : {}) };
 };
 
@@ -423,24 +708,113 @@ const selectiveReview = (session, result) => {
     remainingCount: needsReview.length, done: !!sheet && reviewed.size === 50 } };
 };
 
+const normalizeReviewText = (value) => String(value || "").normalize("NFC").replace(/\s+/gu, " ").trim();
+const reviewChoiceKey = (choice) => JSON.stringify([normalizeReviewText(choice?.text), choice?.image || null]);
+const reviewQuestionKey = (question) => JSON.stringify([
+  normalizeReviewText(question?.questionText), question?.questionImage || null,
+  (question?.choices || []).map(reviewChoiceKey).sort(),
+]);
+const uniqueReviewNumberSet = (reviews, total) => {
+  const numbers = reviews.map(review => review.questionNumber);
+  return reviews.length === total && new Set(numbers).size === total &&
+    numbers.every(number => Number.isInteger(number) && number >= 1 && number <= total) &&
+    Array.from({ length: total }, (_, index) => index + 1).every(number => numbers.includes(number));
+};
+const virtualReviewFailure = (result, reason) => ({ ...result, reviewBound: false, boundAttemptId: null, reviewBindingError: reason });
+
+// Virtual review URLs have no attempt identifier. Bind only a complete review that the
+// bridge opened after this attempt's submitted marker and whose full question set matches
+// the answers captured by this session.
+const bindVirtualReview = (session, result) => {
+  const activity = session.scope.virtualActivity;
+  if (!activity || !session.submitted || !session.reviewOpened || session.reviewOpened.attemptId !== activity.attemptId) {
+    return virtualReviewFailure(result, "Virtual review is not bound to this submitted attempt");
+  }
+  const total = Number(result.totalQuestions || result.score?.total || activity.totalQuestions);
+  const reviews = result.verifiedReviews || [];
+  if (result.reviewLayout !== "all" || result.reviewComplete !== true || !Number.isInteger(total) || total < 1 || total > 1000 ||
+      !uniqueReviewNumberSet(reviews, total)) return virtualReviewFailure(result, "Virtual review is not a complete observed set");
+  if (result.examCode !== undefined && result.examCode !== null) return virtualReviewFailure(result, "Virtual review must not use a review attempt code");
+  if (!result.score || result.score.total !== total || !Number.isInteger(result.score.correct) || result.score.correct < 0 || result.score.correct > total) {
+    return virtualReviewFailure(result, "Virtual review score is missing or does not match its observed total");
+  }
+  const answers = session.attemptAnswers;
+  if (!answers || answers.size !== total) return virtualReviewFailure(result, "Virtual review does not match the complete submitted answer ledger");
+  const rejectedReviews = [];
+  for (const review of reviews) {
+    const saved = answers.get(review.questionNumber);
+    if (!saved || reviewQuestionKey(saved) !== reviewQuestionKey(review)) {
+      return virtualReviewFailure(result, `Virtual review question ${review.questionNumber} does not match this attempt`);
+    }
+    if (!Number.isInteger(saved.selectedChoiceIndex)) {
+      return virtualReviewFailure(result, `Virtual attempt answer ${review.questionNumber} is missing its selected choice`);
+    }
+    const correctReviewChoice = review.choices?.find(choice => choice.index === review.correctChoiceIndex);
+    const selectedSavedChoice = saved.choices?.find(choice => choice.index === saved.selectedChoiceIndex);
+    const correctMatches = review.choices?.filter(choice => reviewChoiceKey(choice) === reviewChoiceKey(correctReviewChoice)) || [];
+    const selectedMatches = review.choices?.filter(choice => reviewChoiceKey(choice) === reviewChoiceKey(selectedSavedChoice)) || [];
+    if (correctMatches.length !== 1 || selectedMatches.length !== 1) {
+      return virtualReviewFailure(result, `Virtual review question ${review.questionNumber} has an ambiguous choice mapping`);
+    }
+    if (review.selectionState === "unanswered" ||
+        (review.selectedChoiceIndex !== null && review.selectedChoiceIndex !== undefined && review.selectedChoiceIndex !== selectedMatches[0].index)) {
+      return virtualReviewFailure(result, `Virtual review selection ${review.questionNumber} does not match this attempt`);
+    }
+    if (selectedMatches[0].index !== correctMatches[0].index) {
+      rejectedReviews.push({ ...review, selectedChoiceIndex: selectedMatches[0].index,
+        correctness: "incorrect", verificationSource: "Virtual School explicit correct-answer label",
+        selectionSource: "bound_attempt_ledger", evidence: review.evidence || `Question ${review.questionNumber}: explicit correct answer` });
+    }
+  }
+  const knownCorrectness = reviews.every(review => ["correct", "incorrect"].includes(review.correctness));
+  const computedCorrect = total - rejectedReviews.length;
+  if (computedCorrect !== result.score.correct) return virtualReviewFailure(result, "Virtual review correctness does not match its observed score");
+  if (knownCorrectness && reviews.filter(review => review.correctness === "correct").length !== result.score.correct) {
+    return virtualReviewFailure(result, "Virtual review correctness does not match its observed score");
+  }
+  const nextActivity = { ...activity, totalQuestions: total, finalResult: result.score,
+    submitted: true, reviewBound: true, reviewComplete: true, reviewAttemptId: activity.attemptId };
+  session.scope = { ...session.scope, virtualActivity: nextActivity };
+  return { ...result, reviewBound: true, boundAttemptId: activity.attemptId, rejectedReviews,
+    reviewBindingError: null };
+};
+
+const reviewIsVirtualScope = (scope) => scope?.origin === "https://main.virtualschool.club";
 const mutations = new Set(["answer_and_next", "advance_subject", "complete_current_lesson", "submit_current_exam"]);
 
 // Keep navigation and its evidence read in one bounded request; never answer or submit here.
 const readReviewResult = async (tabId, session) => {
-  let result = await sendToPage(tabId, { action: "read_exam_result", ...(session?.scope.retryUntilPerfect ? { scope: session.scope } : {}) });
+  const scoped = session && session.scope.mode !== "exam" ? { scope: session.scope } : {};
+  let result = await sendToPage(tabId, { action: "read_exam_result", ...scoped });
+  if (session?.scope && reviewIsVirtualScope(session.scope) && result.submittedMarker) {
+    markVirtualSubmitted(session, result.marker || result.submittedMarker);
+  }
   if (session?.scope.intActivity?.examType === "F" && result.score) {
     session.scope = { ...session.scope, intActivity: { ...session.scope.intActivity, finalResult: result.score } };
   }
-  if (session?.scope.retryUntilPerfect && result.verificationSource) {
+  // Virtual review evidence is scoped to the attempt that opened the review;
+  // the same binding can be used for a chapter posttest when its adapter
+  // supplies a complete observed review. Normal completion never waits for
+  // this branch: it is only reached by an explicit result/review read.
+  if (session?.scope && reviewIsVirtualScope(session.scope) && session.scope.virtualActivity) {
+    result = bindVirtualReview(session, result);
+  }
+  if (session?.scope.retryUntilPerfect && !reviewIsVirtualScope(session.scope) && result.verificationSource) {
     if (result.totalQuestions !== 50) throw new Error("Perfect-score looping requires exactly 50 questions");
     result = selectiveReview(session, result);
   }
-  return { ...result, loopMode: session?.scope.retryUntilPerfect ? "loop_until_50" : "normal" };
+  const loopMode = session?.scope.retryUntilPerfect
+    ? (reviewIsVirtualScope(session.scope) ? "loop_until_full" : "loop_until_50") : "normal";
+  return { ...result, ...(session?.scope ? { scope: session.scope } : {}), loopMode };
 };
 const navigateReview = async (tabId, session, payload, assertSession = () => {}) => {
   assertSession();
-  const navigate = (token) => { assertSession(); return sendToPage(tabId, { action: "open_answer_review", expectedResultToken: token, step: payload.step, questionNumber: payload.questionNumber }); };
+  const scoped = session && session.scope.mode !== "exam" ? { scope: session.scope } : {};
+  const navigate = (token) => { assertSession(); return sendToPage(tabId, { action: "open_answer_review", expectedResultToken: token, step: payload.step, questionNumber: payload.questionNumber, ...scoped }); };
   let navigation = await navigate(payload.resultToken);
+  if (session && reviewIsVirtualScope(session.scope) && payload.step === "open" && session.submitted && navigation.action === "opened_review") {
+    session.reviewOpened = { attemptId: session.scope.virtualActivity?.attemptId || null, resultToken: payload.resultToken };
+  }
   if (payload.readAfter === false || payload.step === "return" || navigation.done) return navigation;
   let needsJump = payload.step === "question" && navigation.action === "opened_sheet";
   const verified = [], rejected = [];
@@ -464,11 +838,20 @@ const navigateReview = async (tabId, session, payload, assertSession = () => {})
       needsJump = false;
       continue;
     }
-    const ready = payload.step === "question" ? result.questionNumber === payload.questionNumber && !result.sheet?.length
+    const virtual = session && reviewIsVirtualScope(session.scope);
+    const ready = virtual
+      ? payload.step === "sheet" ? result.reviewLayout === "all" && result.reviewComplete === true
+      : payload.step === "question" ? result.reviewLayout === "single" && result.ready && result.questionNumber === payload.questionNumber
+      : payload.step === "close" ? result.reviewLayout === "single" && !result.sheet?.length
+      : result.resultToken !== payload.resultToken && (result.reviewLayout === "single" || result.reviewLayout === "all")
+      : payload.step === "question" ? result.questionNumber === payload.questionNumber && !result.sheet?.length
       : payload.step === "sheet" ? result.sheet?.length > 0
       : payload.step === "close" ? !result.sheet?.length
       : result.resultToken !== payload.resultToken;
-    if (ready) return { ...result, verifiedReviews: verified, rejectedReviews: rejected, navigationAction: navigation.action };
+    if (ready) return { ...result,
+      verifiedReviews: virtual && result.reviewComplete ? (result.verifiedReviews || []) : verified,
+      rejectedReviews: virtual && result.reviewComplete ? (result.rejectedReviews || []) : rejected,
+      navigationAction: navigation.action };
   }
   if (lastResult) return { ...lastResult, verifiedReviews: verified, rejectedReviews: rejected, navigationPending: true,
     requestedQuestionNumber: payload.questionNumber || null, navigationWarning: "Navigation timed out. Read the current result before continuing; do not repeat submission." };
@@ -491,9 +874,17 @@ const handleRequest = async (action, payload, port) => {
     finally { mutationInFlight = false; }
   }
   if (action === "read_subjects") {
-    const { tab } = await inspectActivePage();
+    const { tab, page } = await inspectActivePage();
     const result = await sendToPage(tab.id, { action });
-    subjectLists.set(port, { tabId: tab.id, listToken: result.listToken });
+    const virtualListResult = page.origin === VIRTUAL_ORIGIN &&
+      (Array.isArray(result.cards) || result.virtual === true || result.listKind === "virtual" ||
+        (Array.isArray(result.subjects) && result.subjects.some(card => typeof card?.cardToken === "string")));
+    if (virtualListResult || result.origin === VIRTUAL_ORIGIN && Array.isArray(result.cards)) {
+      const list = normalizeVirtualSubjectList(result, tab.id, page.origin);
+      subjectLists.set(port, list);
+    } else {
+      subjectLists.set(port, { tabId: tab.id, origin: page.origin, listToken: result.listToken, result });
+    }
     return result;
   }
   if (action === "open_subject" || action === "return_to_subjects") {
@@ -504,10 +895,65 @@ const handleRequest = async (action, payload, port) => {
       if (action === "open_subject") {
         const list = subjectLists.get(port);
         if (!list || list.listToken !== payload.listToken) throw new Error("Read the subject list in this session first");
+        const ensureList = () => {
+          if (subjectLists.get(port) !== list) throw new Error("Subject list scope expired; read_subjects again");
+        };
+        ensureList();
         await requireCurrentPage(list.tabId);
+        ensureList();
+        if (list.virtual === true) {
+          if (list.opened) throw new Error("Read the subject list in this session first");
+          if (typeof payload.cardToken !== "string" || !payload.cardToken) throw new Error("Virtual subject opening requires the opaque cardToken from read_subjects");
+          if (Object.prototype.hasOwnProperty.call(payload, "subjectCode")) throw new Error("Virtual subjectCode is unavailable until StudyCourse opens");
+          const selected = list.cards.find(card => card.cardToken === payload.cardToken);
+          virtualOpenableCard(selected);
+          const liveResult = await sendToPage(list.tabId, { action: "read_subjects" });
+          ensureList();
+          const liveList = normalizeVirtualSubjectList(liveResult, list.tabId, list.origin);
+          if (liveList.identity !== list.identity) throw new Error("Subject list changed; read_subjects again");
+          const liveCard = liveList.cards.find(card => card.cardToken === payload.cardToken);
+          virtualOpenableCard(liveCard);
+          // The caller's token identifies the queued list. After identity and
+          // card revalidation, pass the current adapter token so a progress
+          // refresh cannot strand an otherwise unchanged card queue.
+          result = await sendToPage(list.tabId, { action, listToken: liveList.listToken, cardToken: payload.cardToken });
+          ensureList();
+          const overview = await waitForVirtualStudyCourse(list.tabId, list, liveCard, result, ensureList);
+          ensureList();
+          subjectLists.set(port, { ...list, opened: { cardToken: payload.cardToken, caption: liveCard.caption, overview } });
+          sessions.delete(port);
+          return { ...result, cardToken: payload.cardToken, caption: liveCard.caption,
+            subjectCode: overview.course.subjectCode, course: overview.course, path: overview.path };
+        }
         result = await sendToPage(list.tabId, { action, listToken: list.listToken, subjectCode: payload.subjectCode });
       } else {
-        result = await sendScoped(configuredSession(port), { action });
+        const session = configuredSession(port);
+        if (isVirtualScope(session.scope)) {
+          if (session.scope.mode !== "subject") throw new Error("Return to subjects requires a scoped Virtual subject overview");
+          const list = subjectLists.get(port);
+          if (!list?.opened) throw new Error("The scoped Virtual subject was not opened from a verified subject list");
+          const ensureSession = () => {
+            if (sessions.get(port) !== session || subjectLists.get(port) !== list) throw new Error("Scope expired; set it again before continuing");
+          };
+          ensureSession();
+          const currentPage = await sendToPage(session.tabId, { action: "inspect_page" });
+          ensureSession();
+          const currentCourse = virtualCourseValues(currentPage);
+          const openedCourse = list.opened.overview.course;
+          if (!/^\/StudyCourse\/?$/iu.test(currentPage.path || "") ||
+              currentCourse.code !== openedCourse.subjectCode || currentCourse.caption !== openedCourse.subjectName ||
+              currentCourse.term !== openedCourse.term || currentCourse.year !== openedCourse.year ||
+              currentCourse.code !== session.scope.subjectCode) {
+            throw new Error("Current Virtual subject overview does not match the opened scoped subject");
+          }
+          result = await sendScoped(session, { action });
+          ensureSession();
+          if (result.action !== "returned_to_subjects") throw new Error("Virtual subject return did not use the observed back button");
+          await waitForVirtualSubjectList(session.tabId, list, result, ensureSession);
+          ensureSession();
+        } else {
+          result = await sendScoped(session, { action });
+        }
       }
       sessions.delete(port);
       subjectLists.delete(port);
@@ -521,7 +967,9 @@ const handleRequest = async (action, payload, port) => {
     const session = configuredSession(port);
     const durationMinutes = payload.durationMinutes;
     if (!Number.isFinite(durationMinutes) || durationMinutes < 0 || durationMinutes > 720) throw new Error("durationMinutes must be between 0 and 720");
-    if (durationMinutes && (session.scope.mode !== "final" || !/^https:\/\/(?:www\.)?int-project\.com$/u.test(session.scope.origin))) throw new Error("Timed pacing requires INT final-only scope");
+    const intFinal = session.scope.mode === "final" && /^https:\/\/(?:www\.)?int-project\.com$/u.test(session.scope.origin);
+    const virtualFinal = isVirtualScope(session.scope) && session.scope.mode === "final";
+    if (durationMinutes && !intFinal && !virtualFinal) throw new Error("Timed pacing requires a supported final-only scope");
     session.scope = { ...session.scope, durationMinutes };
     return { scope: session.scope, durationMinutes, timing: "Minimum duration per attempt from final entry; delays may take longer" };
   }
@@ -529,10 +977,12 @@ const handleRequest = async (action, payload, port) => {
     if (mutationInFlight) throw new Error("Cannot change loop mode during a running action");
     const session = configuredSession(port);
     if (typeof payload.enabled !== "boolean") throw new Error("enabled must be boolean");
-    if (payload.enabled && (session.scope.mode !== "final" || !/^https:\/\/(?:www\.)?int-project\.com$/u.test(session.scope.origin))) throw new Error("Perfect-score looping requires INT final-only scope");
+    const intFinal = session.scope.mode === "final" && /^https:\/\/(?:www\.)?int-project\.com$/u.test(session.scope.origin);
+    const virtualFinal = isVirtualScope(session.scope) && session.scope.mode === "final";
+    if (payload.enabled && !intFinal && !virtualFinal) throw new Error("Perfect-score looping requires a supported final-only scope");
     session.scope = { ...session.scope, retryUntilPerfect: payload.enabled };
     session.completed = false;
-    return { scope: session.scope, loopMode: payload.enabled ? "loop_until_50" : "normal", tabId: session.tabId };
+    return { scope: session.scope, loopMode: payload.enabled ? (isVirtualScope(session.scope) ? "loop_until_full" : "loop_until_50") : "normal", tabId: session.tabId };
   }
   if (action === "set_scope") return setScope(port, payload);
   if (action === "set_current_exam_scope") return setCurrentExamScope(port, payload);

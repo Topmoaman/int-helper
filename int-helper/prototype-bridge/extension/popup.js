@@ -14,6 +14,9 @@ const renderUpdate = update => {
   show("update-title", update.busy ? "กำลังอัปเดต…" : update.needsRestart ? "อัปเดตเป็น v" + update.installed + " แล้ว" : update.available ? "มีรุ่นใหม่ v" + update.latest : "การตรวจอัปเดต");
   show("update-message", update.busy ? "รอสักครู่ ส่วนขยายจะรีโหลดเมื่อเสร็จ" : update.needsRestart ? "รีโหลดหน้าฝึกทำข้อสอบและเปิดงาน Codex ใหม่เพื่อใช้รุ่นนี้" : update.error || update.reason || "อัปเดตเพื่อใช้รุ่นล่าสุด คลังเฉลยเดิมจะยังอยู่");
 };
+const VIRTUAL_ORIGIN = "https://main.virtualschool.club";
+const INT_ORIGINS = new Set(["https://int-project.com", "https://www.int-project.com"]);
+const siteLabel = (origin) => !origin ? "" : origin === VIRTUAL_ORIGIN ? "Virtual School" : INT_ORIGINS.has(origin) ? "INT Project" : "เว็บไซต์ไม่รองรับ";
 const refresh = async () => {
   if (refreshing) return;
   refreshing = true;
@@ -28,10 +31,18 @@ const refresh = async () => {
     show("page-help", status.page === "reload" ? "รีโหลดหน้าเว็บแล้วเปิดป๊อปอัปอีกครั้ง" : status.page === "ready" ? `หน้าเว็บ v${status.pageVersion} ตรงกับส่วนขยาย การเชื่อมต่อไม่ได้หมายถึงกำลังทำข้อสอบ` : "เลือกแท็บ INT Project หรือ Virtual School");
     const scopes = status.scopes || [];
     if (scopes.length) {
-      show("scope", scopes.map(s => s.subjectName || s.subjectCode || "ข้อสอบปัจจุบัน").join(" · "), "ready");
+      show("scope", scopes.map(s => {
+        const site = siteLabel(s.origin);
+        const subject = s.subjectName || s.subjectCode || "ข้อสอบปัจจุบัน";
+        return site ? `${site} · ${subject}` : subject;
+      }).join(" · "), "ready");
       show("scope-help", scopes.map(s => {
-        const mode = s.mode === "final" ? `ปลายภาค · ${s.retryUntilPerfect ? "วนจนได้ 50/50" : "ทำหนึ่งรอบ"}` : s.mode === "chapter" ? `บทที่ ${s.chapter}` : s.mode === "exam" ? `ข้อสอบนี้ · ${s.submissionAllowed ? "ส่งได้" : "ตอบเท่านั้น"}` : "ทั้งวิชา";
-        return mode + (s.durationMinutes ? ` · ${s.durationMinutes} นาที/รอบ` : "");
+        const site = siteLabel(s.origin);
+        const virtual = site === "Virtual School";
+        const total = Number(s.virtualActivity?.totalQuestions);
+        const fullScore = virtual ? (Number.isInteger(total) && total > 0 ? `วนจนได้ ${total}/${total}` : "วนจนได้คะแนนเต็ม") : site === "INT Project" ? "วนจนได้ 50/50" : "โหมดวนซ้ำไม่พร้อมใช้";
+        const mode = s.mode === "final" ? `ปลายภาค · ${s.retryUntilPerfect ? fullScore : "ทำหนึ่งรอบ"}` : s.mode === "chapter" ? `บทที่ ${s.chapter}` : s.mode === "exam" ? `ข้อสอบนี้ · ${s.submissionAllowed ? "ส่งได้" : "ตอบเท่านั้น"}` : "ทั้งวิชา";
+        return `${site ? `${site} · ` : ""}${mode}` + (s.durationMinutes ? ` · ${s.durationMinutes} นาที/รอบ` : "");
       }).join(" / "));
     } else {
       show("scope", status.page === "unsupported" ? "เลือกแท็บแบบฝึกหัด" : "แท็บนี้ยังไม่มีขอบเขตงาน", "warning");

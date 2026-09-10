@@ -20173,12 +20173,12 @@ var questions = [
   }
 ];
 var cleanEnv = Object.fromEntries(Object.entries(import_node_process2.default.env).filter(([, value]) => typeof value === "string"));
-var createBridge = async (name) => {
+var createBridge = async (name, { targetPort = port, historyDir = historyDirectory } = {}) => {
   const bridgeTransport = new StdioClientTransport({
     command: import_node_process2.default.execPath,
     args: ["dist/server.cjs"],
     cwd: root,
-    env: { ...cleanEnv, INT_PRACTICE_BRIDGE_PORT: String(port), INT_PRACTICE_HISTORY_DIR: historyDirectory },
+    env: { ...cleanEnv, INT_PRACTICE_BRIDGE_PORT: String(targetPort), INT_PRACTICE_HISTORY_DIR: historyDir },
     stderr: "pipe"
   });
   const bridgeClient = new Client({ name, version: "0.1.0" });
@@ -20247,12 +20247,252 @@ var stop = async () => {
   for (const extension2 of extensions) extension2.close();
   await client?.close();
 };
+var runVirtualTransport = async () => {
+  const virtualPort = port + 2;
+  const virtualHistory = (0, import_node_fs.mkdtempSync)((0, import_node_path.join)((0, import_node_os.tmpdir)(), "virtual-history-demo-"));
+  const virtualCourse = { origin: "https://main.virtualschool.club", subjectCode: "BIO-22", subjectName: "Biology", level: "J", term: "2", year: "2569" };
+  const virtualCourseWithoutName = { ...virtualCourse };
+  delete virtualCourseWithoutName.subjectName;
+  const intCourse = { origin: "https://int-project.com", subjectCode: "BIO-22", subjectName: "Biology", level: "J", term: "2", year: "2569" };
+  const q1 = {
+    ok: true,
+    questionNumber: 1,
+    totalQuestions: 2,
+    examCode: "V:1",
+    questionText: "Virtual question one",
+    questionImage: null,
+    choices: [{ index: 1, text: "A", image: null, checked: false }, { index: 2, text: "B", image: null, checked: false }],
+    done: false,
+    images: []
+  };
+  const q2 = {
+    ok: true,
+    questionNumber: 2,
+    totalQuestions: 2,
+    examCode: "V:2",
+    questionText: "Virtual question two",
+    questionImage: null,
+    choices: [{ index: 1, text: "C", image: null, checked: false }, { index: 2, text: "D", image: null, checked: false }],
+    done: false,
+    images: []
+  };
+  const q1Shuffled = { ...q1, choices: [{ ...q1.choices[1], index: 1 }, { ...q1.choices[0], index: 2 }] };
+  const q2Shuffled = { ...q2, choices: [{ ...q2.choices[1], index: 1 }, { ...q2.choices[0], index: 2 }] };
+  const q3 = {
+    ok: true,
+    questionNumber: 3,
+    totalQuestions: 3,
+    examCode: "V:3",
+    questionText: "Unseen Virtual question",
+    questionImage: null,
+    choices: [{ index: 1, text: "new", image: null }],
+    done: false,
+    images: []
+  };
+  let course = virtualCourse;
+  let batchMode = "unknown";
+  let batchStep = 0;
+  let delayReview = false;
+  let delayQuestion = false;
+  let delayAnswer = false;
+  let virtualReviewBound = false;
+  const batchActions2 = [];
+  const actionTrace = [];
+  const bridge = await createBridge("virtual-practice-bridge-demo", { targetPort: virtualPort, historyDir: virtualHistory });
+  const extension2 = new wrapper_default(`ws://127.0.0.1:${virtualPort}`, { origin: "chrome-extension://prototype" });
+  await new Promise((resolve, reject) => {
+    extension2.once("open", resolve);
+    extension2.once("error", reject);
+  });
+  extension2.on("message", (raw) => {
+    const message = JSON.parse(raw.toString());
+    if (message.type !== "request") return;
+    actionTrace.push(message.action);
+    let result;
+    if (message.action === "set_scope") {
+      course = message.payload.subjectCode === "INT" ? intCourse : message.payload.subjectCode === "BIO-22" && batchMode === "named-off" ? virtualCourseWithoutName : virtualCourse;
+      result = { scope: { ...course, ...message.payload } };
+    } else if (message.action === "read_exam_result") {
+      result = {
+        ...q1,
+        scope: course,
+        resultToken: "VRESULT",
+        reviewBound: virtualReviewBound,
+        score: { correct: 2, total: 2 },
+        selectedChoiceIndex: null,
+        correctness: "unverified",
+        correctChoiceIndex: 2,
+        verificationSource: "Virtual School explicit correct-answer label",
+        evidence: "\u0E04\u0E33\u0E15\u0E2D\u0E1A\u0E17\u0E35\u0E48\u0E16\u0E39\u0E01\u0E15\u0E49\u0E2D\u0E07 \u0E02",
+        verifiedReviews: [
+          {
+            ...q1,
+            scope: course,
+            selectedChoiceIndex: null,
+            correctness: "unverified",
+            correctChoiceIndex: 2,
+            verificationSource: "Virtual School explicit correct-answer label",
+            evidence: "\u0E02\u0E49\u0E2D 1 \u0E40\u0E09\u0E25\u0E22 \u0E02"
+          },
+          {
+            ...q2,
+            scope: course,
+            selectedChoiceIndex: null,
+            correctness: "unverified",
+            correctChoiceIndex: 2,
+            verificationSource: "Virtual School explicit correct-answer label",
+            evidence: "\u0E02\u0E49\u0E2D 2 \u0E40\u0E09\u0E25\u0E22 \u0E07"
+          }
+        ]
+      };
+    } else if (message.action === "open_answer_review") {
+      result = {
+        ...message.payload.questionNumber === 2 ? q2Shuffled : q1Shuffled,
+        scope: course,
+        resultToken: "VRESULT",
+        reviewBound: virtualReviewBound,
+        action: message.payload.step,
+        selectedChoiceIndex: null,
+        correctness: "unverified",
+        correctChoiceIndex: 1,
+        verificationSource: "Virtual School explicit correct-answer label",
+        evidence: "review destination"
+      };
+    } else if (message.action === "read_current_question") {
+      result = batchMode === "done" ? q1Shuffled : q1Shuffled;
+    } else if (message.action === "answer_and_next") {
+      batchActions2.push(message.payload);
+      if (batchMode === "unknown") result = { ...q3, selected: message.payload.choiceIndex, saved: null, done: false };
+      else if (batchStep++ === 0) result = { ...q2Shuffled, selected: message.payload.choiceIndex, saved: null, done: false };
+      else result = { ok: true, examCode: "V:2", selected: message.payload.choiceIndex, saved: null, done: true, images: [] };
+    } else {
+      result = { ok: true, scope: course, action: message.action };
+    }
+    const send = () => extension2.send(JSON.stringify({ type: "response", id: message.id, ok: true, result }));
+    if (message.action === "read_exam_result" && delayReview || message.action === "read_current_question" && delayQuestion || message.action === "answer_and_next" && delayAnswer) setTimeout(send, 50);
+    else send();
+  });
+  try {
+    const listed = await bridge.client.listTools();
+    const reviewTool = listed.tools.find((tool) => tool.name === "open_answer_review");
+    import_strict.default.equal(reviewTool.inputSchema.properties.questionNumber.maximum, 1e3);
+    await bridge.client.callTool({ name: "set_scope", arguments: { subjectCode: "BIO-22", mode: "final" } });
+    await bridge.client.callTool({ name: "set_question_history", arguments: { enabled: true } });
+    const unbound = await bridge.client.callTool({ name: "read_exam_result", arguments: {} });
+    import_strict.default.equal(unbound.structuredContent.historyVerificationPending, true);
+    import_strict.default.equal(unbound.structuredContent.evidencePending, true);
+    import_strict.default.equal((0, import_node_fs.existsSync)(unbound.structuredContent.historyFile), false, "unbound Virtual evidence does not create a journal");
+    virtualReviewBound = true;
+    const review = await bridge.client.callTool({ name: "read_exam_result", arguments: {} });
+    import_strict.default.equal(review.structuredContent.verificationSource, "Virtual School explicit correct-answer label");
+    const historyFile = review.structuredContent.historyFile;
+    const saved = (0, import_node_fs.readFileSync)(historyFile, "utf8").trim().split("\n").map(JSON.parse);
+    import_strict.default.equal(saved.filter((record2) => record2.type === "verified_answer").length, 2);
+    import_strict.default.ok(saved.filter((record2) => record2.type === "verified_answer").every((record2) => record2.verificationSource === "Virtual School explicit correct-answer label"));
+    const remapped = await bridge.client.callTool({ name: "read_current_question", arguments: {} });
+    import_strict.default.equal(remapped.structuredContent.verifiedAnswer.choiceIndex, 1);
+    const nav = await bridge.client.callTool({ name: "open_answer_review", arguments: { resultToken: "VRESULT", step: "question", questionNumber: 1 } });
+    import_strict.default.equal(nav.structuredContent.action, "question");
+    const beforeQuestionRace = (0, import_node_fs.readFileSync)(historyFile, "utf8");
+    delayQuestion = true;
+    const pendingQuestion = bridge.client.callTool({ name: "read_current_question", arguments: {} });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    await bridge.client.callTool({ name: "set_scope", arguments: { subjectCode: "INT", mode: "final" } });
+    delayQuestion = false;
+    const skippedQuestion = await pendingQuestion;
+    import_strict.default.match(skippedQuestion.structuredContent.historyWarning, /writer or scoped course changed/u);
+    import_strict.default.equal(skippedQuestion.structuredContent.examCode, "V:1");
+    import_strict.default.equal((0, import_node_fs.readFileSync)(historyFile, "utf8"), beforeQuestionRace, "scope-raced question read must not append to the old journal");
+    delayReview = true;
+    const pendingReview = bridge.client.callTool({ name: "read_exam_result", arguments: {} });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    await bridge.client.callTool({ name: "set_scope", arguments: { subjectCode: "INT", mode: "final" } });
+    const skippedReview = await pendingReview;
+    import_strict.default.match(skippedReview.structuredContent.historyWarning, /writer or scoped course changed/u);
+    import_strict.default.equal((0, import_node_fs.readFileSync)(historyFile, "utf8").trim().split("\n").map(JSON.parse).filter((record2) => record2.type === "verified_answer").length, 2);
+    delayReview = false;
+    batchMode = "named-off";
+    await bridge.client.callTool({ name: "set_scope", arguments: { subjectCode: "BIO-22", mode: "final" } });
+    batchMode = "unknown";
+    const answerSeed = await bridge.client.callTool({ name: "read_current_question", arguments: {} });
+    const answerHistoryFile = answerSeed.structuredContent.historyFile;
+    const beforeAnswerRace = (0, import_node_fs.readFileSync)(answerHistoryFile, "utf8");
+    delayAnswer = true;
+    const pendingAnswer = bridge.client.callTool({ name: "answer_and_next", arguments: { examCode: "V:1", choiceIndex: 1, save: false } });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    await bridge.client.callTool({ name: "set_scope", arguments: { subjectCode: "INT", mode: "final" } });
+    delayAnswer = false;
+    const skippedAnswer = await pendingAnswer;
+    import_strict.default.match(skippedAnswer.structuredContent.historyWarning, /writer or scoped course changed/u);
+    import_strict.default.equal(skippedAnswer.structuredContent.selected, 1, "scope-raced answer preserves the browser result");
+    const afterAnswerRace = (0, import_node_fs.readFileSync)(answerHistoryFile, "utf8").trim().split("\n").map(JSON.parse);
+    const beforeAnswerRecords = beforeAnswerRace.trim().split("\n").map(JSON.parse);
+    import_strict.default.equal(
+      afterAnswerRace.filter((record2) => record2.type === "answer_returned").length,
+      beforeAnswerRecords.filter((record2) => record2.type === "answer_returned").length,
+      "scope-raced answer must not append answer_returned"
+    );
+    import_strict.default.equal(
+      afterAnswerRace.some((record2) => record2.type === "question" && record2.question?.examCode === "V:3"),
+      false,
+      "scope-raced answer must not append its next question"
+    );
+    await bridge.client.callTool({ name: "set_scope", arguments: { subjectCode: "BIO-22", mode: "final" } });
+    batchMode = "unknown";
+    const toggleSeed = await bridge.client.callTool({ name: "read_current_question", arguments: {} });
+    const toggleHistoryFile = toggleSeed.structuredContent.historyFile;
+    delayAnswer = true;
+    const pendingHistoryToggleAnswer = bridge.client.callTool({ name: "answer_and_next", arguments: { examCode: "V:1", choiceIndex: 1, save: false } });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    const historyBeforeToggle = (0, import_node_fs.readFileSync)(toggleHistoryFile, "utf8");
+    await bridge.client.callTool({ name: "set_question_history", arguments: { enabled: false } });
+    const replacement = await bridge.client.callTool({ name: "set_question_history", arguments: { enabled: true } });
+    delayAnswer = false;
+    const skippedHistoryToggleAnswer = await pendingHistoryToggleAnswer;
+    import_strict.default.match(skippedHistoryToggleAnswer.structuredContent.historyWarning, /writer or scoped course changed/u);
+    import_strict.default.equal((0, import_node_fs.readFileSync)(toggleHistoryFile, "utf8"), historyBeforeToggle, "history writer replacement must not append the stale answer");
+    import_strict.default.ok(replacement.structuredContent.historyFile, "history re-enable returns the replacement writer");
+    actionTrace.length = 0;
+    const staleCurrent = await bridge.client.callTool({ name: "answer_and_next", arguments: { examCode: "V:3", choiceIndex: 1, save: false } });
+    import_strict.default.equal(actionTrace[0], "read_current_question", "a stale answer response must not repopulate currentQuestion after writer replacement");
+    import_strict.default.equal(staleCurrent.structuredContent.mode, "resync");
+    batchStep = 0;
+    const unknown2 = await bridge.client.callTool({ name: "answer_known_questions", arguments: { maxQuestions: 20 } });
+    import_strict.default.equal(unknown2.structuredContent.knownAnswersApplied, 1);
+    import_strict.default.equal(unknown2.structuredContent.batchStopReason, "needs_reasoning");
+    batchMode = "done";
+    batchStep = 0;
+    const done = await bridge.client.callTool({ name: "answer_known_questions", arguments: { maxQuestions: 20 } });
+    import_strict.default.equal(done.structuredContent.knownAnswersApplied, 2);
+    import_strict.default.equal(done.structuredContent.batchStopReason, "exam_answered");
+    import_strict.default.ok(batchActions2.every((payload) => payload.save === false), "Virtual known batches never use INT save=true");
+    await bridge.client.callTool({ name: "set_scope", arguments: { subjectCode: "INT", mode: "final" } });
+    const isolated = await bridge.client.callTool({ name: "read_current_question", arguments: {} });
+    import_strict.default.equal(isolated.structuredContent.verifiedAnswer, null, "same question does not cross site identity");
+    batchMode = "named-off";
+    await bridge.client.callTool({ name: "set_scope", arguments: { subjectCode: "BIO-22", mode: "final" } });
+    const unnamed = await bridge.client.callTool({ name: "read_current_question", arguments: {} });
+    import_strict.default.equal(unnamed.structuredContent.verifiedAnswer.choiceIndex, 1, "Virtual display-name changes retain the bank");
+  } finally {
+    extension2.close();
+    await bridge.client.close();
+    (0, import_node_fs.rmSync)(virtualHistory, { recursive: true, force: true });
+  }
+};
 var check = async () => {
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/web-adapters.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/virtual-subject-list.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/virtual-subject-list-content.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/web-adapter-worker-e2e.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/regression.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/review-fast.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/resync.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/bank-batch.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/updater.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/upgrade-compat.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/virtual-review.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/virtual-history.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/virtual-lifecycle.mjs"], { stdio: "inherit" });
   const firstBridge = await createBridge("int-helper-bridge-demo-1");
   const secondBridge = await createBridge("int-helper-bridge-demo-2");
   ({ client, transport } = firstBridge);
@@ -20265,6 +20505,9 @@ var check = async () => {
   for (const name of ["set_scope", "read_subjects", "open_subject", "return_to_subjects", "set_exam_pacing", "answer_known_questions", "get_question_history_stats"]) import_strict.default.ok(listed.tools.find((tool) => tool.name === name));
   import_strict.default.equal((await client.callTool({ name: "set_exam_pacing", arguments: { durationMinutes: -1 } })).isError, true);
   import_strict.default.equal((await client.callTool({ name: "open_subject", arguments: { subjectCode: "MATH" } })).isError, true);
+  import_strict.default.equal((await client.callTool({ name: "open_subject", arguments: { listToken: "demo", subjectCode: "MATH", cardToken: "VIRTUAL" } })).isError, true);
+  import_strict.default.equal((await client.callTool({ name: "open_subject", arguments: { listToken: "demo", cardToken: "VIRTUAL" } })).isError, void 0);
+  import_strict.default.equal((await client.callTool({ name: "open_subject", arguments: { listToken: "demo", subjectCode: "MATH" } })).isError, void 0);
   import_strict.default.deepEqual(listed.tools.find((tool) => tool.name === "set_current_exam_scope").inputSchema.required, ["examCode"]);
   import_strict.default.deepEqual(listed.tools.find((tool) => tool.name === "submit_current_exam").inputSchema.required, ["examCode"]);
   import_strict.default.equal((await client.callTool({ name: "submit_current_exam", arguments: {} })).isError, true);
@@ -20343,11 +20586,12 @@ var check = async () => {
   await secondBridge.client.close();
   await stop();
   (0, import_node_fs.rmSync)(historyDirectory, { recursive: true, force: true });
-  console.log("prototype check passed: regression + two MCP tasks + images + tool transport");
+  await runVirtualTransport();
+  console.log("prototype check passed: regression + Virtual review/history + two MCP tasks + images + site-specific batch transport");
 };
 var render = () => {
   console.clear();
-  console.log("\x1B[1mINT INT Helper prototype\x1B[0m");
+  console.log("\x1B[1mINT Helper prototype\x1B[0m");
   console.log(`\x1B[1mbridge\x1B[0m: ${state.bridge}`);
   console.log(`\x1B[1mextension\x1B[0m: ${state.extension}`);
   console.log(`\x1B[1mlast action\x1B[0m: ${state.lastAction || "\u2014"}`);

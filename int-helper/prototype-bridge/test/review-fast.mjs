@@ -62,6 +62,8 @@ assert.match(nodes.get('scope').textContent,/แท็บนี้/);
 assert.match(nodes.get('scope-help').textContent,/แท็บอื่น 1/);
 status={...status,scopes:[{subjectName:'ภาษาไทย',mode:'final',retryUntilPerfect:true,durationMinutes:60}]};
 await render(); assert.match(nodes.get('scope-help').textContent,/60 นาที/);assert.equal(nodes.get('scope').textContent,'ภาษาไทย');
+status={...status,scopes:[{origin:'https://unknown.example',subjectName:'Unknown course',mode:'final',retryUntilPerfect:true}]};
+await render(); assert.match(nodes.get('scope').textContent,/เว็บไซต์ไม่รองรับ/);assert.doesNotMatch(nodes.get('scope').textContent,/INT Project/);
 status={error:'offline'}; await render();assert.equal(nodes.get('scope-help').textContent,'');
 console.log('Fast review passed: one call joins 40 greens + jumps to red; stale token/timeout; NFC/shuffle/different options; live history cache; compact popup states');
 let getStatus;

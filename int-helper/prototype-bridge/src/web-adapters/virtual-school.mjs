@@ -1,0 +1,734 @@
+import {
+  CONTENT_VERSION,
+  aliasQueryValue,
+  examCode,
+  label,
+  pageUrl,
+  singleQueryValue,
+  text,
+  visible,
+} from "./content-helpers.mjs";
+
+const COURSE_PATH = /^\/Course\/?$/iu;
+const STUDY_COURSE_PATH = /^\/StudyCourse\/?$/iu;
+const EXAM_PATH = /^\/Exam\/?$/iu;
+const CONTENT_PATH = /^\/Content\/?$/iu;
+const REVIEW_PATH = /^\/(examanswers|AllExamAnswers)\/?$/iu;
+
+export const createVirtualSchoolAdapter = ({ document, location }) => {
+  let currentExamBinding = null;
+  let virtualAttemptId = null;
+  const observedAnswers = new Map();
+  let reviewSnapshot = "";
+  let reviewSequence = 0;
+  const reviewEpoch = Math.random().toString(36).slice(2);
+
+  const currentUrl = () => pageUrl(location);
+  const currentOrigin = () => currentUrl().origin;
+  const controls = () => [...document.querySelectorAll("button, a")].filter(visible);
+
+  const virtualImageHidden = (image) => image?.hidden === true || image?.style?.display === "none";
+  const virtualImageSource = (image) =>
+    image && !virtualImageHidden(image) ? image.currentSrc || image.src || null : null;
+  const virtualQuestionImage = () => document.querySelector('main img[src*="/question_pic/"]');
+
+  const virtualExamTotal = () => {
+    const total = Number(text(document.body).match(/ทั้งหมด\s*(\d+)\s*ข้อ/u)?.[1]);
+    if (!Number.isInteger(total) || total < 1 || total > 1000) {
+      throw new Error("Virtual School exam total is missing or invalid");
+    }
+    return total;
+  };
+
+  const virtualSchoolMetadata = () => {
+    const number = Number((document.querySelector("main h2")?.innerText || "").match(/ข้อคำถามที่\s*(\d+)/u)?.[1]);
+    const code = examCode(document.body);
+    if (!number || !code) throw new Error("question metadata not found");
+    return { number, code, token: `${code}:${number}` };
+  };
+
+  const readQuestion = () => {
+    if (!EXAM_PATH.test(location.pathname)) {
+      throw new Error(`Current page is ${location.pathname}, not an exam question; use inspect_page`);
+    }
+    if (/ส่งคำตอบเรียบร้อยแล้ว/u.test(document.body?.innerText || "")) {
+      throw new Error("Exam already submitted; use inspect_page or advance_subject to inspect the result");
+    }
+    const question = document.querySelector(".exam-question");
+    const imageElement = virtualQuestionImage();
+    const image = virtualImageSource(imageElement);
+    if (!question && !image) throw new Error("Exam question is not ready; inspect the page before retrying");
+    const { number, token } = virtualSchoolMetadata();
+    const choices = [...document.querySelectorAll('main input[type="radio"]')].map((radio, position) => {
+      const content = radio.nextElementSibling;
+      const choiceImage = content?.querySelector("img");
+      const choiceImageSource = virtualImageSource(choiceImage);
+      const contentText = text(content);
+      return {
+        index: position + 1,
+        text: contentText || (choiceImage ? "" : (radio.value || "").trim()),
+        image: choiceImageSource,
+        checked: radio.checked,
+      };
+    });
+    if (!choices.length) throw new Error("answer choices not found");
+    const checked = choices.find((choice) => choice.checked);
+    if (checked) observedAnswers.set(token, checked.index);
+    else observedAnswers.delete(token);
+    return {
+      ok: true,
+      questionNumber: number,
+      totalQuestions: virtualExamTotal(),
+      examCode: token,
+      questionText: text(question),
+      questionImage: image,
+      choices,
+      done: false,
+    };
+  };
+
+  const applyAnswer = ({ choiceIndex, expectedExamCode, save }) => {
+    const { examCode: token } = readQuestion();
+    if (token !== String(expectedExamCode)) throw new Error(`stale exam code: ${token}`);
+    const radio = [...document.querySelectorAll('main input[type="radio"]')][Number(choiceIndex) - 1];
+    if (!radio) throw new Error("answer choice not found");
+    radio.click();
+    if (!radio.checked) throw new Error("answer choice was not selected");
+    observedAnswers.set(token, Number(choiceIndex));
+    return {
+      ok: true,
+      examCode: token,
+      selected: Number(choiceIndex),
+      saved: null,
+      selectionVerified: true,
+      saveRequested: save === true,
+      persistence: "unverified_until_submission",
+    };
+  };
+
+  const navigateNext = ({ expectedExamCode }) => {
+    const { token } = virtualSchoolMetadata();
+    if (token !== String(expectedExamCode)) throw new Error(`stale exam code: ${token}`);
+    const button = [...document.querySelectorAll("main button")].find((element) => text(element) === "ข้อถัดไป");
+    if (!button || button.disabled) return { ok: true, done: true };
+    button.click();
+    return { ok: true, done: false };
+  };
+
+  const courseIdentity = () => {
+    const params = currentUrl().searchParams;
+    return {
+      subjectCode: aliasQueryValue(params, ["subject", "subjectCode", "subj", "code"], "subject"),
+      level: singleQueryValue(params, "level"),
+      selectedLevel: singleQueryValue(params, "selectedLevel"),
+      term: singleQueryValue(params, "term"),
+      year: singleQueryValue(params, "year"),
+      subjectName: aliasQueryValue(params, ["subjectName", "title", "SUBJECT_NAME"], "subjectName") || text(document.querySelector("h1")) || null,
+    };
+  };
+
+  const chapterCards = () => [...document.querySelectorAll("article")].map((card) => {
+    const header = card.querySelector("button");
+    const number = Number(text(header).match(/^บทที่\s*(\d+)(?:\s|$)/u)?.[1]);
+    return { card, header, number, title: text(header?.querySelector("h4")) };
+  }).filter(({ number }) => number > 0);
+
+  const isPretest = () => singleQueryValue(currentUrl().searchParams, "examtype") === "P" &&
+    /แบบทดสอบก่อนเรียน/u.test(text(document.body));
+
+  const assertScope = (scope) => {
+    if (scope?.mode === "exam") {
+      if (!currentExamBinding || scope.examBinding !== currentExamBinding.id || location.href !== currentExamBinding.url) {
+        throw new Error("Current-exam scope expired; inspect and bind the open exam again");
+      }
+      if (virtualSchoolMetadata().code !== currentExamBinding.code) throw new Error("Current exam changed; inspect and bind again");
+      return;
+    }
+    if (!scope || !["chapter", "subject", "final"].includes(scope.mode)) {
+      throw new Error("Set an explicit scope before taking actions");
+    }
+    if (scope.origin !== currentOrigin()) throw new Error("Scoped automation is only verified for main.virtualschool.club");
+    const current = courseIdentity();
+    for (const key of ["subjectCode", "level", "term", "year"]) {
+      if (!scope[key] || current[key] !== scope[key]) throw new Error(`Scope mismatch or missing ${key}`);
+    }
+    if (!/^\/(StudyCourse|Content|Exam|examanswers|AllExamAnswers)\/?$/iu.test(location.pathname)) {
+      throw new Error("Page is outside the supported scoped routes");
+    }
+    if (scope.mode === "final" && !STUDY_COURSE_PATH.test(location.pathname) &&
+        (!/^\/(Exam|examanswers|AllExamAnswers)\/?$/iu.test(location.pathname) ||
+          singleQueryValue(currentUrl().searchParams, "examtype") !== "F")) {
+      throw new Error("Page is outside the requested final exam");
+    }
+    if (scope.virtualActivity?.examType === "F" && !STUDY_COURSE_PATH.test(location.pathname) &&
+        singleQueryValue(currentUrl().searchParams, "examtype") !== "F") {
+      throw new Error("Page is outside the active Virtual final attempt");
+    }
+    if (scope.mode === "chapter" && singleQueryValue(currentUrl().searchParams, "examtype") === "F") {
+      throw new Error("Final exam is outside the requested chapter");
+    }
+    if (scope.mode !== "chapter") return;
+    if (!Number.isInteger(scope.chapter) || scope.chapter < 1 || !scope.chapterTitle) {
+      throw new Error("Invalid chapter scope");
+    }
+    if (STUDY_COURSE_PATH.test(location.pathname)) {
+      const cards = chapterCards();
+      if (!cards.length) throw new Error("Chapter overview is loading");
+      const matches = cards.filter((entry) => entry.number === scope.chapter);
+      if (matches.length !== 1 || matches[0].title !== scope.chapterTitle ||
+          cards.filter((entry) => entry.title === scope.chapterTitle).length !== 1) {
+        throw new Error("Target chapter cannot be identified");
+      }
+      return;
+    }
+    const params = currentUrl().searchParams;
+    if (CONTENT_PATH.test(location.pathname)) {
+      if (params.get("lessonTitle") !== scope.chapterTitle) throw new Error("Lesson is outside the requested chapter");
+    } else if (Number(params.get("chapter")) !== scope.chapter || params.get("SUB_SUBJECT_NAME") !== scope.chapterTitle) {
+      throw new Error("Exam is outside the requested chapter");
+    }
+  };
+
+  const assertSubmission = ({ expectedExamCode, scope }) => {
+    const { token, code, number } = virtualSchoolMetadata();
+    if (token !== expectedExamCode) throw new Error(`stale exam code: ${token}`);
+    const emptyPretestAllowed = scope.mode !== "exam" && scope.allowEmptyPretest === true && isPretest();
+    if (emptyPretestAllowed) return;
+    const total = virtualExamTotal();
+    const radios = [...document.querySelectorAll('main input[type="radio"]')];
+    const checked = radios.findIndex((radio) => radio.checked);
+    if (checked >= 0) observedAnswers.set(`${code}:${number}`, checked + 1);
+    else observedAnswers.delete(`${code}:${number}`);
+    if (!total || total > 1000 || /คุณยังทำข้อสอบไม่ครบ|ยังไม่ได้ทำอีก\s*[1-9]/u.test(text(document.body)) ||
+        Array.from({ length: total }, (_, index) => `${code}:${index + 1}`).some((key) => !observedAnswers.has(key))) {
+      throw new Error("Not every answer has been verified in this exam; refusing submission");
+    }
+  };
+
+  const virtualSubmissionStatus = ({ scope } = {}) => {
+    if (scope) assertScope(scope);
+    if (!EXAM_PATH.test(location.pathname)) {
+      return { ok: true, submitted: false, path: location.pathname, examType: singleQueryValue(currentUrl().searchParams, "examtype") };
+    }
+    const marker = /ส่งคำตอบเรียบร้อยแล้ว/u.test(text(document.body));
+    return {
+      ok: true,
+      submitted: marker,
+      marker: marker ? "ส่งคำตอบเรียบร้อยแล้ว" : null,
+      path: location.pathname,
+      examType: singleQueryValue(currentUrl().searchParams, "examtype"),
+    };
+  };
+
+  const beginVirtualAttempt = ({ attemptId, scope } = {}) => {
+    if (scope) assertScope(scope);
+    if (!['subject', 'final'].includes(scope?.mode)) throw new Error("Virtual attempt entry requires a scoped subject or final");
+    if (typeof attemptId !== "string" || !attemptId) throw new Error("Missing Virtual attempt ID");
+    observedAnswers.clear();
+    virtualAttemptId = attemptId;
+    return { ok: true, attemptId, observedAnswersReset: true };
+  };
+
+  const advanceSubject = (scope, nextVirtualAttemptId, nextVirtualAttemptEnteredAt) => {
+    const currentControls = controls();
+    if (EXAM_PATH.test(location.pathname) && /ส่งคำตอบเรียบร้อยแล้ว/u.test(text(document.body))) {
+      if (singleQueryValue(currentUrl().searchParams, "examtype") === "F") {
+        const marker = "ส่งคำตอบเรียบร้อยแล้ว";
+        if (scope.retryUntilPerfect && !scope.virtualActivity?.reviewBound) {
+          return { ok: true, mode: "review_required", submitted: true, terminalStatus: true,
+            submittedMarker: marker, finalResult: scope.virtualActivity?.finalResult || null, reviewBound: false };
+        }
+        return { ok: true, mode: "complete", submitted: true, terminalStatus: true,
+          submittedMarker: marker, finalResult: scope.virtualActivity?.finalResult || null };
+      }
+      const next = currentControls.find((element) => /^(เริ่มเรียนเนื้อหา|ดูเฉลยคำตอบ)$/u.test(text(element)));
+      if (next) next.click();
+      return { ok: true, mode: "result", action: next ? "returned" : "waiting" };
+    }
+    if (REVIEW_PATH.test(location.pathname)) {
+      const back = currentControls.find((element) => /^(?:←\s*)?กลับไปหน้าเรียน$/u.test(text(element)));
+      if (back) back.click();
+      return { ok: true, mode: "result", action: back ? "returned" : "waiting" };
+    }
+    const dialog = document.querySelector('.swal2-container, [role="dialog"][aria-modal="true"]');
+    if (CONTENT_PATH.test(location.pathname)) {
+      if (/กำลังโหลดบทเรียน/u.test(text(document.body))) return { ok: true, mode: "lesson", action: "waiting" };
+      if (dialog && visible(dialog)) {
+        const confirmLesson = [...dialog.querySelectorAll("button, a")].find((element) =>
+          visible(element) && text(element) === "ยืนยันออกบทเรียน");
+        if (confirmLesson && text(dialog).includes("ยืนยันการออกบทเรียน")) {
+          confirmLesson.click();
+          return { ok: true, mode: "lesson", action: "confirmed" };
+        }
+        return { ok: true, mode: "lesson", action: "waiting" };
+      }
+      const exitLesson = currentControls.find((element) => text(element) === "ออกจากบทเรียน");
+      if (exitLesson) {
+        exitLesson.click();
+        return { ok: true, mode: "lesson", action: "exit_opened" };
+      }
+      return { ok: true, mode: "lesson", action: "waiting" };
+    }
+    if (dialog && visible(dialog)) return { ok: true, mode: "submission", action: "confirmation_required" };
+    if (EXAM_PATH.test(location.pathname)) {
+      if ((document.querySelector(".exam-question") || virtualQuestionImage()) &&
+          document.querySelectorAll('main input[type="radio"]').length) {
+        const pretest = isPretest();
+        return { ok: true, mode: "exam", pretest, needsAnswers: !(pretest && scope.allowEmptyPretest === true) };
+      }
+      return { ok: true, mode: "exam", action: "waiting", ready: false };
+    }
+    if (STUDY_COURSE_PATH.test(location.pathname)) {
+      if (scope.mode === "subject" && /ความคืบหน้า\s*100%/u.test(text(document.body))) return { ok: true, mode: "complete" };
+      const cards = chapterCards().filter((entry) => scope.mode !== "final" && (scope.mode === "subject" || entry.number === scope.chapter));
+      for (const { card, header, number } of cards) {
+        const local = [...card.querySelectorAll("button, a")].filter(visible);
+        const pretest = local.find((element) => text(element) === "ก่อนเรียน");
+        const posttest = local.find((element) => text(element) === "หลังเรียน");
+        const topics = [...card.querySelectorAll('button[aria-label^="เปิดบทเรียน:"]')];
+        const finished = (element) => element?.classList.contains("bg-emerald-500");
+        const complete = /ผ่านเกณฑ์หน่วยเรียนแล้ว/u.test(text(card)) && finished(pretest) && finished(posttest) &&
+          topics.length > 0 && topics.every((element) => element.querySelector("svg.text-emerald-500"));
+        if (complete) {
+          if (scope.mode === "chapter") return { ok: true, mode: "chapter_complete", chapter: number };
+          continue;
+        }
+        if (!card.querySelector('button[aria-label^="เปิดบทเรียน:"]')) {
+          if (!visible(header)) return { ok: true, mode: "overview", action: "waiting" };
+          header.click();
+          return { ok: true, mode: "overview", action: "expanded", chapter: number };
+        }
+        const lesson = topics.find((element) => visible(element) && !element.querySelector("svg.text-emerald-500") &&
+          !/(?:กรุณาศึกษา|ล็อก)/u.test(label(element)));
+        const activity = pretest && !finished(pretest) ? pretest : lesson || (posttest && !finished(posttest) ? posttest : null);
+        if (activity) {
+          activity.click();
+          return { ok: true, mode: "overview", action: "opened", chapter: number, activity: label(activity) };
+        }
+        return { ok: true, mode: "overview", action: "waiting", chapter: number };
+      }
+      if (scope.virtualActivity?.submitted) {
+        if (!scope.retryUntilPerfect) return { ok: true, mode: "complete", submitted: true, terminalStatus: true,
+          finalResult: scope.virtualActivity.finalResult || null };
+        const score = scope.virtualActivity.finalResult;
+        if (score && score.correct === score.total && score.total > 0) {
+          return { ok: true, mode: "complete", submitted: true, terminalStatus: true, finalResult: score };
+        }
+        if (!scope.virtualActivity.reviewBound) {
+          return { ok: true, mode: "review_required", submitted: true, terminalStatus: true,
+            finalResult: score || null, reviewBound: false };
+        }
+      }
+      const finalExam = ["subject", "final"].includes(scope.mode) && currentControls.find((element) => text(element) === "ทำแบบทดสอบปลายภาค");
+      if (finalExam) {
+        observedAnswers.clear();
+        virtualAttemptId = typeof nextVirtualAttemptId === "string" && nextVirtualAttemptId ? nextVirtualAttemptId : null;
+        const enteredAt = Number.isFinite(nextVirtualAttemptEnteredAt) ? nextVirtualAttemptEnteredAt : Date.now();
+        finalExam.click();
+        return { ok: true, mode: "overview", action: "opened", activity: label(finalExam),
+          virtualFinalOpened: true, observedAnswersReset: true, virtualAttemptId, virtualAttemptEnteredAt: enteredAt };
+      }
+      return scope.mode === "final" ? { ok: true, mode: "scope_boundary", reason: "Final exam is not available" } : { ok: true, mode: "overview", action: "waiting" };
+    }
+    return { ok: true, mode: "lesson", action: "waiting" };
+  };
+
+  const choiceLabelIndex = (value) => ["1Aก", "2Bข", "3Cค", "4Dง", "5Eจ"]
+    .findIndex((labels) => value && labels.includes(value)) + 1;
+
+  const readVirtualReviewScore = () => {
+    const labels = [...document.querySelectorAll("p, span")].filter((element) => text(element) === "คะแนนรวม");
+    const scores = labels.map((element) => text(element.nextElementSibling).match(/^(\d+)\s*\/\s*(\d+)$/u)).filter(Boolean)
+      .map((match) => ({ correct: Number(match[1]), total: Number(match[2]), passed: null }));
+    if (!scores.length) return null;
+    if (new Set(scores.map((score) => `${score.correct}/${score.total}`)).size !== 1) {
+      throw new Error("Virtual School review score is ambiguous");
+    }
+    const score = scores[0];
+    if (!Number.isInteger(score.total) || score.total < 1 || score.total > 1000 || score.correct < 0 || score.correct > score.total) return null;
+    return score;
+  };
+
+  const readVirtualSubmittedScore = () => {
+    // The immediate result is a success modal, not the review's คะแนนรวม card.
+    const body = text(document.body);
+    const marker = body.indexOf("ส่งคำตอบเรียบร้อยแล้ว");
+    if (marker < 0) return null;
+    const resultText = body.slice(marker);
+    // Keep the existing labeled summary format; never use it to fill a
+    // partially loaded modal that already advertises its own score field.
+    if (!resultText.includes("ได้คะแนน")) return readVirtualReviewScore();
+    const matches = [...resultText.matchAll(/ได้คะแนน\s*(\d+)\s*คะแนนเต็ม\s*(\d+)/gu)];
+    if (!matches.length) return null;
+    if (new Set(matches.map((match) => `${match[1]}/${match[2]}`)).size !== 1) {
+      throw new Error("Virtual School submitted score is ambiguous");
+    }
+    const correct = Number(matches[0][1]);
+    const total = Number(matches[0][2]);
+    if (!Number.isInteger(total) || total < 1 || total > 1000 || correct < 0 || correct > total) return null;
+    const passed = /ไม่ผ่านเกณฑ์|ยังไม่ผ่าน/u.test(resultText) ? false : /ผ่านเกณฑ์/u.test(resultText) ? true : null;
+    return { correct, total, passed };
+  };
+
+  const virtualReviewImage = (root, selector) => {
+    const images = [...(root?.querySelectorAll(selector) || [])];
+    const available = images.filter((image) => !virtualImageHidden(image));
+    if (available.length > 1) throw new Error("Multiple review images cannot be represented without losing content");
+    const image = available[0];
+    const source = virtualImageSource(image);
+    const failed = source && image.complete === true && image.naturalWidth === 0 ? 1 : 0;
+    return { image: source, unavailable: images.filter((candidate) => virtualImageHidden(candidate) || !virtualImageSource(candidate)).length, failed };
+  };
+
+  const readVirtualReviewQuestion = (root, questionNumber, totalQuestions, all = false) => {
+    const question = root?.querySelector(".prose");
+    const questionImage = virtualReviewImage(root, 'img[src*="/question_pic/"]');
+    const cards = [...(root?.querySelectorAll("div.group") || [])];
+    let unavailableImageCount = questionImage.unavailable;
+    let failedImageCount = questionImage.failed;
+    const correct = [];
+    const selected = [];
+    const correctLabels = [];
+    const choices = cards.map((card, position) => {
+      const glyph = text(all ? card.firstElementChild : card.firstElementChild?.firstElementChild);
+      const index = choiceLabelIndex(glyph);
+      if (index !== position + 1) throw new Error("Virtual School review choice labels are missing or ambiguous");
+      const badges = [...card.querySelectorAll("span")].map(text);
+      const marker = badges.filter((caption) => caption === (all ? "เฉลยที่ถูกต้อง" : "คำตอบที่ถูกต้อง") || (all && caption === "ตอบข้อนี้ และตอบถูก"));
+      if (marker.length > 1) throw new Error("Virtual School correct-answer label is ambiguous");
+      if (marker.length === 1) { correct.push(index); correctLabels.push(marker[0]); }
+      const selection = all ? badges.filter((caption) => caption === "เป็นคำตอบที่เลือก" || caption === "ตอบข้อนี้ และตอบถูก") : [];
+      if (selection.length > 1) throw new Error("Virtual School selected-answer label is ambiguous");
+      if (selection.length === 1) selected.push(index);
+      const image = virtualReviewImage(card, 'img[src*="/answers_pic/"]');
+      unavailableImageCount += image.unavailable;
+      failedImageCount += image.failed;
+      const choice = { index, text: text(card.querySelector(".break-words")), image: image.image, checked: null };
+      if (!choice.text && !choice.image) throw new Error("Virtual School review choice content is not ready");
+      return choice;
+    });
+    if (!Number.isInteger(questionNumber) || questionNumber < 1 || questionNumber > totalQuestions ||
+        (!text(question) && !questionImage.image) || !choices.length || correct.length !== 1) {
+      throw new Error("Review question or explicit correct answer is not ready");
+    }
+    const unanswered = /คุณไม่ได้เลือกคำตอบในข้อนี้|ผิด\s*\(ไม่ได้เลือกคำตอบ\)/u.test(text(root));
+    if (selected.length > 1 || (unanswered && selected.length)) throw new Error("Virtual School selected-answer evidence is contradictory");
+    const selectedChoiceIndex = selected[0] || null;
+    if (selectedChoiceIndex !== null) choices.forEach((choice) => { choice.checked = choice.index === selectedChoiceIndex; });
+    return {
+      questionNumber,
+      totalQuestions,
+      examCode: null,
+      questionText: text(question),
+      questionImage: questionImage.image,
+      choices,
+      correctChoiceIndex: correct[0],
+      selectedChoiceIndex,
+      selectionState: unanswered ? "unanswered" : selectedChoiceIndex !== null ? "selected" : "unknown",
+      correctness: unanswered ? "incorrect" : selectedChoiceIndex !== null ? selectedChoiceIndex === correct[0] ? "correct" : "incorrect" : "unverified",
+      verificationSource: "Virtual School explicit correct-answer label",
+      evidence: `${correctLabels[0]}: ${["ก", "ข", "ค", "ง", "จ"][correct[0] - 1]}`,
+      unavailableImageCount,
+      failedImageCount,
+      url: location.href,
+    };
+  };
+
+  const readVirtualReview = () => {
+    const all = /^\/AllExamAnswers\/?$/iu.test(location.pathname);
+    const score = readVirtualReviewScore();
+    const base = { score, ready: false, reviewComplete: false, reviewLayout: all ? "all" : "single",
+      totalQuestions: score?.total || null, reviewedQuestionNumbers: [], verifiedReviews: [] };
+    if (!score) return base;
+    if (all) {
+      const cards = [...document.querySelectorAll('section[id^="question-"]')];
+      const numbers = cards.map((card) => Number((card.id || "").match(/^question-(\d+)$/u)?.[1]));
+      if (new Set(numbers).size !== numbers.length) throw new Error("Virtual School review question numbers are ambiguous");
+      const reviews = cards.map((card, index) => readVirtualReviewQuestion(card, numbers[index], score.total, true));
+      const complete = reviews.length === score.total && Array.from({ length: score.total }, (_, index) => index + 1).every((number) => numbers.includes(number));
+      return { ...base, verifiedReviews: reviews, reviewedQuestionNumbers: numbers, ready: complete, reviewComplete: complete };
+    }
+    const root = document.querySelector("#main-question-area");
+    const number = Number(text(root).match(/โจทย์ข้อที่\s*(\d+)/u)?.[1]);
+    if (!root || !number) return base;
+    const question = readVirtualReviewQuestion(root, number, score.total);
+    return { ...base, ...question, ready: true, reviewedQuestionNumbers: [number] };
+  };
+
+  const readExamResult = () => {
+    const body = text(document.body);
+    const resultPage = REVIEW_PATH.test(location.pathname) || (EXAM_PATH.test(location.pathname) && /ส่งคำตอบเรียบร้อยแล้ว/u.test(body));
+    if (!resultPage) throw new Error("Open the submitted result or answer-review page first");
+    const review = controls().filter((element) => /^(ดูเฉลยคำตอบ|ดูเฉลย|ต้องการดูวิดีโอเฉลย)$/u.test(text(element)));
+    const question = REVIEW_PATH.test(location.pathname) ? readVirtualReview() : null;
+    const virtualScore = !question && EXAM_PATH.test(location.pathname) ? readVirtualSubmittedScore() : null;
+    const snapshot = REVIEW_PATH.test(location.pathname)
+      ? JSON.stringify({
+        url: location.href,
+        body,
+        review: question,
+        imageSources: [...(document.querySelectorAll('img[src*="/question_pic/"], img[src*="/answers_pic/"]') || [])]
+          .filter((image) => !virtualImageHidden(image))
+          .map((image) => [image.currentSrc || image.src || null, image.hidden === true, image.style?.display || ""]),
+      })
+      : `${location.href}#${body}`;
+    if (snapshot !== reviewSnapshot) {
+      reviewSnapshot = snapshot;
+      reviewSequence += 1;
+    }
+    return {
+      ok: true,
+      url: location.href,
+      resultToken: `${reviewEpoch}:${reviewSequence}`,
+      resultText: question ? question.evidence || "Virtual School submitted answer review" : body,
+      score: virtualScore || question?.score || null,
+      reviewAvailable: review.length === 1,
+      correctness: "unverified",
+      questionImage: null,
+      choices: [],
+      submittedMarker: EXAM_PATH.test(location.pathname) && /ส่งคำตอบเรียบร้อยแล้ว/u.test(body) ? "ส่งคำตอบเรียบร้อยแล้ว" : null,
+      ...question,
+    };
+  };
+
+  const openAnswerReview = ({ expectedResultToken, step = "open", questionNumber }) => {
+    const result = readExamResult();
+    if (result.resultToken !== expectedResultToken) throw new Error("Result changed; read it again");
+    let target;
+    if (REVIEW_PATH.test(location.pathname)) {
+      const unique = (predicate) => {
+        const matches = controls().filter(predicate);
+        if (matches.length !== 1) throw new Error("Review navigation control unavailable or ambiguous");
+        return matches[0];
+      };
+      if (step === "return") target = unique((element) => /^(?:←\s*)?กลับไปหน้าเรียน$/u.test(text(element)));
+      else if (!result.ready) throw new Error("Virtual School review is not ready");
+      else if (step === "sheet") {
+        if (result.reviewLayout === "all") return { ok: true, action: "all_review_already_open", done: false };
+        target = unique((element) => text(element) === "ดูเฉลยทุกข้อในชุดนี้");
+      } else if (step === "next" && result.reviewLayout === "single") {
+        if (result.questionNumber === result.totalQuestions) return { ok: true, done: true };
+        target = unique((element) => text(element) === "ข้อถัดไป");
+      } else if (step === "question" && result.reviewLayout === "single") {
+        if (!Number.isInteger(questionNumber) || questionNumber < 1 || questionNumber > result.totalQuestions) throw new Error("Invalid review question number");
+        if (questionNumber === result.questionNumber) return { ok: true, action: "question_already_open", done: false };
+        const numbered = controls().filter((element) => text(element) === String(questionNumber));
+        target = numbered.length === 1 ? numbered[0] : unique((element) => text(element) === `ข้อ ${questionNumber}`);
+      } else throw new Error("This review step is unavailable on the current Virtual School view");
+      target.click();
+      return { ok: true, action: step === "sheet" ? "opened_all_review" : step === "return" ? "returned" : "next", done: false };
+    }
+    if (step !== "open" || !result.reviewAvailable) throw new Error("A unique answer-review control is not available");
+    target = controls().find((element) => /^(ดูเฉลยคำตอบ|ดูเฉลย|ต้องการดูวิดีโอเฉลย)$/u.test(text(element)));
+    if (!visible(target)) throw new Error("Review navigation control unavailable");
+    target.click();
+    return { ok: true, action: "opened_review", done: false };
+  };
+
+  const normalizeCaption = (value) => String(value || "").normalize("NFC").replace(/\s+/gu, " ").trim();
+
+  const listContext = () => {
+    const url = currentUrl();
+    const params = url.searchParams;
+    return {
+      origin: url.origin,
+      path: url.pathname,
+      level: singleQueryValue(params, "level"),
+      term: singleQueryValue(params, "term"),
+      year: singleQueryValue(params, "year"),
+    };
+  };
+
+  const listIdentity = (context, captions) => JSON.stringify({ ...context, captions });
+  const opaqueToken = (prefix, value) => `${prefix}:${encodeURIComponent(value)}`;
+  const subjectCards = () => [...document.querySelectorAll(".card-body")].filter(visible);
+
+  const readSubjectCard = (card) => {
+    const title = normalizeCaption(text(card.querySelector("h3.card-title")));
+    if (!title) throw new Error("Virtual School subject card title is missing");
+    const progressText = text(card.querySelector(".prog-pct"));
+    const progressMatch = progressText.match(/^(\d+(?:\.\d+)?)%$/u);
+    if (!progressMatch) throw new Error(`Virtual School progress is unknown for subject ${title}`);
+    const progress = Number(progressMatch[1]);
+    if (!Number.isFinite(progress) || progress < 0 || progress > 100) throw new Error(`Virtual School progress is invalid for subject ${title}`);
+    const action = [...card.querySelectorAll("button.btn-primary")].filter(visible);
+    if (action.length !== 1) throw new Error(`Virtual School subject action is unavailable or ambiguous for subject ${title}`);
+    const button = action[0];
+    return {
+      title,
+      caption: title,
+      semester: text(card.querySelector(".meta-chip")) || null,
+      progress,
+      progressText,
+      finished: progress === 100,
+      finalStatus: text(card.querySelector(".final-status")) || null,
+      finalFailed: !!card.querySelector(".final-status > .final--fail"),
+      action: text(button),
+      disabled: !!button.disabled || button.getAttribute?.("aria-disabled") === "true" || button.classList?.contains("disabled"),
+    };
+  };
+
+  const readSubjects = () => {
+    if (!COURSE_PATH.test(location.pathname)) throw new Error("Open the Virtual School subject selection page first");
+    const context = listContext();
+    const cards = subjectCards();
+    if (!cards.length) throw new Error("Virtual School subject list is empty or still loading");
+    const parsedCards = cards.map((card) => readSubjectCard(card));
+    if (new Set(parsedCards.map((card) => card.caption)).size !== parsedCards.length) {
+      throw new Error("Virtual School subject captions are ambiguous");
+    }
+    const identity = listIdentity(context, parsedCards.map((card) => card.caption));
+    const resultCards = parsedCards.map((card) => ({
+      ...card,
+      cardToken: opaqueToken("virtual-card", JSON.stringify([context, card.caption])),
+    }));
+    return {
+      origin: currentOrigin(),
+      path: location.pathname,
+      listContext: context,
+      level: context.level,
+      term: context.term,
+      year: context.year,
+      listToken: opaqueToken("virtual-list", identity),
+      cards: resultCards,
+    };
+  };
+
+  const openSubject = ({ listToken, cardToken }) => {
+    if (typeof listToken !== "string" || !listToken) throw new Error("Missing Virtual School listToken");
+    if (typeof cardToken !== "string" || !cardToken) throw new Error("Missing Virtual School cardToken");
+    const list = readSubjects();
+    if (list.listToken !== listToken) throw new Error("Subject list changed; read_subjects again");
+    const subject = list.cards.find((candidate) => candidate.cardToken === cardToken);
+    if (!subject) throw new Error("Subject card is missing or stale; read_subjects again");
+    if (subject.finished) throw new Error("Subject is already finished");
+    if (subject.disabled || !/^(?:เริ่มเรียน|ดำเนินการต่อ)$/u.test(subject.action)) throw new Error("Subject action is disabled or unavailable");
+    const cards = subjectCards();
+    const index = list.cards.findIndex((candidate) => candidate.cardToken === cardToken);
+    const card = cards[index];
+    const action = [...(card?.querySelectorAll("button.btn-primary") || [])].filter(visible);
+    if (action.length !== 1 || action[0].disabled || action[0].getAttribute?.("aria-disabled") === "true" ||
+        !/^(?:เริ่มเรียน|ดำเนินการต่อ)$/u.test(text(action[0]))) {
+      throw new Error("Subject action is unavailable or stale; read_subjects again");
+    }
+    action[0].click();
+    const opened = STUDY_COURSE_PATH.test(location.pathname) ? inspectPage() : null;
+    return {
+      ok: true,
+      action: "opened_subject",
+      cardToken,
+      subjectCode: opened?.course?.subjectCode || null,
+      course: opened?.course || null,
+      destinationPath: location.pathname,
+      destinationConfirmed: !!opened,
+      next: opened ? "Set normal subject scope from the returned course identity" : "Inspect the loaded StudyCourse, then set normal subject scope",
+    };
+  };
+
+  const returnToSubjects = ({ scope }) => {
+    assertScope(scope);
+    if (!STUDY_COURSE_PATH.test(location.pathname) || scope.mode !== "subject") {
+      throw new Error("Return to the scoped Virtual School course overview first");
+    }
+    const back = [...document.querySelectorAll('button[title="ย้อนกลับ"]')].filter(visible);
+    if (back.length !== 1) throw new Error("Virtual School subject-list return control is unavailable or ambiguous");
+    back[0].click();
+    const confirmed = COURSE_PATH.test(location.pathname);
+    const list = confirmed ? readSubjects() : null;
+    return {
+      ok: true,
+      action: "returned_to_subjects",
+      destinationPath: location.pathname,
+      destinationConfirmed: confirmed,
+      listToken: list?.listToken || null,
+      next: confirmed ? "Read the subject list and compare its listToken before continuing" : "Wait for /Course, then read the subject list before continuing",
+    };
+  };
+
+  const submitCurrentExam = (message) => {
+    if (!EXAM_PATH.test(location.pathname)) throw new Error("current page is not a supported exam");
+    if (/ส่งคำตอบเรียบร้อยแล้ว/u.test(text(document.body))) {
+      return { ...virtualSubmissionStatus(), mode: "result", action: "already_submitted" };
+    }
+    assertSubmission(message);
+    const dialog = document.querySelector('.swal2-container, [role="dialog"][aria-modal="true"]');
+    if (dialog && visible(dialog)) {
+      if (/กระดาษคำตอบ/u.test(text(dialog)) && !/ยืนยันการส่งคำตอบ|คุณยังทำข้อสอบไม่ครบ/u.test(text(dialog))) {
+        const submit = [...dialog.querySelectorAll("button")].find((element) => visible(element) && text(element) === "ส่งคำตอบ");
+        if (!submit) return { ok: true, mode: "submission", action: "waiting" };
+        submit.click();
+        return { ok: true, mode: "submission", action: "opened" };
+      }
+      if (!/ยืนยันการส่งคำตอบ|คุณยังทำข้อสอบไม่ครบ/u.test(text(dialog))) throw new Error("Unknown submission dialog; inspect the page");
+      const confirm = [...dialog.querySelectorAll("button")].find((element) => visible(element) && text(element) === "ยืนยันการส่ง");
+      if (!confirm) return { ok: true, mode: "submission", action: "waiting" };
+      confirm.click();
+      return { ok: true, mode: "submission", action: "confirmed" };
+    }
+    const submit = controls().find((element) => /^(?:ส่งคำตอบ(?:ทั้งหมด)?|ส่งข้อสอบ|ส่งแบบทดสอบ|ยืนยันส่งคำตอบ|ยืนยันส่งข้อสอบ)$/u.test(text(element)));
+    if (submit) {
+      submit.click();
+      return { ok: true, mode: "submission", action: "opened" };
+    }
+    const sheet = controls().find((element) => /ดูกระดาษคำตอบ/u.test(text(element)) && /ส่งคำตอบ/u.test(text(element)));
+    if (!sheet) throw new Error("submit-all control unavailable");
+    sheet.click();
+    return { ok: true, mode: "submission", action: "opened_sheet" };
+  };
+
+  const inspectPage = () => ({
+    path: location.pathname,
+    url: location.href,
+    origin: currentOrigin(),
+    course: courseIdentity(),
+    chapters: chapterCards().map(({ number, title }) => ({ number, title })),
+    contentVersion: CONTENT_VERSION,
+    controls: [...document.querySelectorAll("button, a")]
+      .filter((element) => !element.getClientRects || element.getClientRects().length > 0)
+      .slice(0, 40)
+      .map((element) => ({ label: label(element).slice(0, 160), disabled: !!element.disabled })),
+  });
+
+  const bindCurrentExam = ({ examBinding, expectedExamCode, allowSubmit }) => {
+    if (typeof examBinding !== "string" || !examBinding) throw new Error("Missing exam binding");
+    if (!EXAM_PATH.test(location.pathname)) throw new Error("Open an exam question first");
+    const question = readQuestion();
+    if (question.examCode !== expectedExamCode) throw new Error("Stale exam code; read the current question again");
+    currentExamBinding = { id: examBinding, url: location.href, code: virtualSchoolMetadata().code, submissionAllowed: allowSubmit === true };
+    return { mode: "exam", origin: currentOrigin(), examBinding, submissionAllowed: currentExamBinding.submissionAllowed };
+  };
+
+  const supports = (locationLike = location) => locationLike.hostname === "main.virtualschool.club";
+
+  const handle = (action, message = {}) => {
+    if (action === "page_version") return { contentVersion: CONTENT_VERSION };
+    if (action === "read_subjects") return readSubjects();
+    if (action === "open_subject") return openSubject(message);
+    if (action === "return_to_subjects") return returnToSubjects(message);
+    if (action === "bind_current_exam") return bindCurrentExam(message);
+    if (action === "read_submission_status") return virtualSubmissionStatus(message);
+    if (action === "begin_virtual_attempt") return beginVirtualAttempt(message);
+    if (action === "read_exam_result") {
+      if (message.scope) assertScope(message.scope);
+      return readExamResult();
+    }
+    if (action === "open_answer_review") {
+      if (message.scope) assertScope(message.scope);
+      return openAnswerReview(message);
+    }
+    if (message.scope?.mode === "exam" && !["read_question", "apply_answer", "navigate_next", "inspect_page"].includes(action) &&
+        !(action === "submit_exam" && currentExamBinding?.submissionAllowed === true && message.scope.submissionAllowed === true)) {
+      throw new Error("Current-exam scope allows answers only; submission and chapter navigation are disabled");
+    }
+    if (message.scope || ["apply_answer", "navigate_next", "advance_subject", "submit_exam"].includes(action)) assertScope(message.scope);
+    if (action === "read_question") return readQuestion();
+    if (action === "apply_answer") return applyAnswer(message);
+    if (action === "navigate_next") return navigateNext(message);
+    if (action === "advance_subject") return advanceSubject(message.scope, message.virtualAttemptId, message.virtualAttemptEnteredAt);
+    if (action === "inspect_page") return inspectPage();
+    if (action === "submit_exam") return submitCurrentExam(message);
+    return null;
+  };
+
+  return { supports, inspect: inspectPage, handle };
+};

@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build": "esbuild src/server.mjs --bundle --platform=node --format=cjs --target=node20 --outfile=dist/server.cjs && esbuild demo/demo.mjs --bundle --platform=node --format=cjs --target=node20 --outfile=dist/demo.cjs",
+    "build:content": "esbuild src/web-adapters/entrypoint.mjs --bundle --platform=browser --format=iife --target=chrome116 --outfile=extension/content-script.js",
+    "build": "esbuild src/server.mjs --bundle --platform=node --format=cjs --target=node20 --outfile=dist/server.cjs && esbuild demo/demo.mjs --bundle --platform=node --format=cjs --target=node20 --outfile=dist/demo.cjs && npm run build:content",
     "demo": "node dist/demo.cjs",
     "check": "node dist/demo.cjs --check"
   },

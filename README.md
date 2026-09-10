@@ -2,7 +2,7 @@
 
 A Codex plugin and local Chrome extension for authorized practice on INT Project and Virtual School. It uses the active Codex model; no separate model API key is required. This is an unofficial local prototype, not affiliated with either learning platform.
 
-Shared version: **0.18.0** · Chrome extension: **0.13.0**.
+Shared version: **0.19.0** · Chrome extension: **0.14.0**.
 
 ## What works
 
@@ -11,12 +11,13 @@ Shared version: **0.18.0** · Chrome extension: **0.13.0**.
 | Read text and image questions | Supported | Supported |
 | Scoped answers and guarded submission | Supported | Supported |
 | One-attempt final mode (Normal) | Supported | Supported |
-| Extract verified correct answers from review | Supported | Planned |
-| Unique subject answer bank and known-answer batches | Supported | Full workflow planned |
-| Review and retry 50-question finals (Loop) | Supported | Planned |
-| Minimum duration per final attempt | Supported | Planned |
+| Read/open unfinished subjects on the selected list | Supported | Implemented with opaque card tokens |
+| Extract verified correct answers from review | Supported | Implemented for complete, bound final reviews |
+| Unique subject answer bank and known-answer batches | Supported | Implemented for verified final answers |
+| Review and retry finals (Loop) | Exactly 50 questions | Uses the observed total |
+| Minimum duration per final attempt | Supported | Implemented |
 
-Virtual School support is partial. A finished attempt or a passing grade does not guarantee a full score. Loop needs Codex to remain active and can stop for usage limits, unavailable review data or site restrictions.
+Virtual School result/review parsing and navigation are covered by page inspection and simulated integration tests. The release's automated checks do not run a live exam. Virtual chapter/posttest reviews do not populate the reusable answer bank yet. A finished attempt or a passing grade does not guarantee a full score. Loop needs Codex to remain active and can stop for usage limits, unavailable review data or site restrictions.
 
 ## Install
 
@@ -31,7 +32,7 @@ git clone https://github.com/Topmoaman/int-helper.git
 cd int-helper
 ```
 
-Keep this folder: Chrome loads the extension from it. Prebuilt MCP bundles are included, so normal installation does not require npm install.
+Prebuilt MCP bundles are included, so normal installation does not require npm install. The installer copies the runtime to a stable directory; keep this downloaded folder if you want the development source and tests.
 
 ### 2. Run the one-time installer
 
@@ -66,7 +67,9 @@ When an update is available:
 
 The update button requires the one-time installer above and a connected compatible bridge. It stays disabled while a practice scope is unfinished or any supported exam page is open. Internet/installation failures are shown in the popup; an already known update remains visible while offline. Local edits stop an update rather than being overwritten. Failed installation restores the previous files and attempts to restore the previous Codex plugin. Saved history is outside the install directory and is preserved.
 
-This is a user-triggered updater for an unpacked extension, not Chrome Web Store auto-update. Old 0.17 installations need the one-time setup to receive this capability. Merely pushing commits does not notify users: publish a stable GitHub Release containing the update asset.
+This is a user-triggered updater for an unpacked extension, not Chrome Web Store auto-update. Managed 0.18.0 installations can update directly to 0.19.0. Old 0.17 installations need the one-time setup to receive this capability. Merely pushing commits does not notify users: publish a stable GitHub Release containing the update asset.
+
+The update asset contains the executable runtime, installer and documentation. Development source, fixtures and tests remain in the repository/source ZIP. This keeps updates compatible with the original 0.18.0 installer while allowing separate website adapters in the source tree.
 
 ## Use
 
@@ -80,11 +83,15 @@ INT Loop example:
 
 > ทำปลายภาควิชาที่เปิดอยู่แบบ Loop อนุญาตให้ตอบ บันทึก ส่งคำตอบ อ่านเฉลย และเริ่มรอบใหม่ในวิชาเดิมทุกครั้งจนได้ 50/50 โดยไม่ต้องถามยืนยันซ้ำ
 
+Virtual School Loop example:
+
+> ทำปลายภาค Virtual School วิชาที่เปิดอยู่แบบ Loop อนุญาตให้ตอบ ส่งคำตอบ บันทึกเฉลย และเริ่มรอบใหม่ในวิชาเดิมจนได้คะแนนเต็มตามจำนวนข้อจริง โดยไม่ต้องถามยืนยันซ้ำ
+
 Optional pacing:
 
 > ใช้เวลาอย่างน้อย 60 นาทีต่อรอบ
 
-History is off by default. Ask to enable it if you want questions remembered; enabling INT Loop also enables history. This shared edition does not inherit the original author's pretest preferences. Specify whether pretests should be answered or submitted empty.
+History is off by default. Ask to enable it if you want questions remembered; enabling a supported final Loop also enables history. This shared edition does not inherit the original author's pretest preferences. Specify whether pretests should be answered or submitted empty.
 
 ## Local data and connection
 
@@ -98,6 +105,7 @@ The bridge binds to `127.0.0.1` on ports 17373–17388. This prototype checks Ch
 
 - After replacing the extension files, click **Reload** on its Chrome extension card, then reload the practice page.
 - After updating/reinstalling the plugin, open a new Codex task.
+- If Codex still reports a missing old plugin cache path, restart Codex and verify that the registered bridge tools load. A connected extension badge alone does not prove that the current task has those tools.
 - If `node` is missing, install Node.js and restart Codex so it sees the updated PATH.
 - If a question code becomes stale, use the fresh code returned by the bridge; a page reload is only needed for extension/page version mismatch or lost scope.
 - The extension does not independently solve questions or keep an exam running after Codex disconnects.
@@ -111,9 +119,11 @@ npm run build
 npm run check
 ```
 
-The checks use local simulated pages and mock extension connections. They do not answer or submit a live website exam. Test coverage includes scope, submission, review, duplicate history, exact answer reuse, stale codes and multiple MCP sessions. A full live Virtual School review/retry cycle has not been implemented.
+Run these commands from a repository clone/source ZIP, which includes all development files. The managed installation contains only the runtime.
 
-This release adds a managed updater and renames the shared plugin to INT Helper. Virtual School review/Loop parity remains planned. Third-party dependency notices are in `THIRD_PARTY_NOTICES.md`.
+The checks use simulated pages and mock extension connections. Coverage includes both website adapters, subject cards, submitted-modal scores, explicit review labels, variable totals, bound-review retry gates, scope/history races, exact answer reuse, stale codes and multiple MCP sessions. The upgrade check runs the frozen public 0.18.0 updater against the new asset and starts its installed MCP runtime without source files or npm dependencies.
+
+Version 0.19.0 adds Virtual School final review/Loop support, fixes missing submitted scores and explicit correct/wrong-choice parsing, and preserves the managed updater. Third-party dependency notices are in `THIRD_PARTY_NOTICES.md`.
 
 ## Publishing a release
 
@@ -123,4 +133,4 @@ Bump the plugin version, the `VERSION` constant in `extension/updates.js`, the e
 node scripts/build-release.mjs release
 ```
 
-Publish a stable tag such as `v0.18.0` with `release/int-helper-update.json` attached. The tag and plugin version must match exactly. Update sources are restricted to this repository; file paths are allowlisted and local pairing credentials are excluded from release packages. Checksums detect damaged content; trust in the publisher comes from GitHub HTTPS and repository ownership, not a separate signing key.
+Publish a stable tag such as `v0.19.0` with `release/int-helper-update.json` attached. The tag and plugin version must match exactly. Update sources are restricted to this repository; file paths are allowlisted and local pairing credentials are excluded from release packages. Checksums detect damaged content; trust in the publisher comes from GitHub HTTPS and repository ownership, not a separate signing key.

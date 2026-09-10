@@ -12,17 +12,46 @@ let updateInFlight = false;
 let history = null;
 let currentQuestion = null;
 let historyScope = null;
+const isIntOrigin = (origin) => /^https:\/\/(?:www\.)?int-project\.com$/u.test(String(origin || ""));
+const isVirtualOrigin = (origin) => String(origin || "") === "https://main.virtualschool.club";
+const historyScopeKey = (scope) => {
+  if (!scope || (!isIntOrigin(scope.origin) && !isVirtualOrigin(scope.origin))) return null;
+  const keys = isVirtualOrigin(scope.origin)
+    ? ["origin", "subjectCode", "level", "term", "year"]
+    : ["origin", "subjectCode", "subjectName", "level", "term", "year"];
+  const values = keys.map((key) => String(scope[key] ?? "").normalize("NFC").replace(/\s+/gu, " ").trim());
+  return values.every(Boolean) ? JSON.stringify(values) : null;
+};
+const captureHistoryContext = () => ({ writer: history, scope: historyScope, key: historyScopeKey(historyScope) });
+const historyContextStillValid = (context) => context?.writer === history && context?.scope === historyScope && historyScopeKey(historyScope) === context.key;
+const historyWarning = (question, details = {}) => ({
+  ...question,
+  ...details,
+  historyWarning: "The browser action completed, but local history was not saved because the history writer or scoped course changed during the browser request",
+});
+const reviewContextStillValid = (context, response) => {
+  if (!context?.writer || !historyContextStillValid(context) || !context.key) return false;
+  // New worker responses bind review evidence to the scoped course. Keep
+  // compatibility with older INT responses that omitted scope, while requiring
+  // Virtual's newer adapter to return its binding explicitly.
+  if (Object.prototype.hasOwnProperty.call(response || {}, "scope") && historyScopeKey(response.scope) !== context.key) return false;
+  if (!Object.prototype.hasOwnProperty.call(response || {}, "scope") && !isIntOrigin(context.scope?.origin)) return false;
+  for (const review of [...(response?.verifiedReviews || []), ...(response?.rejectedReviews || [])]) {
+    if (Object.prototype.hasOwnProperty.call(review || {}, "scope") && historyScopeKey(review.scope) !== context.key) return false;
+  }
+  return true;
+};
 const setHistoryScope = (scope) => {
   historyScope = scope;
   currentQuestion = null;
   if (history) history = createHistory(undefined, historyScope);
 };
-const rememberQuestion = (question, writer = history) => {
+const rememberQuestion = (question, writer = history, scope = historyScope) => {
   if (!writer) return question;
   if (!question.questionText && !question.questionImage) return question;
   const { examCode, questionNumber, totalQuestions, questionText, questionImage, choices, images = [] } = question;
   const record = { examCode, questionNumber, totalQuestions, questionText, questionImage, choices, images };
-  writer.append({ type: "question", scope: historyScope, question: record });
+  writer.append({ type: "question", scope, question: record });
   currentQuestion = record;
   const match = writer.lookupDetailed(question);
   return { ...question, historyFile: writer.file, verifiedAnswer: match.answer, historyMatch: match.reason };
@@ -87,7 +116,7 @@ const attachBridge = (bridge) => bridge.on("connection", (socket) => {
 
   socket.on("close", () => {
     if (browser === socket) browser = null;
-    rejectPending("INT INT Helper extension disconnected");
+    rejectPending("INT Helper extension disconnected");
   });
 });
 
@@ -113,13 +142,13 @@ const startBridge = async () => {
   for (let port = basePort; port < basePort + portCount; port += 1) {
     try {
       const bridge = await listen(port);
-      bridge.on("error", (error) => console.error(`INT INT Helper WebSocket error: ${error.message}`));
+      bridge.on("error", (error) => console.error(`INT Helper WebSocket error: ${error.message}`));
       return { bridge, port };
     } catch (error) {
       if (error.code !== "EADDRINUSE") throw error;
     }
   }
-  throw new Error(`No free INT INT Helper port in ${basePort}-${basePort + portCount - 1}`);
+  throw new Error(`No free INT Helper port in ${basePort}-${basePort + portCount - 1}`);
 };
 
 const requestBrowser = (action, payload = {}) =>
@@ -129,7 +158,7 @@ const requestBrowser = (action, payload = {}) =>
       return;
     }
     if (!browser || browser.readyState !== browser.OPEN) {
-      reject(new Error("INT INT Helper extension is not connected"));
+      reject(new Error("INT Helper extension is not connected"));
       return;
     }
     const id = String(++sequence);
@@ -178,8 +207,11 @@ server.registerTool(
     annotations: { readOnlyHint: false, destructiveHint: false },
   },
   async () => {
-    const writer = history;
-    return toolResult(rememberQuestion(await requestBrowser("read_current_question"), writer));
+    const context = captureHistoryContext();
+    const question = await requestBrowser("read_current_question");
+    if (!context.writer) return toolResult(question);
+    if (!historyContextStillValid(context)) return toolResult(historyWarning(question));
+    return toolResult(rememberQuestion(question, context.writer, context.scope));
   },
 );
 
@@ -194,22 +226,36 @@ server.registerTool(
 );
 
 server.registerTool("read_subjects", {
-  description: "Read INT subject cards on the selected level/term page: exact IDs, image labels, printed progress and listToken. Does not click. For an explicitly requested all-unfinished-subjects run, save the initial unfinished queue and listToken; Normal mode only.",
+  description: "Read supported subject cards on the selected level/term page: INT subjectCode or Virtual School cardToken, image labels, printed progress and listToken. Does not click. For an explicitly requested all-unfinished-subjects run, save the initial unfinished queue and listToken; Normal mode only.",
   inputSchema: {}, annotations: { readOnlyHint: true },
 }, async () => toolResult(await requestBrowser("read_subjects")));
 server.registerTool("open_subject", {
-  description: "Open one unfinished INT subject from the exact listToken returned by read_subjects in this session. Pins the listed tab; refuses changed lists, finished cards and unknown progress. Inspect the resulting overview and set normal subject scope before working. Never answers or submits.",
-  inputSchema: { listToken: z.string().min(1), subjectCode: z.string().min(1) }, annotations: { destructiveHint: false },
-}, async (payload) => { const result = await requestBrowser("open_subject", payload); setHistoryScope(null); return toolResult(result); });
+  description: "Open one unfinished subject from the exact listToken returned by read_subjects in this session. INT uses subjectCode; Virtual School uses cardToken. Provide exactly one selector. Pins the listed tab; refuses changed lists, finished cards and unknown progress. Inspect the resulting overview and set normal subject scope before working. Never answers or submits.",
+  inputSchema: z.object({
+    listToken: z.string().min(1),
+    subjectCode: z.string().min(1).optional(),
+    cardToken: z.string().min(1).optional(),
+  }).refine(({ subjectCode, cardToken }) => Boolean(subjectCode) !== Boolean(cardToken), {
+    message: "Provide exactly one of subjectCode (INT) or cardToken (Virtual School)",
+  }), annotations: { destructiveHint: false },
+}, async (payload) => {
+  const result = await requestBrowser("open_subject", payload);
+  if (!result.navigationPending) setHistoryScope(null);
+  return toolResult(result);
+});
 server.registerTool("return_to_subjects", {
-  description: "From the scoped INT subject overview, click its Select subject control and clear that course scope. First return from exams/results using normal scoped navigation. Read the list again and compare it with the original queue before opening the next unfinished subject.",
+  description: "From the scoped subject overview, click its Select subject control and clear that course scope after the destination is verified. First return from exams/results using normal scoped navigation. If navigationPending is returned, keep the current scope and inspect the destination before retrying. Read the list again and compare it with the original queue before opening the next unfinished subject.",
   inputSchema: {}, annotations: { destructiveHint: false },
-}, async () => { const result = await requestBrowser("return_to_subjects"); setHistoryScope(null); return toolResult(result); });
+}, async () => {
+  const result = await requestBrowser("return_to_subjects");
+  if (!result.navigationPending) setHistoryScope(null);
+  return toolResult(result);
+});
 
 server.registerTool(
   "set_scope",
   {
-    description: "Set an explicit Virtual School or INT Project chapter/subject/final-only scope from the course overview, using its inspected subjectCode verbatim. retryUntilPerfect opts INT final-only scope into the 50-question review/retry loop and enables verified-answer history; default false is Normal and an explicit final-only request may retake a completed final once through its enabled link. This does not click the page.",
+    description: "Set an explicit Virtual School or INT Project chapter/subject/final-only scope from the course overview, using its inspected subjectCode verbatim. retryUntilPerfect opts a supported final scope into its review/retry workflow and enables verified-answer history; default false is Normal and an explicit final-only request may retake a completed final once through its enabled link. The supported exam total comes from the observed page; this does not assume 50 for Virtual School. This does not click the page.",
     inputSchema: {
       subjectCode: z.string().min(1),
       mode: z.enum(["chapter", "subject", "final"]),
@@ -228,13 +274,13 @@ server.registerTool(
 );
 
 server.registerTool("set_exam_pacing", {
-  description: "Set a minimum duration for each scoped INT 50-question final: 60 = one hour, 120 = two hours, 0 = off (default). Set after final scope and before entry. Each Loop retry gets its own duration. Changing the value uses the current attempt's original start. On mode=pacing, wait in interruptible chunks up to 60 seconds and retry the same action. Solving or website delays may make completion later. This tool does not sleep or run an exam.",
+  description: "Set a minimum duration for each supported scoped final: 60 = one hour, 120 = two hours, 0 = off (default). The worker validates the site's observed question total and scope before applying pacing; Virtual School totals are not assumed to be 50. Set after final scope and before entry. Each retry gets its own duration. Changing the value uses the current attempt's original start. On mode=pacing, wait in interruptible chunks up to 60 seconds and retry the same action. Solving or website delays may make completion later. This tool does not sleep or run an exam.",
   inputSchema: { durationMinutes: z.number().min(0).max(720) }, annotations: { destructiveHint: false },
 }, async (payload) => toolResult(await requestBrowser("set_exam_pacing", payload)));
 
 server.registerTool(
   "set_exam_loop",
-  { description: "Toggle the current scoped INT 50-question final between Normal (enabled=false: one attempt) and Loop (enabled=true: answer, submit, review and retry until a submitted 50/50). Preserves the current attempt. Enabling also enables local verified-answer history. Does not itself answer, submit, navigate, or run the model loop; follow the skill workflow.", inputSchema: { enabled: z.boolean() }, annotations: { destructiveHint: false } },
+  { description: "Toggle the current scoped supported final between Normal (enabled=false: one attempt) and Loop (enabled=true: answer, submit, review and retry until the observed total is fully correct). INT retains its 50-question rule; Virtual School uses its observed total and explicit review evidence. Preserves the current attempt. Enabling also enables local verified-answer history. Does not itself answer, submit, navigate, or run the model loop; follow the skill workflow.", inputSchema: { enabled: z.boolean() }, annotations: { destructiveHint: false } },
   async ({ enabled }) => {
     const result = await requestBrowser("set_exam_loop", { enabled });
     setHistoryScope(result.scope || null);
@@ -258,10 +304,16 @@ server.registerTool(
 );
 
 const answerOne = async ({ choiceIndex, examCode, save }) => {
-    const writer = history;
+    const context = captureHistoryContext();
+    const writer = context.writer;
     if (!writer) return toolResult(await requestBrowser("answer_and_next", { choiceIndex, examCode, save }));
-    if (currentQuestion?.examCode !== examCode) rememberQuestion(await requestBrowser("read_current_question"), writer);
-    if (currentQuestion?.examCode !== examCode) return toolResult({ ...rememberQuestion(await requestBrowser("read_current_question"), writer),
+    let refreshed;
+    if (currentQuestion?.examCode !== examCode) {
+      const question = await requestBrowser("read_current_question");
+      if (!historyContextStillValid(context)) return toolResult(historyWarning(question, { answerApplied: false, submissionApplied: false }));
+      refreshed = rememberQuestion(question, writer, context.scope);
+    }
+    if (currentQuestion?.examCode !== examCode) return toolResult({ ...refreshed,
       ok: true, mode: "resync", action: "question_refreshed", answerApplied: false, submissionApplied: false, done: false,
       nextAction: "answer_and_next", recovery: "Check this fresh question and use its exact examCode to continue. Do not reload." });
     const verified = historyScope?.retryUntilPerfect && writer.lookup(currentQuestion);
@@ -273,11 +325,12 @@ const answerOne = async ({ choiceIndex, examCode, save }) => {
     // Record intent before acting; this is not evidence of correctness or persistence.
     writer.append({ type: "answer_requested", examCode, questionNumber: currentQuestion.questionNumber, choice, saveRequested: save, correctness: "unverified" });
     const result = await requestBrowser("answer_and_next", { choiceIndex, examCode, save });
+    if (!historyContextStillValid(context)) return toolResult(historyWarning(result));
     if (result.mode === "pacing") return toolResult({ ...result, historyFile: writer.file });
-    if (result.mode === "resync") return toolResult(rememberQuestion(result, writer));
+    if (result.mode === "resync") return toolResult(rememberQuestion(result, writer, context.scope));
     try {
       writer.append({ type: "answer_returned", examCode, selected: result.selected, saved: result.saved ?? null, correctness: "unverified" });
-      const next = !result.done ? rememberQuestion(result, writer) : result;
+      const next = !result.done ? rememberQuestion(result, writer, context.scope) : result;
       return toolResult({ ...next, historyFile: writer.file });
     } catch (error) {
       // The browser already acted: preserve its response so callers do not retry it.
@@ -300,14 +353,22 @@ server.registerTool(
 );
 
 server.registerTool("answer_known_questions", {
-  description: "Save up to 20 consecutive answers in the already authorized INT exam, using only exact verified local history matches. Never guesses or submits. Requires enabled history and scope. Stops at an unknown question, pacing, resync, done=true, or 12 seconds; returns the current question for reasoning. Use this to avoid re-solving known questions. Continue calling within the authorized loop when batchStopReason=batch_limit.",
+  description: "Answer up to 20 consecutive questions in an already authorized INT or Virtual School exam, using only exact verified local history matches. INT receives save=true; Virtual School receives save=false. Never guesses or submits. Requires enabled, identified history and supported scope. Stops at an unknown question, pacing, resync, done=true, or 12 seconds; returns the current question for reasoning. Continue calling within the authorized loop when batchStopReason=batch_limit.",
   inputSchema: { maxQuestions: z.number().int().min(1).max(20).default(10) },
   annotations: { destructiveHint: false },
 }, async ({ maxQuestions }) => {
-  if (!history || !historyScope || !/^https:\/\/(?:www\.)?int-project\.com$/u.test(historyScope.origin || "")) throw new Error("Enable verified history in an INT scope first");
+  const scopeKey = historyScopeKey(historyScope);
+  if (!history || !scopeKey) throw new Error("Enable verified history in an identified INT or Virtual School scope first");
   const writer = history;
-  const result = await answerKnownQuestions({ maxQuestions, stillAuthorized: () => history === writer,
-    read: async () => rememberQuestion(await requestBrowser("read_current_question"), writer),
+  const result = await answerKnownQuestions({ maxQuestions, save: isIntOrigin(historyScope.origin),
+    stillAuthorized: () => history === writer && historyScopeKey(historyScope) === scopeKey,
+    read: async () => {
+      const context = captureHistoryContext();
+      const question = await requestBrowser("read_current_question");
+      if (!context.writer) return question;
+      if (!historyContextStillValid(context)) return historyWarning(question);
+      return rememberQuestion(question, context.writer, context.scope);
+    },
     answer: async payload => (await answerOne(payload)).structuredContent,
   });
   return toolResult(result);
@@ -341,42 +402,59 @@ server.registerTool(
 server.registerTool(
   "submit_current_exam",
   {
-    description: "Within configured scope, perform one guarded step of submitting the exact current exam. INT verifies saved answers through its answer sheet first. Use the examCode returned by each step. Known same-attempt codes can follow INT wrapping from question 50 to 1. mode=resync means nothing was submitted: retry with the returned current examCode in the same scope, without reloading. Inspect each returned action and repeat the required submission steps only for the authorized exam.",
+    description: "Within configured scope, perform one guarded step of submitting the exact current exam. INT verifies saved answers through its answer sheet first; Virtual School uses its scoped answer ledger and known confirmation. Use the examCode returned by each step. Same-attempt codes can follow the site's final-question behavior. mode=resync means nothing was submitted: retry with the returned current examCode in the same scope, without reloading. Inspect each returned action and repeat the required submission steps only for the authorized exam.",
     inputSchema: { examCode: z.string().min(1) },
   },
   async ({ examCode }) => toolResult(await requestBrowser("submit_current_exam", { examCode })),
 );
 
-const reviewToolResult = (response) => {
+const reviewToolResult = (response, context = captureHistoryContext()) => {
   const { verifiedReviews = [], rejectedReviews = [], ...result } = response;
-  if (history && (result.verificationSource || result.score || verifiedReviews.length || rejectedReviews.length)) {
+  const hasEvidence = result.verificationSource || result.score || verifiedReviews.length || rejectedReviews.length;
+  const virtualEvidencePending = isVirtualOrigin(context.scope?.origin) && hasEvidence && response.reviewBound !== true;
+  if (virtualEvidencePending) {
+    const pending = { ...result, evidencePending: true, historyVerificationPending: true };
+    if (history && reviewContextStillValid(context, response)) pending.historyFile = context.writer.file;
+    else if (history) pending.historyWarning = "Virtual review evidence is pending a bound complete review for this submitted attempt";
+    return toolResult(pending);
+  }
+  if (hasEvidence && reviewContextStillValid(context, response)) {
     try {
-      for (const review of rejectedReviews) history.rejectAnswer(review);
-      for (const review of verifiedReviews) history.rememberReview(review);
-      if (result.verificationSource || result.score) history.rememberReview(result);
-      return toolResult({ ...result, historyFile: history.file, historyStats: history.stats() });
+      for (const review of rejectedReviews) context.writer.rejectAnswer(review);
+      for (const review of verifiedReviews) context.writer.rememberReview(review);
+      if (result.verificationSource || result.score) context.writer.rememberReview(result);
+      return toolResult({ ...result, historyFile: context.writer.file, historyStats: context.writer.stats() });
     } catch (error) { return toolResult({ ...result, historyWarning: `Local history write failed: ${error.message}` }); }
+  }
+  if (hasEvidence && history) {
+    return toolResult({ ...result, historyWarning: "Review evidence was not saved because the history writer or scoped course changed during the browser read" });
   }
   return toolResult({ ...result, ...(history ? { historyFile: history.file } : {}) });
 };
 server.registerTool(
   "read_exam_result",
-  { description: "Read submitted result or review without navigation. Saves verified green sheet rows and explicit corrected answers when history is enabled. reviewPlan reports greenCount, redCount, verifiedCount, remainingCount and nextQuestionNumber.", inputSchema: {}, annotations: { destructiveHint: false } },
-  async () => reviewToolResult(await requestBrowser("read_exam_result")),
+  { description: "Read the submitted result or review without navigation. When history is enabled, saves only site-explicit verified answers and bound selected-answer corrections for the scoped course. Virtual School accepts only its explicit correct-answer label; an aggregate score alone is never a bank answer. reviewPlan reports observed green/red/verified/remaining counts and the next question number.", inputSchema: {}, annotations: { destructiveHint: false } },
+  async () => {
+    const context = captureHistoryContext();
+    return reviewToolResult(await requestBrowser("read_exam_result"), context);
+  },
 );
 server.registerTool(
   "open_answer_review",
-  { description: "Navigate from the latest exact resultToken AND return/save the destination review in one call. Default readAfter=true: step=open enters review; sheet reads all red/green rows; question jumps directly to questionNumber, opening the sheet internally if needed. Use returned reviewPlan.nextQuestionNumber until done. No extra read_exam_result is needed after success. close closes the sheet; return leaves review (no result read). readAfter=false is legacy navigation only. Never starts an attempt or submits.", inputSchema: { resultToken: z.string().min(1), step: z.enum(["open", "sheet", "close", "next", "question", "return"]).default("open"), questionNumber: z.number().int().min(1).max(50).optional(), readAfter: z.boolean().default(true) }, annotations: { destructiveHint: false } },
-  async (payload) => reviewToolResult(await requestBrowser("open_answer_review", payload)),
+  { description: "Navigate from the latest exact resultToken and return/save the destination review in one call. Default readAfter=true: step=open enters review; sheet reads the observed reviewed questions; question jumps directly to questionNumber, opening the sheet internally if needed. Use returned reviewPlan.nextQuestionNumber until done. The question bound is 1–1000; the active worker may apply a smaller site-specific bound. No extra read_exam_result is needed after success. close closes the sheet; return leaves review (no result read). readAfter=false is legacy navigation only. Never starts an attempt or submits.", inputSchema: { resultToken: z.string().min(1), step: z.enum(["open", "sheet", "close", "next", "question", "return"]).default("open"), questionNumber: z.number().int().min(1).max(1000).optional(), readAfter: z.boolean().default(true) }, annotations: { destructiveHint: false } },
+  async (payload) => {
+    const context = captureHistoryContext();
+    return reviewToolResult(await requestBrowser("open_answer_review", payload), context);
+  },
 );
 
 const main = async () => {
   const { port } = await startBridge();
-  console.error(`INT INT Helper listening on ws://127.0.0.1:${port}`);
+  console.error(`INT Helper listening on ws://127.0.0.1:${port}`);
   await server.connect(new StdioServerTransport());
 };
 
 main().catch((error) => {
-  console.error(`INT INT Helper MCP error: ${error.message}`);
+  console.error(`INT Helper MCP error: ${error.message}`);
   process.exitCode = 1;
 });

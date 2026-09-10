@@ -51,20 +51,13 @@ export const validatePackage = (payload, expectedVersion) => {
 };
 
 export const createPackage = async root => {
-  // Ship the executable installation only. Source/tests (including nested web
-  // adapters and HTML fixtures) remain in the repository/source ZIP. Keeping
-  // this payload within the 0.18.0 path contract lets that updater install it.
-  const runtimePath = path => allowedPath(path) &&
-    (!path.startsWith('int-helper/prototype-bridge/') ||
-      /^int-helper\/prototype-bridge\/(?:src\/updater\.mjs|dist\/server\.cjs|extension\/[\w-]+\.(?:js|html|json))$/.test(path)) &&
-    path !== 'scripts/build-release.mjs';
   const files = [];
   const visit = async (folder, prefix = '') => {
     for (const entry of await fs.readdir(folder, { withFileTypes: true })) {
       if (['.git', 'node_modules', 'history', 'release'].includes(entry.name)) continue;
       const path = prefix + entry.name;
       if (entry.isDirectory()) await visit(join(folder, entry.name), path + '/');
-      else if (entry.isFile() && runtimePath(path)) {
+      else if (entry.isFile() && allowedPath(path)) {
         const bytes = await fs.readFile(join(root, path));
         files.push({ path, size: bytes.length, sha256: digest(bytes), base64: bytes.toString('base64') });
       }

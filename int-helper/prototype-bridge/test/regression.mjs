@@ -209,7 +209,7 @@ console.log(`regression passed: ${sourcePath}`);
 // Exercise the actual worker with Chrome/socket boundaries mocked; no live account is touched.
 {
   const sockets = [];
-  let activeTab = 1, version = "0.13.0", handler, popupListener, delayHook, held;
+  let activeTab = 1, version = "0.14.0", handler, popupListener, delayHook, held;
   const sent = [];
   let selectionResult = { examCode: "EXAM:1", selected: 2, saved: null, persistence: "unverified_until_submission" };
   let readResult = () => ({ examCode: "EXAM:2", choices: [], images: [] });
@@ -224,7 +224,7 @@ console.log(`regression passed: ${sourcePath}`);
   let advance = () => ({ mode: "chapter_complete", chapter: 1 });
   const chrome = {
     action: { setBadgeText() {}, setBadgeBackgroundColor() {}, setTitle() {} },
-    runtime: { getManifest: () => ({ version: "0.13.0" }), getURL: (p) => `chrome-extension://test/${p}`, onMessage: { addListener: (fn) => { popupListener = fn; } } },
+    runtime: { getManifest: () => ({ version: "0.14.0" }), getURL: (p) => `chrome-extension://test/${p}`, onMessage: { addListener: (fn) => { popupListener = fn; } } },
     tabs: {
       query: async () => [{ id: activeTab, active: true, url: `${base}/StudyCourse` }],
       sendMessage: async (id, message) => {
@@ -289,7 +289,7 @@ console.log(`regression passed: ${sourcePath}`);
   const before = sent.filter((m) => m.action === "advance_subject").length;
   await assert.rejects(handler("advance_subject", {}, 17373), /reloading/);
   assert.equal(sent.filter((m) => m.action === "advance_subject").length, before);
-  version = "0.13.0";
+  version = "0.14.0";
   advance = () => new Promise((resolve) => { held = resolve; });
   const running = handler("advance_subject", {}, 17373);
   while (!held) await Promise.resolve();
@@ -309,7 +309,7 @@ console.log(`regression passed: ${sourcePath}`);
   assert.equal((await status()).page, "ready");
   version = "0.2.7";
   assert.equal((await status()).page, "reload");
-  version = "0.13.0";
+  version = "0.14.0";
   pageInfo.path = "/StudyCourse";
   await handler("set_scope", { subjectCode: "MATH", mode: "final" }, 17373);
   pageInfo.path = "/Exam";

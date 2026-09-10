@@ -1,6 +1,6 @@
 {
   "name": "int-helper",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "description": "Answer supported practice questions through a local Chrome extension and MCP bridge without an API key.",
   "author": {
     "name": "Local developer"

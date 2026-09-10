@@ -34965,29 +34965,69 @@ var import_node_fs = require("node:fs");
 var import_node_os = require("node:os");
 var import_node_path = require("node:path");
 var import_node_crypto = require("node:crypto");
-var normalize = (value) => (value || "").normalize("NFC").replace(/\s+/gu, " ").trim();
-var content = (item) => JSON.stringify([normalize(item.text), item.image || null]);
-var questionKey = (q) => (0, import_node_crypto.createHash)("sha256").update(JSON.stringify([
+var VIRTUAL_ORIGIN = "https://main.virtualschool.club";
+var VIRTUAL_EXPLICIT_SOURCE = "Virtual School explicit correct-answer label";
+var INT_EXPLICIT_SOURCE = "INT explicit correct-answer label";
+var INT_SHEET_SOURCE = "INT submitted answer-sheet marker";
+var VIRTUAL_LEDGER_SOURCE = "bound_attempt_ledger";
+var normalize = (value) => String(value ?? "").normalize("NFC").replace(/\s+/gu, " ").trim();
+var normalizeImage = (value) => {
+  const normalized = normalize(value);
+  return normalized || null;
+};
+var content = (item = {}) => JSON.stringify([normalize(item.text), normalizeImage(item.image)]);
+var questionKey = (q = {}) => (0, import_node_crypto.createHash)("sha256").update(JSON.stringify([
   normalize(q.questionText),
-  q.questionImage || null,
-  q.choices.map(content).sort()
+  normalizeImage(q.questionImage),
+  (q.choices || []).map(content).sort()
 ])).digest("hex");
-var createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR || (0, import_node_path.join)((0, import_node_os.homedir)(), ".local", "share", "int-practice-helper", "history"), scope = null) => {
+var isVirtual = (origin) => normalize(origin) === VIRTUAL_ORIGIN;
+var identityFields = (virtual) => virtual ? ["origin", "subjectCode", "level", "term", "year"] : ["origin", "subjectCode", "subjectName", "level", "term", "year"];
+var courseFields = ["origin", "subjectCode", "level", "term", "year"];
+var scopedSubject = (scope) => {
   const subject = Object.fromEntries(["origin", "subjectCode", "subjectName", "level", "term", "year"].map((key) => [key, normalize(scope?.[key]) || null]));
-  const identified = ["origin", "subjectCode", "level", "term", "year"].every((key) => subject[key]);
-  const subjectKey = identified ? (0, import_node_crypto.createHash)("sha256").update(JSON.stringify(subject)).digest("hex") : null;
-  const name = (subject.subjectName || subject.subjectCode || "unassigned").replace(/[^\p{L}\p{M}\p{N}_-]+/gu, "_").slice(0, 60);
-  directory = (0, import_node_path.join)(directory, subjectKey ? `${name}-${subjectKey}` : "unassigned");
-  const file2 = (0, import_node_path.join)(directory, `${(/* @__PURE__ */ new Date()).toISOString().replaceAll(":", "-")}-${(0, import_node_crypto.randomUUID)()}.jsonl`);
+  const virtual = isVirtual(subject.origin);
+  const identified = courseFields.every((key) => subject[key]);
+  const identity = virtual ? Object.fromEntries(courseFields.map((key) => [key, subject[key]])) : subject;
+  const subjectKey = identified ? (0, import_node_crypto.createHash)("sha256").update(JSON.stringify(identity)).digest("hex") : null;
+  return { subject, virtual, identified, identity, subjectKey };
+};
+var sameCourse = (recordSubject, subject, virtual) => {
+  if (!recordSubject || !subject) return false;
+  const fields = virtual ? courseFields : identityFields(false);
+  return fields.every((key) => normalize(recordSubject[key]) === subject[key]);
+};
+var acceptedRecord = (record2, virtual) => {
+  if (!virtual) return true;
+  if (record2.type === "verified_answer") return record2.verificationSource === VIRTUAL_EXPLICIT_SOURCE;
+  if (record2.type === "rejected_answer") {
+    const selected = record2.question?.choices?.find((choice) => choice.index === record2.selectedChoiceIndex);
+    const correct = record2.question?.choices?.find((choice) => choice.index === record2.correctChoiceIndex);
+    return record2.verificationSource === VIRTUAL_EXPLICIT_SOURCE && record2.selectionSource === VIRTUAL_LEDGER_SOURCE && record2.correctness === "incorrect" && selected && correct && selected.index !== correct.index && content(selected) === content(record2.rejectedChoice);
+  }
+  return true;
+};
+var safeName = (value) => normalize(value).replace(/[^\p{L}\p{M}\p{N}_-]+/gu, "_").slice(0, 60);
+var createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR || (0, import_node_path.join)((0, import_node_os.homedir)(), ".local", "share", "int-practice-helper", "history"), scope = null) => {
+  const metadata = scopedSubject(scope);
+  const { subject, virtual, identified, subjectKey } = metadata;
+  const name = safeName(virtual ? subject.subjectCode : subject.subjectName || subject.subjectCode || "unassigned");
+  const rootDirectory = directory;
+  const journalDirectory = (0, import_node_path.join)(rootDirectory, subjectKey ? `${name}-${subjectKey}` : "unassigned");
+  const file2 = (0, import_node_path.join)(journalDirectory, `${(/* @__PURE__ */ new Date()).toISOString().replaceAll(":", "-")}-${(0, import_node_crypto.randomUUID)()}.jsonl`);
   const append = (record2) => {
-    (0, import_node_fs.mkdirSync)(directory, { recursive: true, mode: 448 });
+    (0, import_node_fs.mkdirSync)(journalDirectory, { recursive: true, mode: 448 });
     (0, import_node_fs.appendFileSync)(file2, JSON.stringify({ ...record2, subject, subjectKey, recordedAt: (/* @__PURE__ */ new Date()).toISOString(), version: 2 }) + "\n", { encoding: "utf8", mode: 384 });
   };
   const rememberReview = (review) => {
     append({ type: "review_evidence", result: review });
-    if (!["INT explicit correct-answer label", "INT submitted answer-sheet marker"].includes(review.verificationSource)) return;
-    if (review.verificationSource === "INT submitted answer-sheet marker" && (review.correctness !== "correct" || review.correctChoiceIndex !== review.selectedChoiceIndex)) return;
-    const choice = review.choices.find((c) => c.index === review.correctChoiceIndex);
+    const source = review.verificationSource;
+    const explicit = source === INT_EXPLICIT_SOURCE || source === VIRTUAL_EXPLICIT_SOURCE;
+    const sheet = source === INT_SHEET_SOURCE;
+    if (!explicit && !sheet) return;
+    if (virtual ? source !== VIRTUAL_EXPLICIT_SOURCE : source === VIRTUAL_EXPLICIT_SOURCE) return;
+    if (sheet && (review.correctness !== "correct" || review.correctChoiceIndex !== review.selectedChoiceIndex)) return;
+    const choice = review.choices?.find((candidate) => candidate.index === review.correctChoiceIndex);
     if (!choice || !review.questionText && !review.questionImage) return;
     const known = lookup(review);
     if (known?.choiceIndex === choice.index) return;
@@ -35002,21 +35042,72 @@ var createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR || (0, imp
       correctChoice: choice,
       selectedChoiceIndex: review.selectedChoiceIndex,
       correctness: review.correctness,
+      verificationSource: source,
       sourceUrl: review.url,
       sourceExamCode: review.examCode,
       evidence: review.evidence
     });
   };
   const rejectAnswer = (review) => {
-    if (review.verificationSource !== "INT submitted answer-sheet marker" || review.correctness !== "incorrect") return;
-    const choice = review.choices?.find((c) => c.index === review.selectedChoiceIndex);
-    if (!choice) return;
-    append({ type: "rejected_answer", questionKey: questionKey(review), rejectedChoice: choice, evidence: review.evidence });
+    const intSheet = review.verificationSource === INT_SHEET_SOURCE && review.correctness === "incorrect";
+    const virtualCorrection = review.verificationSource === VIRTUAL_EXPLICIT_SOURCE && review.correctness === "incorrect" && review.selectionSource === VIRTUAL_LEDGER_SOURCE;
+    if (virtual ? !virtualCorrection : !intSheet) return;
+    const selected = review.choices?.find((candidate) => candidate.index === review.selectedChoiceIndex);
+    if (!selected) return;
+    if (!review.questionText && !review.questionImage || !review.choices?.length) return;
+    if (virtualCorrection) {
+      const correct2 = review.choices.find((candidate) => candidate.index === review.correctChoiceIndex);
+      if (!correct2 || correct2.index === selected.index) return;
+    }
+    const correct = review.choices.find((candidate) => candidate.index === review.correctChoiceIndex);
+    append({
+      type: "rejected_answer",
+      questionKey: questionKey(review),
+      question: {
+        questionText: review.questionText,
+        questionImage: review.questionImage,
+        choices: review.choices
+      },
+      rejectedChoice: selected,
+      selectedChoiceIndex: review.selectedChoiceIndex,
+      correctChoiceIndex: review.correctChoiceIndex,
+      correctChoice: correct,
+      correctness: review.correctness,
+      verificationSource: review.verificationSource,
+      selectionSource: review.selectionSource,
+      evidence: review.evidence
+    });
   };
-  const bankFile = (0, import_node_path.join)(directory, "answer-bank.json");
+  const bankFile = (0, import_node_path.join)(journalDirectory, "answer-bank.json");
   const cache = /* @__PURE__ */ new Map();
-  let index = null, stems = /* @__PURE__ */ new Set(), evidenceTotals = {};
-  const stemKey = (q) => JSON.stringify([normalize(q.questionText), q.questionImage || null]);
+  let index = null;
+  let stems = /* @__PURE__ */ new Set();
+  let evidenceTotals = {};
+  const journalFiles = () => {
+    const directories = /* @__PURE__ */ new Set([journalDirectory]);
+    if (virtual && identified) {
+      directories.add(rootDirectory);
+      try {
+        for (const entry of (0, import_node_fs.readdirSync)(rootDirectory, { withFileTypes: true })) {
+          if (entry.isDirectory()) directories.add((0, import_node_path.join)(rootDirectory, entry.name));
+        }
+      } catch (error51) {
+        if (error51.code !== "ENOENT") throw error51;
+      }
+    }
+    const files = [];
+    for (const currentDirectory of directories) {
+      let names;
+      try {
+        names = (0, import_node_fs.readdirSync)(currentDirectory);
+      } catch (error51) {
+        if (error51.code === "ENOENT") continue;
+        throw error51;
+      }
+      for (const currentName of names) if (currentName.endsWith(".jsonl")) files.push((0, import_node_path.join)(currentDirectory, currentName));
+    }
+    return files.sort();
+  };
   const statsSnapshot = () => {
     const types = {}, observed = /* @__PURE__ */ new Set();
     for (const entry of cache.values()) {
@@ -35032,23 +35123,23 @@ var createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR || (0, imp
       uniqueObservedQuestions: observed.size,
       verifiedRecords: types.verified_answer || 0,
       ...evidenceTotals,
-      usableAnswers: [...index?.values() || []].filter((e) => e.answers.size === 1).length,
-      conflicts: [...index?.values() || []].filter((e) => e.answers.size > 1).length
+      usableAnswers: [...index?.values() || []].filter((entry) => entry.answers.size === 1).length,
+      conflicts: [...index?.values() || []].filter((entry) => entry.answers.size > 1).length
     };
   };
   const writeBank = () => {
-    (0, import_node_fs.mkdirSync)(directory, { recursive: true, mode: 448 });
+    (0, import_node_fs.mkdirSync)(journalDirectory, { recursive: true, mode: 448 });
     const snapshot = {
       version: 1,
       subject,
       subjectKey,
       updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
       stats: statsSnapshot(),
-      entries: [...index].filter(([, entry]) => entry.question).map(([key, entry]) => ({
+      entries: [...index || /* @__PURE__ */ new Map()].filter(([, entry]) => entry.question).map(([key, entry]) => ({
         questionKey: key,
         question: entry.question,
         status: entry.answers.size === 1 ? "verified" : entry.answers.size ? "conflict" : "rejected",
-        answers: [...entry.answers.values()].map((r) => ({ correctChoice: r.correctChoice, evidence: r.evidence, sourceUrl: r.sourceUrl, recordedAt: r.recordedAt }))
+        answers: [...entry.answers.values()].map((record2) => ({ correctChoice: record2.correctChoice, evidence: record2.evidence, sourceUrl: record2.sourceUrl, recordedAt: record2.recordedAt }))
       }))
     };
     const temporary = bankFile + "." + (0, import_node_crypto.randomUUID)() + ".tmp";
@@ -35056,62 +35147,58 @@ var createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR || (0, imp
     (0, import_node_fs.renameSync)(temporary, bankFile);
   };
   const refresh = () => {
-    let files;
-    try {
-      files = (0, import_node_fs.readdirSync)(directory).filter((f) => f.endsWith(".jsonl")).sort();
-    } catch (error51) {
-      if (error51.code !== "ENOENT") throw error51;
-      files = [];
-    }
+    const files = identified ? journalFiles() : [];
     let changed = !index;
-    for (const name2 of files) {
-      const path = (0, import_node_path.join)(directory, name2), stat = (0, import_node_fs.statSync)(path), signature = `${stat.size}:${stat.mtimeMs}`;
-      if (cache.get(name2)?.signature === signature) continue;
+    for (const path of files) {
+      const stat = (0, import_node_fs.statSync)(path);
+      const signature = `${stat.size}:${stat.mtimeMs}`;
+      if (cache.get(path)?.signature === signature) continue;
       const records2 = [], types = {}, observed = /* @__PURE__ */ new Set(), digest2 = (0, import_node_crypto.createHash)("sha256");
       for (const line of (0, import_node_fs.readFileSync)(path, "utf8").split("\n")) {
-        let r;
+        let record2;
         try {
-          r = JSON.parse(line);
+          record2 = JSON.parse(line);
         } catch {
           continue;
         }
-        if (r.subjectKey !== subjectKey) continue;
-        types[r.type] = (types[r.type] || 0) + 1;
-        if (r.type === "question" && r.question?.choices?.length) observed.add(questionKey(r.question));
-        if (!["verified_answer", "rejected_answer"].includes(r.type)) continue;
+        if (!sameCourse(record2.subject, subject, virtual) || !acceptedRecord(record2, virtual)) continue;
+        types[record2.type] = (types[record2.type] || 0) + 1;
+        if (record2.type === "question" && record2.question?.choices?.length) observed.add(questionKey(record2.question));
+        if (!["verified_answer", "rejected_answer"].includes(record2.type)) continue;
         digest2.update(line);
-        records2.push({ ...r, matchKey: r.question ? questionKey(r.question) : r.questionKey });
+        records2.push({ ...record2, matchKey: record2.question ? questionKey(record2.question) : record2.questionKey });
       }
       const evidenceSignature = digest2.digest("hex");
-      if (cache.get(name2)?.evidenceSignature !== evidenceSignature) changed = true;
-      cache.set(name2, { signature, evidenceSignature, records: records2, types, observed });
+      if (cache.get(path)?.evidenceSignature !== evidenceSignature) changed = true;
+      cache.set(path, { signature, evidenceSignature, records: records2, types, observed });
     }
-    for (const name2 of cache.keys()) if (!files.includes(name2)) {
-      cache.delete(name2);
+    for (const path of cache.keys()) if (!files.includes(path)) {
+      cache.delete(path);
       changed = true;
     }
     if (!changed) return;
-    const records = [...cache.values()].flatMap((entry) => entry.records).sort((a, b) => a.recordedAt.localeCompare(b.recordedAt));
-    const aliases = new Map(records.filter((r) => r.question).map((r) => [r.questionKey, r.matchKey]));
+    const records = [...cache.values()].flatMap((entry) => entry.records).sort((a, b) => String(a.recordedAt || "").localeCompare(String(b.recordedAt || "")));
+    const aliases = new Map(records.filter((record2) => record2.question).map((record2) => [record2.questionKey, record2.matchKey]));
     index = /* @__PURE__ */ new Map();
     stems = /* @__PURE__ */ new Set();
     const verifiedKeys = /* @__PURE__ */ new Set(), verifiedPairs = /* @__PURE__ */ new Set();
     let verifiedCount = 0;
-    for (const r of records) {
-      const key = r.type === "rejected_answer" ? aliases.get(r.questionKey) || r.matchKey : r.matchKey;
+    for (const record2 of records) {
+      const key = record2.type === "rejected_answer" ? aliases.get(record2.questionKey) || record2.matchKey : record2.matchKey;
+      if (!key) continue;
       if (!index.has(key)) index.set(key, { answers: /* @__PURE__ */ new Map(), question: null });
       const entry = index.get(key);
-      if (r.question) {
-        entry.question = r.question;
-        stems.add(stemKey(r.question));
+      if (record2.question) {
+        entry.question = record2.question;
+        stems.add(JSON.stringify([normalize(record2.question.questionText), normalizeImage(record2.question.questionImage)]));
       }
-      if (r.type === "verified_answer" && r.correctChoice) {
-        entry.answers.set(content(r.correctChoice), r);
-        verifiedCount++;
+      if (record2.type === "verified_answer" && record2.correctChoice) {
+        entry.answers.set(content(record2.correctChoice), record2);
+        verifiedCount += 1;
         verifiedKeys.add(key);
-        verifiedPairs.add(JSON.stringify([key, content(r.correctChoice)]));
+        verifiedPairs.add(JSON.stringify([key, content(record2.correctChoice)]));
       }
-      if (r.type === "rejected_answer" && r.rejectedChoice) entry.answers.delete(content(r.rejectedChoice));
+      if (record2.type === "rejected_answer" && record2.rejectedChoice) entry.answers.delete(content(record2.rejectedChoice));
     }
     evidenceTotals = { uniqueVerifiedQuestions: verifiedKeys.size, duplicateVerifiedRecords: verifiedCount - verifiedPairs.size };
     if (subjectKey && records.length) writeBank();
@@ -35121,12 +35208,13 @@ var createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR || (0, imp
     if (!subjectKey) return miss("subject_unidentified");
     if (!question.choices?.length || !question.questionText && !question.questionImage) return miss("question_incomplete");
     refresh();
-    const entry = index.get(questionKey(question));
-    if (!entry) return miss(stems.has(stemKey(question)) ? "different_choices" : "no_verified_match");
+    const key = questionKey(question);
+    const entry = index.get(key);
+    if (!entry) return miss(stems.has(JSON.stringify([normalize(question.questionText), normalizeImage(question.questionImage)])) ? "different_choices" : "no_verified_match");
     if (!entry.answers.size) return miss("answer_rejected");
     if (entry.answers.size !== 1) return miss("conflicting_evidence");
     const [identity, record2] = [...entry.answers][0];
-    const matches = question.choices.filter((c) => content(c) === identity);
+    const matches = question.choices.filter((choice) => content(choice) === identity);
     if (matches.length !== 1) return miss("ambiguous_choice");
     return { reason: "verified_match", answer: { choiceIndex: matches[0].index, correctness: "verified", evidence: record2.evidence, sourceUrl: record2.sourceUrl } };
   };
@@ -35136,12 +35224,13 @@ var createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR || (0, imp
     if (subjectKey) writeBank();
     return statsSnapshot();
   };
-  return { file: file2, bankFile, subject, append, rememberReview, rejectAnswer, lookup, lookupDetailed, stats };
+  return { file: file2, bankFile, subject, subjectKey, append, rememberReview, rejectAnswer, lookup, lookupDetailed, stats };
 };
 
 // src/known-answers.mjs
-var answerKnownQuestions = async ({ read, answer, maxQuestions = 10, stillAuthorized = () => true, now = Date.now }) => {
+var answerKnownQuestions = async ({ read, answer, maxQuestions = 10, save = true, stillAuthorized = () => true, now = Date.now }) => {
   if (!Number.isInteger(maxQuestions) || maxQuestions < 1 || maxQuestions > 20) throw new Error("maxQuestions must be 1\u201320");
+  if (typeof save !== "boolean") throw new Error("save must be boolean");
   const started = now();
   let result = await read(), applied = 0;
   const finish = (reason) => ({ ...result, knownAnswersApplied: applied, batchStopReason: reason });
@@ -35150,7 +35239,7 @@ var answerKnownQuestions = async ({ read, answer, maxQuestions = 10, stillAuthor
     if (result.done) return finish("exam_answered");
     if (!result.verifiedAnswer) return finish("needs_reasoning");
     if (result.verifiedAnswer.correctness !== "verified" || !result.choices?.some((c) => c.index === result.verifiedAnswer.choiceIndex)) throw new Error("Verified choice is not present in the current question");
-    result = await answer({ examCode: result.examCode, choiceIndex: result.verifiedAnswer.choiceIndex, save: true });
+    result = await answer({ examCode: result.examCode, choiceIndex: result.verifiedAnswer.choiceIndex, save });
     if (["resync", "pacing", "verified_answer_available"].includes(result.mode)) return finish(result.mode);
     if (result.selected === void 0) return finish("answer_not_confirmed");
     applied++;
@@ -35349,17 +35438,41 @@ var updateInFlight = false;
 var history = null;
 var currentQuestion = null;
 var historyScope = null;
+var isIntOrigin = (origin) => /^https:\/\/(?:www\.)?int-project\.com$/u.test(String(origin || ""));
+var isVirtualOrigin = (origin) => String(origin || "") === "https://main.virtualschool.club";
+var historyScopeKey = (scope) => {
+  if (!scope || !isIntOrigin(scope.origin) && !isVirtualOrigin(scope.origin)) return null;
+  const keys = isVirtualOrigin(scope.origin) ? ["origin", "subjectCode", "level", "term", "year"] : ["origin", "subjectCode", "subjectName", "level", "term", "year"];
+  const values = keys.map((key) => String(scope[key] ?? "").normalize("NFC").replace(/\s+/gu, " ").trim());
+  return values.every(Boolean) ? JSON.stringify(values) : null;
+};
+var captureHistoryContext = () => ({ writer: history, scope: historyScope, key: historyScopeKey(historyScope) });
+var historyContextStillValid = (context) => context?.writer === history && context?.scope === historyScope && historyScopeKey(historyScope) === context.key;
+var historyWarning = (question, details = {}) => ({
+  ...question,
+  ...details,
+  historyWarning: "The browser action completed, but local history was not saved because the history writer or scoped course changed during the browser request"
+});
+var reviewContextStillValid = (context, response) => {
+  if (!context?.writer || !historyContextStillValid(context) || !context.key) return false;
+  if (Object.prototype.hasOwnProperty.call(response || {}, "scope") && historyScopeKey(response.scope) !== context.key) return false;
+  if (!Object.prototype.hasOwnProperty.call(response || {}, "scope") && !isIntOrigin(context.scope?.origin)) return false;
+  for (const review of [...response?.verifiedReviews || [], ...response?.rejectedReviews || []]) {
+    if (Object.prototype.hasOwnProperty.call(review || {}, "scope") && historyScopeKey(review.scope) !== context.key) return false;
+  }
+  return true;
+};
 var setHistoryScope = (scope) => {
   historyScope = scope;
   currentQuestion = null;
   if (history) history = createHistory(void 0, historyScope);
 };
-var rememberQuestion = (question, writer = history) => {
+var rememberQuestion = (question, writer = history, scope = historyScope) => {
   if (!writer) return question;
   if (!question.questionText && !question.questionImage) return question;
   const { examCode, questionNumber, totalQuestions, questionText, questionImage, choices, images = [] } = question;
   const record2 = { examCode, questionNumber, totalQuestions, questionText, questionImage, choices, images };
-  writer.append({ type: "question", scope: historyScope, question: record2 });
+  writer.append({ type: "question", scope, question: record2 });
   currentQuestion = record2;
   const match = writer.lookupDetailed(question);
   return { ...question, historyFile: writer.file, verifiedAnswer: match.answer, historyMatch: match.reason };
@@ -35425,7 +35538,7 @@ var attachBridge = (bridge) => bridge.on("connection", (socket) => {
   });
   socket.on("close", () => {
     if (browser === socket) browser = null;
-    rejectPending("INT INT Helper extension disconnected");
+    rejectPending("INT Helper extension disconnected");
   });
 });
 var listen = (port) => new Promise((resolve, reject) => {
@@ -35448,13 +35561,13 @@ var startBridge = async () => {
   for (let port = basePort; port < basePort + portCount; port += 1) {
     try {
       const bridge = await listen(port);
-      bridge.on("error", (error51) => console.error(`INT INT Helper WebSocket error: ${error51.message}`));
+      bridge.on("error", (error51) => console.error(`INT Helper WebSocket error: ${error51.message}`));
       return { bridge, port };
     } catch (error51) {
       if (error51.code !== "EADDRINUSE") throw error51;
     }
   }
-  throw new Error(`No free INT INT Helper port in ${basePort}-${basePort + portCount - 1}`);
+  throw new Error(`No free INT Helper port in ${basePort}-${basePort + portCount - 1}`);
 };
 var requestBrowser = (action, payload = {}) => new Promise((resolve, reject) => {
   if (updateInFlight && action !== "update_guard") {
@@ -35462,7 +35575,7 @@ var requestBrowser = (action, payload = {}) => new Promise((resolve, reject) => 
     return;
   }
   if (!browser || browser.readyState !== browser.OPEN) {
-    reject(new Error("INT INT Helper extension is not connected"));
+    reject(new Error("INT Helper extension is not connected"));
     return;
   }
   const id = String(++sequence);
@@ -35507,8 +35620,11 @@ server.registerTool(
     annotations: { readOnlyHint: false, destructiveHint: false }
   },
   async () => {
-    const writer = history;
-    return toolResult(rememberQuestion(await requestBrowser("read_current_question"), writer));
+    const context = captureHistoryContext();
+    const question = await requestBrowser("read_current_question");
+    if (!context.writer) return toolResult(question);
+    if (!historyContextStillValid(context)) return toolResult(historyWarning(question));
+    return toolResult(rememberQuestion(question, context.writer, context.scope));
   }
 );
 server.registerTool(
@@ -35521,32 +35637,38 @@ server.registerTool(
   async () => toolResult(await requestBrowser("inspect_page"))
 );
 server.registerTool("read_subjects", {
-  description: "Read INT subject cards on the selected level/term page: exact IDs, image labels, printed progress and listToken. Does not click. For an explicitly requested all-unfinished-subjects run, save the initial unfinished queue and listToken; Normal mode only.",
+  description: "Read supported subject cards on the selected level/term page: INT subjectCode or Virtual School cardToken, image labels, printed progress and listToken. Does not click. For an explicitly requested all-unfinished-subjects run, save the initial unfinished queue and listToken; Normal mode only.",
   inputSchema: {},
   annotations: { readOnlyHint: true }
 }, async () => toolResult(await requestBrowser("read_subjects")));
 server.registerTool("open_subject", {
-  description: "Open one unfinished INT subject from the exact listToken returned by read_subjects in this session. Pins the listed tab; refuses changed lists, finished cards and unknown progress. Inspect the resulting overview and set normal subject scope before working. Never answers or submits.",
-  inputSchema: { listToken: external_exports.string().min(1), subjectCode: external_exports.string().min(1) },
+  description: "Open one unfinished subject from the exact listToken returned by read_subjects in this session. INT uses subjectCode; Virtual School uses cardToken. Provide exactly one selector. Pins the listed tab; refuses changed lists, finished cards and unknown progress. Inspect the resulting overview and set normal subject scope before working. Never answers or submits.",
+  inputSchema: external_exports.object({
+    listToken: external_exports.string().min(1),
+    subjectCode: external_exports.string().min(1).optional(),
+    cardToken: external_exports.string().min(1).optional()
+  }).refine(({ subjectCode, cardToken }) => Boolean(subjectCode) !== Boolean(cardToken), {
+    message: "Provide exactly one of subjectCode (INT) or cardToken (Virtual School)"
+  }),
   annotations: { destructiveHint: false }
 }, async (payload) => {
   const result = await requestBrowser("open_subject", payload);
-  setHistoryScope(null);
+  if (!result.navigationPending) setHistoryScope(null);
   return toolResult(result);
 });
 server.registerTool("return_to_subjects", {
-  description: "From the scoped INT subject overview, click its Select subject control and clear that course scope. First return from exams/results using normal scoped navigation. Read the list again and compare it with the original queue before opening the next unfinished subject.",
+  description: "From the scoped subject overview, click its Select subject control and clear that course scope after the destination is verified. First return from exams/results using normal scoped navigation. If navigationPending is returned, keep the current scope and inspect the destination before retrying. Read the list again and compare it with the original queue before opening the next unfinished subject.",
   inputSchema: {},
   annotations: { destructiveHint: false }
 }, async () => {
   const result = await requestBrowser("return_to_subjects");
-  setHistoryScope(null);
+  if (!result.navigationPending) setHistoryScope(null);
   return toolResult(result);
 });
 server.registerTool(
   "set_scope",
   {
-    description: "Set an explicit Virtual School or INT Project chapter/subject/final-only scope from the course overview, using its inspected subjectCode verbatim. retryUntilPerfect opts INT final-only scope into the 50-question review/retry loop and enables verified-answer history; default false is Normal and an explicit final-only request may retake a completed final once through its enabled link. This does not click the page.",
+    description: "Set an explicit Virtual School or INT Project chapter/subject/final-only scope from the course overview, using its inspected subjectCode verbatim. retryUntilPerfect opts a supported final scope into its review/retry workflow and enables verified-answer history; default false is Normal and an explicit final-only request may retake a completed final once through its enabled link. The supported exam total comes from the observed page; this does not assume 50 for Virtual School. This does not click the page.",
     inputSchema: {
       subjectCode: external_exports.string().min(1),
       mode: external_exports.enum(["chapter", "subject", "final"]),
@@ -35564,13 +35686,13 @@ server.registerTool(
   }
 );
 server.registerTool("set_exam_pacing", {
-  description: "Set a minimum duration for each scoped INT 50-question final: 60 = one hour, 120 = two hours, 0 = off (default). Set after final scope and before entry. Each Loop retry gets its own duration. Changing the value uses the current attempt's original start. On mode=pacing, wait in interruptible chunks up to 60 seconds and retry the same action. Solving or website delays may make completion later. This tool does not sleep or run an exam.",
+  description: "Set a minimum duration for each supported scoped final: 60 = one hour, 120 = two hours, 0 = off (default). The worker validates the site's observed question total and scope before applying pacing; Virtual School totals are not assumed to be 50. Set after final scope and before entry. Each retry gets its own duration. Changing the value uses the current attempt's original start. On mode=pacing, wait in interruptible chunks up to 60 seconds and retry the same action. Solving or website delays may make completion later. This tool does not sleep or run an exam.",
   inputSchema: { durationMinutes: external_exports.number().min(0).max(720) },
   annotations: { destructiveHint: false }
 }, async (payload) => toolResult(await requestBrowser("set_exam_pacing", payload)));
 server.registerTool(
   "set_exam_loop",
-  { description: "Toggle the current scoped INT 50-question final between Normal (enabled=false: one attempt) and Loop (enabled=true: answer, submit, review and retry until a submitted 50/50). Preserves the current attempt. Enabling also enables local verified-answer history. Does not itself answer, submit, navigate, or run the model loop; follow the skill workflow.", inputSchema: { enabled: external_exports.boolean() }, annotations: { destructiveHint: false } },
+  { description: "Toggle the current scoped supported final between Normal (enabled=false: one attempt) and Loop (enabled=true: answer, submit, review and retry until the observed total is fully correct). INT retains its 50-question rule; Virtual School uses its observed total and explicit review evidence. Preserves the current attempt. Enabling also enables local verified-answer history. Does not itself answer, submit, navigate, or run the model loop; follow the skill workflow.", inputSchema: { enabled: external_exports.boolean() }, annotations: { destructiveHint: false } },
   async ({ enabled }) => {
     const result = await requestBrowser("set_exam_loop", { enabled });
     setHistoryScope(result.scope || null);
@@ -35592,11 +35714,17 @@ server.registerTool(
   }
 );
 var answerOne = async ({ choiceIndex, examCode, save }) => {
-  const writer = history;
+  const context = captureHistoryContext();
+  const writer = context.writer;
   if (!writer) return toolResult(await requestBrowser("answer_and_next", { choiceIndex, examCode, save }));
-  if (currentQuestion?.examCode !== examCode) rememberQuestion(await requestBrowser("read_current_question"), writer);
+  let refreshed;
+  if (currentQuestion?.examCode !== examCode) {
+    const question = await requestBrowser("read_current_question");
+    if (!historyContextStillValid(context)) return toolResult(historyWarning(question, { answerApplied: false, submissionApplied: false }));
+    refreshed = rememberQuestion(question, writer, context.scope);
+  }
   if (currentQuestion?.examCode !== examCode) return toolResult({
-    ...rememberQuestion(await requestBrowser("read_current_question"), writer),
+    ...refreshed,
     ok: true,
     mode: "resync",
     action: "question_refreshed",
@@ -35620,11 +35748,12 @@ var answerOne = async ({ choiceIndex, examCode, save }) => {
   if (!choice) throw new Error("Answer choice not found");
   writer.append({ type: "answer_requested", examCode, questionNumber: currentQuestion.questionNumber, choice, saveRequested: save, correctness: "unverified" });
   const result = await requestBrowser("answer_and_next", { choiceIndex, examCode, save });
+  if (!historyContextStillValid(context)) return toolResult(historyWarning(result));
   if (result.mode === "pacing") return toolResult({ ...result, historyFile: writer.file });
-  if (result.mode === "resync") return toolResult(rememberQuestion(result, writer));
+  if (result.mode === "resync") return toolResult(rememberQuestion(result, writer, context.scope));
   try {
     writer.append({ type: "answer_returned", examCode, selected: result.selected, saved: result.saved ?? null, correctness: "unverified" });
-    const next = !result.done ? rememberQuestion(result, writer) : result;
+    const next = !result.done ? rememberQuestion(result, writer, context.scope) : result;
     return toolResult({ ...next, historyFile: writer.file });
   } catch (error51) {
     currentQuestion = null;
@@ -35644,16 +35773,24 @@ server.registerTool(
   answerOne
 );
 server.registerTool("answer_known_questions", {
-  description: "Save up to 20 consecutive answers in the already authorized INT exam, using only exact verified local history matches. Never guesses or submits. Requires enabled history and scope. Stops at an unknown question, pacing, resync, done=true, or 12 seconds; returns the current question for reasoning. Use this to avoid re-solving known questions. Continue calling within the authorized loop when batchStopReason=batch_limit.",
+  description: "Answer up to 20 consecutive questions in an already authorized INT or Virtual School exam, using only exact verified local history matches. INT receives save=true; Virtual School receives save=false. Never guesses or submits. Requires enabled, identified history and supported scope. Stops at an unknown question, pacing, resync, done=true, or 12 seconds; returns the current question for reasoning. Continue calling within the authorized loop when batchStopReason=batch_limit.",
   inputSchema: { maxQuestions: external_exports.number().int().min(1).max(20).default(10) },
   annotations: { destructiveHint: false }
 }, async ({ maxQuestions }) => {
-  if (!history || !historyScope || !/^https:\/\/(?:www\.)?int-project\.com$/u.test(historyScope.origin || "")) throw new Error("Enable verified history in an INT scope first");
+  const scopeKey = historyScopeKey(historyScope);
+  if (!history || !scopeKey) throw new Error("Enable verified history in an identified INT or Virtual School scope first");
   const writer = history;
   const result = await answerKnownQuestions({
     maxQuestions,
-    stillAuthorized: () => history === writer,
-    read: async () => rememberQuestion(await requestBrowser("read_current_question"), writer),
+    save: isIntOrigin(historyScope.origin),
+    stillAuthorized: () => history === writer && historyScopeKey(historyScope) === scopeKey,
+    read: async () => {
+      const context = captureHistoryContext();
+      const question = await requestBrowser("read_current_question");
+      if (!context.writer) return question;
+      if (!historyContextStillValid(context)) return historyWarning(question);
+      return rememberQuestion(question, context.writer, context.scope);
+    },
     answer: async (payload) => (await answerOne(payload)).structuredContent
   });
   return toolResult(result);
@@ -35685,41 +35822,58 @@ server.registerTool(
 server.registerTool(
   "submit_current_exam",
   {
-    description: "Within configured scope, perform one guarded step of submitting the exact current exam. INT verifies saved answers through its answer sheet first. Use the examCode returned by each step. Known same-attempt codes can follow INT wrapping from question 50 to 1. mode=resync means nothing was submitted: retry with the returned current examCode in the same scope, without reloading. Inspect each returned action and repeat the required submission steps only for the authorized exam.",
+    description: "Within configured scope, perform one guarded step of submitting the exact current exam. INT verifies saved answers through its answer sheet first; Virtual School uses its scoped answer ledger and known confirmation. Use the examCode returned by each step. Same-attempt codes can follow the site's final-question behavior. mode=resync means nothing was submitted: retry with the returned current examCode in the same scope, without reloading. Inspect each returned action and repeat the required submission steps only for the authorized exam.",
     inputSchema: { examCode: external_exports.string().min(1) }
   },
   async ({ examCode }) => toolResult(await requestBrowser("submit_current_exam", { examCode }))
 );
-var reviewToolResult = (response) => {
+var reviewToolResult = (response, context = captureHistoryContext()) => {
   const { verifiedReviews = [], rejectedReviews = [], ...result } = response;
-  if (history && (result.verificationSource || result.score || verifiedReviews.length || rejectedReviews.length)) {
+  const hasEvidence = result.verificationSource || result.score || verifiedReviews.length || rejectedReviews.length;
+  const virtualEvidencePending = isVirtualOrigin(context.scope?.origin) && hasEvidence && response.reviewBound !== true;
+  if (virtualEvidencePending) {
+    const pending2 = { ...result, evidencePending: true, historyVerificationPending: true };
+    if (history && reviewContextStillValid(context, response)) pending2.historyFile = context.writer.file;
+    else if (history) pending2.historyWarning = "Virtual review evidence is pending a bound complete review for this submitted attempt";
+    return toolResult(pending2);
+  }
+  if (hasEvidence && reviewContextStillValid(context, response)) {
     try {
-      for (const review of rejectedReviews) history.rejectAnswer(review);
-      for (const review of verifiedReviews) history.rememberReview(review);
-      if (result.verificationSource || result.score) history.rememberReview(result);
-      return toolResult({ ...result, historyFile: history.file, historyStats: history.stats() });
+      for (const review of rejectedReviews) context.writer.rejectAnswer(review);
+      for (const review of verifiedReviews) context.writer.rememberReview(review);
+      if (result.verificationSource || result.score) context.writer.rememberReview(result);
+      return toolResult({ ...result, historyFile: context.writer.file, historyStats: context.writer.stats() });
     } catch (error51) {
       return toolResult({ ...result, historyWarning: `Local history write failed: ${error51.message}` });
     }
+  }
+  if (hasEvidence && history) {
+    return toolResult({ ...result, historyWarning: "Review evidence was not saved because the history writer or scoped course changed during the browser read" });
   }
   return toolResult({ ...result, ...history ? { historyFile: history.file } : {} });
 };
 server.registerTool(
   "read_exam_result",
-  { description: "Read submitted result or review without navigation. Saves verified green sheet rows and explicit corrected answers when history is enabled. reviewPlan reports greenCount, redCount, verifiedCount, remainingCount and nextQuestionNumber.", inputSchema: {}, annotations: { destructiveHint: false } },
-  async () => reviewToolResult(await requestBrowser("read_exam_result"))
+  { description: "Read the submitted result or review without navigation. When history is enabled, saves only site-explicit verified answers and bound selected-answer corrections for the scoped course. Virtual School accepts only its explicit correct-answer label; an aggregate score alone is never a bank answer. reviewPlan reports observed green/red/verified/remaining counts and the next question number.", inputSchema: {}, annotations: { destructiveHint: false } },
+  async () => {
+    const context = captureHistoryContext();
+    return reviewToolResult(await requestBrowser("read_exam_result"), context);
+  }
 );
 server.registerTool(
   "open_answer_review",
-  { description: "Navigate from the latest exact resultToken AND return/save the destination review in one call. Default readAfter=true: step=open enters review; sheet reads all red/green rows; question jumps directly to questionNumber, opening the sheet internally if needed. Use returned reviewPlan.nextQuestionNumber until done. No extra read_exam_result is needed after success. close closes the sheet; return leaves review (no result read). readAfter=false is legacy navigation only. Never starts an attempt or submits.", inputSchema: { resultToken: external_exports.string().min(1), step: external_exports.enum(["open", "sheet", "close", "next", "question", "return"]).default("open"), questionNumber: external_exports.number().int().min(1).max(50).optional(), readAfter: external_exports.boolean().default(true) }, annotations: { destructiveHint: false } },
-  async (payload) => reviewToolResult(await requestBrowser("open_answer_review", payload))
+  { description: "Navigate from the latest exact resultToken and return/save the destination review in one call. Default readAfter=true: step=open enters review; sheet reads the observed reviewed questions; question jumps directly to questionNumber, opening the sheet internally if needed. Use returned reviewPlan.nextQuestionNumber until done. The question bound is 1\u20131000; the active worker may apply a smaller site-specific bound. No extra read_exam_result is needed after success. close closes the sheet; return leaves review (no result read). readAfter=false is legacy navigation only. Never starts an attempt or submits.", inputSchema: { resultToken: external_exports.string().min(1), step: external_exports.enum(["open", "sheet", "close", "next", "question", "return"]).default("open"), questionNumber: external_exports.number().int().min(1).max(1e3).optional(), readAfter: external_exports.boolean().default(true) }, annotations: { destructiveHint: false } },
+  async (payload) => {
+    const context = captureHistoryContext();
+    return reviewToolResult(await requestBrowser("open_answer_review", payload), context);
+  }
 );
 var main = async () => {
   const { port } = await startBridge();
-  console.error(`INT INT Helper listening on ws://127.0.0.1:${port}`);
+  console.error(`INT Helper listening on ws://127.0.0.1:${port}`);
   await server.connect(new StdioServerTransport());
 };
 main().catch((error51) => {
-  console.error(`INT INT Helper MCP error: ${error51.message}`);
+  console.error(`INT Helper MCP error: ${error51.message}`);
   process.exitCode = 1;
 });
