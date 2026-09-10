@@ -1,0 +1,20 @@
+{
+  "name": "int-practice-community",
+  "interface": {
+    "displayName": "INT Practice Helper"
+  },
+  "plugins": [
+    {
+      "name": "int-practice-helper",
+      "source": {
+        "source": "local",
+        "path": "./int-practice-helper"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    }
+  ]
+}

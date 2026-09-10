@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "int-practice-bridge": {
+      "command": "node",
+      "args": ["./prototype-bridge/dist/server.cjs"],
+      "cwd": ".",
+      "env": {
+        "INT_PRACTICE_BRIDGE_PORT": "17373"
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "int-practice-helper",
+  "version": "0.17.0+codex.20260910",
+  "description": "Answer supported practice questions through a local Chrome extension and MCP bridge without an API key.",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Int Practice Helper",
+    "shortDescription": "Answer practice questions through a fast local browser bridge.",
+    "longDescription": "Reads text and image questions from supported signed-in practice pages through a local Chrome extension, or completes an explicitly requested subject, using the active Codex model without an external model API.",
+    "developerName": "Local developer",
+    "category": "Education",
+    "capabilities": [
+      "browser",
+      "mcp"
+    ],
+    "defaultPrompt": "Inspect the current supported practice page and help me with the questions I request."
+  }
+}

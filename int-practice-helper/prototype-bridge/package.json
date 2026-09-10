@@ -1,0 +1,19 @@
+{
+  "name": "int-practice-bridge-prototype",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/server.mjs --bundle --platform=node --format=cjs --target=node20 --outfile=dist/server.cjs && esbuild demo/demo.mjs --bundle --platform=node --format=cjs --target=node20 --outfile=dist/demo.cjs",
+    "demo": "node dist/demo.cjs",
+    "check": "node dist/demo.cjs --check"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "ws": "8.21.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.1"
+  }
+}

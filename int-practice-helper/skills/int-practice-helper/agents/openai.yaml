@@ -1,0 +1,4 @@
+interface:
+  display_name: "INT Practice Helper"
+  short_description: "อ่านและตอบแบบฝึกหัดที่รองรับผ่าน local MCP bridge"
+  default_prompt: "ใช้ $int-practice-helper ทำแบบฝึกหัดในแท็บ Chrome ปัจจุบัน"

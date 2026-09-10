@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="th">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practice Bridge</title>
+<style>
+:root{color-scheme:light;font:12px system-ui,sans-serif;color:#25334b;background:#fff}
+*{box-sizing:border-box}body{width:280px;margin:0;padding:12px 14px}
+header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+h1{font-size:14px;margin:0;font-weight:650}#version{font:10px ui-monospace,monospace;color:#637189}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:6px 0}
+.label{color:#637189;flex-shrink:0}strong{font-size:12px;text-align:right;overflow-wrap:anywhere}
+#scope-block{border-top:1px solid #e2e8f0;margin-top:5px;padding-top:8px}
+#scope{display:block;text-align:left;line-height:1.5;font-size:13px}
+p{margin:3px 0 0;line-height:1.5;overflow-wrap:anywhere}.ready{color:#16734a}.warning{color:#925900}
+#scope-help{color:#637189}details{margin-top:9px;font-size:11px;color:#637189}summary{cursor:pointer;width:fit-content}
+summary:focus-visible{outline:2px solid #16734a;outline-offset:3px}details p{margin-top:5px}
+</style>
+<header><h1>Practice Bridge</h1><span id="version"></span></header>
+<main role="status" aria-live="polite">
+<div class="row"><span class="label">การเชื่อมต่อ</span><strong id="bridge">กำลังตรวจ…</strong></div>
+<div class="row"><span class="label">แท็บนี้</span><strong id="page">กำลังตรวจ…</strong></div>
+<div id="scope-block"><strong id="scope">กำลังตรวจขอบเขต…</strong><p id="scope-help"></p></div>
+</main>
+<details><summary>รายละเอียด</summary><p id="connection-help"></p><p id="page-help"></p></details>
+<script src="popup.js"></script>
+</html>
