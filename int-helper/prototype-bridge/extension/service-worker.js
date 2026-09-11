@@ -416,7 +416,7 @@ const setCurrentExamScope = async (port, { examCode, allowSubmit }) => {
   return { scope, tabId: tab.id };
 };
 
-const setScope = async (port, { subjectCode, mode, chapter, allowEmptyPretest, retryUntilPerfect }) => {
+const setScope = async (port, { subjectCode, mode, chapter, allowEmptyPretest, retryUntilPerfect, autoSubmit }) => {
   if (mutationInFlight) throw new Error("Cannot change scope during a running action");
   if (!["chapter", "subject", "final"].includes(mode) || (mode === "chapter" && (!Number.isInteger(chapter) || chapter < 1))) throw new Error("Invalid scope");
   const { tab, page } = await inspectActivePage();
@@ -442,7 +442,7 @@ const setScope = async (port, { subjectCode, mode, chapter, allowEmptyPretest, r
       throw new Error("The requested chapter title is not unique on this page");
     }
   }
-  const scope = { ...course, origin: page.origin, mode, chapter, chapterTitle, allowEmptyPretest, retryUntilPerfect: retryUntilPerfect === true };
+  const scope = { ...course, origin: page.origin, mode, chapter, chapterTitle, allowEmptyPretest, retryUntilPerfect: retryUntilPerfect === true, autoSubmit: autoSubmit === true };
   const session = { scope, tabId: tab.id, port };
   resetAttemptState(session);
   sessions.set(port, session);
@@ -530,10 +530,13 @@ const pacingWait = async (session, examCode, submitting = false) => {
     session.scope = { ...session.scope, virtualActivity: { ...activity, totalQuestions: total } };
   }
   const durationMs = minutes * 60_000;
-  const dueAt = startedAt + durationMs * (submitting ? 1 : (question.questionNumber - 1) / total);
+  // Anchor the last answer to the requested finish time, including manual-submit
+  // runs. The old /total formula finished the answers one interval too early.
+  const dueAt = startedAt + durationMs * (submitting || total === 1 ? 1 : (question.questionNumber - 1) / (total - 1));
   const waitMs = Math.max(0, Math.ceil(dueAt - Date.now()));
   return waitMs ? { ok: true, mode: "pacing", action: "waiting", answerApplied: false, done: false,
     examCode, questionNumber: question.questionNumber, waitMs, waitUntil: new Date(dueAt).toISOString(),
+    targetCompletionAt: new Date(startedAt + durationMs).toISOString(),
     submissionAt: new Date(startedAt + durationMs).toISOString() } : null;
 };
 
@@ -622,6 +625,10 @@ const completeCurrentLesson = async (port) => {
 const submitCurrentExam = async ({ examCode }, port) => {
   if (typeof examCode !== "string" || !examCode) throw new Error("An exact examCode is required for submission");
   const session = configuredSession(port);
+  if (session.scope.mode !== "exam" && !session.scope.retryUntilPerfect && session.scope.autoSubmit !== true) {
+    return { ok: true, mode: "awaiting_user_submission", action: "manual_submission_required", submitted: false,
+      examCode, autoSubmit: false, message: "Automatic whole-exam submission is disabled. Let the user review and submit, then read the result before continuing." };
+  }
   const virtual = session.scope?.origin === "https://main.virtualschool.club";
   if (virtual) {
     const status = await sendScoped(session, { action: "read_submission_status" });
@@ -966,12 +973,13 @@ const handleRequest = async (action, payload, port) => {
     if (mutationInFlight) throw new Error("Cannot change pacing during a running action");
     const session = configuredSession(port);
     const durationMinutes = payload.durationMinutes;
-    if (!Number.isFinite(durationMinutes) || durationMinutes < 0 || durationMinutes > 720) throw new Error("durationMinutes must be between 0 and 720");
+    if (!Number.isFinite(durationMinutes) || durationMinutes < 0 || durationMinutes > 119) throw new Error("durationMinutes must be between 0 and 119; the exam limit is 120 minutes, with one minute reserved for submission");
     const intFinal = session.scope.mode === "final" && /^https:\/\/(?:www\.)?int-project\.com$/u.test(session.scope.origin);
     const virtualFinal = isVirtualScope(session.scope) && session.scope.mode === "final";
     if (durationMinutes && !intFinal && !virtualFinal) throw new Error("Timed pacing requires a supported final-only scope");
     session.scope = { ...session.scope, durationMinutes };
-    return { scope: session.scope, durationMinutes, timing: "Minimum duration per attempt from final entry; delays may take longer" };
+    return { scope: session.scope, durationMinutes, examLimitMinutes: 120,
+      timing: "Space answers from final entry so the last answer targets the requested duration. Do not add a fresh delay after every answer; late actions skip elapsed waits. Website and reasoning delays can overrun the target." };
   }
   if (action === "set_exam_loop") {
     if (mutationInFlight) throw new Error("Cannot change loop mode during a running action");

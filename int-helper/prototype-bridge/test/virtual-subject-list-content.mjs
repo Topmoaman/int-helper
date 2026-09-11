@@ -70,12 +70,12 @@ class Socket {
 }
 const chrome = {
   action: { setBadgeText() {}, setBadgeBackgroundColor() {}, setTitle() {} },
-  runtime: { getManifest: () => ({ version: "0.14.0" }), getURL: value => `chrome-extension://test/${value}`, onMessage: { addListener() {} } },
+  runtime: { getManifest: () => ({ version: "0.15.0" }), getURL: value => `chrome-extension://test/${value}`, onMessage: { addListener() {} } },
   tabs: {
     query: async () => [{ id: 9, active: true, url: location.href }],
     sendMessage: async (id, message) => {
       sent.push({ id, ...message });
-      if (message.action === "page_version") return { ok: true, result: { contentVersion: "0.14.0" } };
+      if (message.action === "page_version") return { ok: true, result: { contentVersion: "0.15.0" } };
       let response;
       contentListener(message, null, value => { response = value; });
       return response;

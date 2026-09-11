@@ -1,4 +1,4 @@
 interface:
   display_name: "INT Helper"
-  short_description: "อ่านและตอบแบบฝึกหัดที่รองรับผ่าน local MCP bridge"
-  default_prompt: "ใช้ $int-helper ทำแบบฝึกหัดในแท็บ Chrome ปัจจุบัน"
+  short_description: "ให้ AI ช่วยทำแบบฝึกหัด INT Project และ Virtual School"
+  default_prompt: "ใช้ $int-helper ช่วยทำแบบฝึกหัดที่ฉันขอใน Chrome หากเป็น Normal ให้ถามตัวเลือกส่งข้อสอบทั้งชุดก่อนเริ่ม เว้นแต่ฉันระบุไว้แล้ว"

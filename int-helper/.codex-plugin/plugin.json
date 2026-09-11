@@ -1,7 +1,7 @@
 {
   "name": "int-helper",
-  "version": "0.19.0",
-  "description": "Answer supported practice questions through a local Chrome extension and MCP bridge without an API key.",
+  "version": "0.20.0",
+  "description": "ให้ AI ใน Codex ช่วยอ่านและทำแบบฝึกหัดบน INT Project และ Virtual School ผ่าน Chrome",
   "author": {
     "name": "Local developer"
   },
@@ -9,14 +9,14 @@
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "INT Helper",
-    "shortDescription": "Answer practice questions through a fast local browser bridge.",
-    "longDescription": "Reads text and image questions from supported signed-in practice pages through a local Chrome extension, or completes an explicitly requested subject, using the active Codex model without an external model API.",
+    "shortDescription": "ให้ AI ช่วยทำแบบฝึกหัด INT Project และ Virtual School",
+    "longDescription": "เชื่อม Codex กับ Chrome เพื่ออ่านโจทย์ข้อความและรูปภาพ ทำแบบฝึกหัดตามวิชาหรือบทที่เลือก ตั้งจังหวะการตอบ และเลือกให้ AI ส่งข้อสอบหรือหยุดให้คุณส่งเอง ไม่ต้องใช้ API key เพิ่ม",
     "developerName": "Local developer",
     "category": "Education",
     "capabilities": [
       "browser",
       "mcp"
     ],
-    "defaultPrompt": "Inspect the current supported practice page and help me with the questions I request."
+    "defaultPrompt": "ช่วยดูหน้าแบบฝึกหัดที่เปิดอยู่และทำเฉพาะงานที่ฉันขอ หากเป็น Normal ให้ถามก่อนเริ่มว่าจะส่งข้อสอบทั้งชุดให้อัตโนมัติหรือให้ฉันตรวจแล้วส่งเอง เว้นแต่ฉันระบุไว้แล้ว"
   }
 }

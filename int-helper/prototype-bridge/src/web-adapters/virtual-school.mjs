@@ -471,7 +471,9 @@ export const createVirtualSchoolAdapter = ({ document, location }) => {
           .filter((image) => !virtualImageHidden(image))
           .map((image) => [image.currentSrc || image.src || null, image.hidden === true, image.style?.display || ""]),
       })
-      : `${location.href}#${body}`;
+      // The exam clock continues behind the submitted-result modal. Its ticks
+      // do not change the result; keep every other part of the snapshot guarded.
+      : `${location.href}#${body.replace(/เวลาสอบ\s+\d{2}:[0-5]\d:[0-5]\d(?=\s|$)/gu, "เวลาสอบ <clock>")}`;
     if (snapshot !== reviewSnapshot) {
       reviewSnapshot = snapshot;
       reviewSequence += 1;

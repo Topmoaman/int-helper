@@ -1,7 +1,7 @@
 (() => {
   // src/web-adapters/content-helpers.mjs
   var text = (element) => (element?.innerText || "").replace(/\s+/gu, " ").trim();
-  var CONTENT_VERSION = "0.14.0";
+  var CONTENT_VERSION = "0.15.0";
   var label = (element) => [element?.getAttribute?.("aria-label"), text(element), element?.title].filter(Boolean).join(" ");
   var visible = (element) => element && !element.disabled && (!element.getClientRects || element.getClientRects().length > 0);
   var pageUrl = (locationLike = globalThis.location) => new URL(locationLike.href);
@@ -998,7 +998,7 @@
         body,
         review: question,
         imageSources: [...document2.querySelectorAll('img[src*="/question_pic/"], img[src*="/answers_pic/"]') || []].filter((image) => !virtualImageHidden(image)).map((image) => [image.currentSrc || image.src || null, image.hidden === true, image.style?.display || ""])
-      }) : `${location2.href}#${body}`;
+      }) : `${location2.href}#${body.replace(/เวลาสอบ\s+\d{2}:[0-5]\d:[0-5]\d(?=\s|$)/gu, "\u0E40\u0E27\u0E25\u0E32\u0E2A\u0E2D\u0E1A <clock>")}`;
       if (snapshot !== reviewSnapshot) {
         reviewSnapshot = snapshot;
         reviewSequence += 1;

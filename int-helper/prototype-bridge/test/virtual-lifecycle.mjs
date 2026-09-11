@@ -228,7 +228,7 @@ const virtualScope = { origin: virtualOrigin, subjectCode: "MATH", level: "2", t
     expose: (fn) => { handler = fn; },
   });
 
-  const setup = await handler("set_scope", { subjectCode: "MATH", mode: "final", retryUntilPerfect: false }, 17373);
+  const setup = await handler("set_scope", { subjectCode: "MATH", mode: "final", retryUntilPerfect: false, autoSubmit: true }, 17373);
   assert.equal(setup.scope.origin, virtualOrigin);
   const entered = await handler("advance_subject", {}, 17373);
   assert.equal(entered.virtualActivity.attemptId, "attempt-1");

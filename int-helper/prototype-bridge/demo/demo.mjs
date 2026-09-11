@@ -313,6 +313,8 @@ const check = async () => {
   execFileSync(process.execPath, ["test/virtual-review.mjs"], { stdio: "inherit" });
   execFileSync(process.execPath, ["test/virtual-history.mjs"], { stdio: "inherit" });
   execFileSync(process.execPath, ["test/virtual-lifecycle.mjs"], { stdio: "inherit" });
+  execFileSync(process.execPath, ["test/normal-submission.mjs"], { stdio: "inherit" });
+  execFileSync(process.execPath, ["test/target-pacing.mjs"], { stdio: "inherit" });
   const firstBridge = await createBridge("int-helper-bridge-demo-1");
   const secondBridge = await createBridge("int-helper-bridge-demo-2");
   ({ client, transport } = firstBridge);
@@ -325,6 +327,7 @@ const check = async () => {
   const listed = await client.listTools();
   for (const name of ["set_scope", "read_subjects", "open_subject", "return_to_subjects", "set_exam_pacing", "answer_known_questions", "get_question_history_stats"]) assert.ok(listed.tools.find(tool => tool.name === name));
   assert.equal((await client.callTool({ name: "set_exam_pacing", arguments: { durationMinutes: -1 } })).isError, true);
+  assert.equal((await client.callTool({ name: "set_exam_pacing", arguments: { durationMinutes: 120 } })).isError, true);
   assert.equal((await client.callTool({ name: "open_subject", arguments: { subjectCode: "MATH" } })).isError, true);
   assert.equal((await client.callTool({ name: "open_subject", arguments: { listToken: "demo", subjectCode: "MATH", cardToken: "VIRTUAL" } })).isError, true);
   assert.equal((await client.callTool({ name: "open_subject", arguments: { listToken: "demo", cardToken: "VIRTUAL" } })).isError, undefined);
@@ -337,7 +340,9 @@ const check = async () => {
   assert.deepEqual(readdirSync(historyDirectory), []);
   assert.equal((await client.callTool({ name: "answer_known_questions", arguments: {} })).isError, true);
   assert.equal((await client.callTool({ name: "get_question_history_stats", arguments: {} })).isError, true);
-  await client.callTool({ name: "set_scope", arguments: { subjectCode: "ENG", mode: "final" } });
+  assert.equal(listed.tools.find(tool => tool.name === "set_scope").inputSchema.properties.autoSubmit.default, false);
+  assert.equal((await client.callTool({ name: "set_scope", arguments: { subjectCode: "ENG", mode: "final" } })).structuredContent.scope.autoSubmit, false);
+  assert.equal((await client.callTool({ name: "set_scope", arguments: { subjectCode: "ENG", mode: "final", autoSubmit: true } })).structuredContent.scope.autoSubmit, true);
   await client.callTool({ name: "set_question_history", arguments: { enabled: true } });
   const unknownBatch = await client.callTool({ name: "answer_known_questions", arguments: { maxQuestions: 20 } });
   assert.equal(unknownBatch.structuredContent.batchStopReason, "needs_reasoning");

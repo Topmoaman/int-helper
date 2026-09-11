@@ -1,116 +1,108 @@
 # INT Helper
 
-A Codex plugin and local Chrome extension for authorized practice on INT Project and Virtual School. It uses the active Codex model; no separate model API key is required. This is an unofficial local prototype, not affiliated with either learning platform.
+**ให้ AI ใน Codex ช่วยทำแบบฝึกหัดบน INT Project และ Virtual School ผ่าน Chrome**
 
-Shared version: **0.19.0** · Chrome extension: **0.14.0**.
+AI อ่านโจทย์ได้ทั้งข้อความและรูปภาพ ช่วยตอบตามบทหรือวิชาที่คุณเลือก และอ่านเฉลยหลังส่งคำตอบได้ คุณเลือกได้ว่าจะให้ AI ส่งข้อสอบทั้งชุดให้ หรือหยุดให้ตรวจแล้วกดส่งเอง ไม่ต้องมี API key เพิ่ม
 
-## What works
+**เวอร์ชัน 0.20.0** · ส่วนขยาย Chrome **0.15.0** · [ดาวน์โหลดรุ่นล่าสุด](https://github.com/Topmoaman/int-helper/releases/latest)
 
-| Feature | INT Project | Virtual School |
-| --- | --- | --- |
-| Read text and image questions | Supported | Supported |
-| Scoped answers and guarded submission | Supported | Supported |
-| One-attempt final mode (Normal) | Supported | Supported |
-| Read/open unfinished subjects on the selected list | Supported | Implemented with opaque card tokens |
-| Extract verified correct answers from review | Supported | Implemented for complete, bound final reviews |
-| Unique subject answer bank and known-answer batches | Supported | Implemented for verified final answers |
-| Review and retry finals (Loop) | Exactly 50 questions | Uses the observed total |
-| Minimum duration per final attempt | Supported | Implemented |
+## ใช้ช่วยอะไรได้บ้าง
 
-Virtual School result/review parsing and navigation are covered by page inspection and simulated integration tests. The release's automated checks do not run a live exam. Virtual chapter/posttest reviews do not populate the reusable answer bank yet. A finished attempt or a passing grade does not guarantee a full score. Loop needs Codex to remain active and can stop for usage limits, unavailable review data or site restrictions.
+บอกสิ่งที่อยากให้ช่วยเป็นภาษาปกติได้เลย เช่น วิชาไหน บทไหน อยากทำครั้งเดียวหรือฝึกซ้ำ และอยากตรวจคำตอบก่อนส่งหรือไม่ AI จะใช้ข้อมูลจากหน้าที่คุณเปิดและถามเพิ่มเมื่อยังขาดข้อมูลที่จำเป็น
 
-## Install
+- **ติดอยู่ที่โจทย์ข้อหนึ่ง** — ให้ AI อ่านข้อความหรือรูปโจทย์ อธิบายวิธีคิด และช่วยหาคำตอบได้ จะให้แค่อธิบายก่อนก็ได้
+- **อยากทำเฉพาะบทที่ยังค้าง** — ระบุบทที่ต้องการให้ช่วย AI จะเดินผ่านแบบฝึกหัดและบทเรียนในขอบเขตนั้น ถ้าต้องการให้ส่งแบบทดสอบก่อนเรียนแบบเว้นว่าง ให้บอกแยกต่างหาก
+- **อยากทำวิชานี้ต่อให้ครบ** — ให้ AI ทำส่วนที่ยังไม่เสร็จในวิชาที่เลือก รวมแบบทดสอบที่เปิดให้ทำ และรายงานผลตามที่เว็บไซต์แสดง การทำครบหนึ่งรอบไม่ได้แปลว่าผ่านเสมอไป
+- **มีหลายวิชาค้างอยู่ในหน้าเดียวกัน** — ให้ AI ดูรายชื่อวิชาที่ยังไม่เสร็จ แล้วทำต่อทีละวิชาในระดับและเทอมที่เลือก ถ้าอนุญาตให้ส่งอัตโนมัติ ก็ทำงานที่เหลือต่อได้โดยไม่ต้องรอกดส่งทุกชุด
+- **อยากตรวจคำตอบเองก่อนส่ง** — AI ตอบและบันทึกให้ครบ แล้วหยุดก่อนส่งข้อสอบทั้งชุด คุณตรวจหรือแก้คำตอบแล้วกดส่งเอง จากนั้นบอก AI ให้ช่วยอ่านผลและทำงานที่เหลือต่อได้
+- **อยากค่อย ๆ ทำปลายภาคให้จบใกล้เวลาที่ตั้ง** — เช่น มีเวลาหนึ่งชั่วโมงและอยากกระจายการตอบตลอดชั่วโมง AI จะเว้นจังหวะระหว่างข้อ ให้ข้อสุดท้ายอยู่ใกล้นาทีที่ 60 ไม่ได้รอเฉพาะก่อนกดส่ง
+- **อยากดูว่าหลังสอบผิดตรงไหน** — ให้ AI เปิดเฉลย อธิบายข้อที่ผิด และถ้าคุณขอให้จำไว้ ก็เก็บเฉพาะคำตอบที่มีหลักฐานยืนยันจากเว็บไซต์ไว้ใช้ภายหลัง
+- **อยากฝึกปลายภาคซ้ำจนคะแนนเต็ม** — เลือก Loop เพื่อให้ AI ตอบ ส่ง อ่านเฉลย แล้วเริ่มรอบใหม่ในวิชาเดิม พร้อมนำคำตอบที่ยืนยันแล้วกลับมาใช้ คุณบอกหยุดหรือเปลี่ยนเป็นทำครั้งเดียวได้
 
-You need Chrome, Node.js 20 or newer, Codex with plugin support, and your own signed-in practice account. `node` must be available to Codex. These instructions use the Codex CLI for plugin installation; the plugin can then be used in the desktop app.
+**Normal** คือทำหนึ่งรอบ ก่อนเริ่มจะให้เลือกว่า AI ส่งข้อสอบทั้งชุดให้หรือคุณส่งเอง ถ้าบอกไว้แล้วจะใช้ตัวเลือกนั้นตลอดงาน **Loop** คือสั่งให้ทำปลายภาคซ้ำพร้อมส่งและอ่านเฉลยในแต่ละรอบ
 
-### 1. Get the files
+INT Loop ใช้กับปลายภาค 50 ข้อ ส่วน Virtual School ใช้จำนวนข้อจริงของรอบนั้น การตั้งเวลาใช้กับปลายภาค ตั้งได้สูงสุด 119 นาที; 0 คือปิดการรอ เวลาเป็นเป้าหมายของข้อสุดท้าย การคิดคำตอบ เว็บโหลด หรือเวลาที่คุณตรวจและส่งเองอาจทำให้จบช้ากว่านั้น
 
-Download and extract this repository using **Code → Download ZIP**, or clone it:
+AI ต้องทำงานอยู่ใน Codex จึงจะทำต่อได้ ส่วนขยายไม่ได้คิดคำตอบหรือทำข้อสอบต่อเองเมื่อปิด Codex คะแนนเต็มและเวลาจบตรงวินาทีไม่สามารถรับประกันได้
 
-```sh
-git clone https://github.com/Topmoaman/int-helper.git
-cd int-helper
+## ตัวอย่างการใช้จริงหนึ่งรอบ
+
+คุณเปิดหน้ารวมบทเรียนของวิชา แล้วบอกความต้องการประมาณนี้:
+
+> อยากทำปลายภาควิชานี้ ค่อย ๆ ทำให้ครบประมาณหนึ่งชั่วโมง แล้วให้ฉันตรวจคำตอบก่อนส่ง
+
+สิ่งที่จะเกิดขึ้น:
+
+1. AI ดูวิชาที่เปิดอยู่และเตรียมทำเฉพาะปลายภาค โดยใช้ตัวเลือกให้คุณส่งเองตามที่บอกไว้
+2. AI อ่านโจทย์ ตอบ และบันทึกคำตอบทีละข้อ โดยเว้นจังหวะตามเวลาที่ตั้ง
+3. เมื่อตอบครบ จะบอกว่าพร้อมให้คุณตรวจและกดส่ง โดยยังไม่อ้างคะแนนก่อนส่ง
+4. หลังคุณส่งและบอกให้ทำต่อ AI จะอ่านผลจริงแล้วรายงานให้
+
+ถ้าคุณต้องการให้ส่งให้อัตโนมัติ หรือทำวิชาอื่นต่อด้วย ก็บอกเพิ่มเป็นภาษาปกติได้ ตัวอย่างนี้เป็นเพียงหนึ่งวิธีใช้ ไม่ต้องพิมพ์ตามคำต่อคำ
+
+เริ่มงานบท/วิชา/ปลายภาคจากหน้ารวมบทเรียนของวิชานั้น ประวัติคำถามปิดเป็นค่าเริ่มต้น; เปิดเมื่อคุณขอให้จำคำถามหรือเลือก Loop
+
+## ให้ AI ช่วยติดตั้ง — คัดลอกข้อความนี้ได้เลย
+
+ใช้กับ AI ที่เปิด terminal และจัดการไฟล์ในเครื่องคุณได้ เช่น Codex แล้วส่งข้อความนี้:
+
+```text
+ช่วยติดตั้ง INT Helper จาก https://github.com/Topmoaman/int-helper ในเครื่องนี้ให้หน่อย
+อ่าน README.md และ AI-INSTALL.md ใน repository ก่อน แล้วใช้รุ่น stable ล่าสุด
+ตรวจว่ามี Chrome, Node.js 20 ขึ้นไป และคำสั่ง codex ที่รองรับ plugin
+ติดตั้งด้วยตัวติดตั้งของโครงการ และบอกโฟลเดอร์ที่ต้องเลือกใน Chrome แบบเต็ม
+ช่วยทำขั้นตอนที่ทำได้ แล้วบอกเฉพาะขั้นตอนที่ฉันต้องกดเอง
+สุดท้ายตรวจว่าปลั๊กอินและส่วนขยายเชื่อมต่อกันได้
+งานนี้ติดตั้งและตรวจการเชื่อมต่อเท่านั้น ยังไม่ต้องตอบหรือส่งข้อสอบ
 ```
 
-Prebuilt MCP bundles are included, so normal installation does not require npm install. The installer copies the runtime to a stable directory; keep this downloaded folder if you want the development source and tests.
+[เปิดคู่มือสำหรับ AI ผู้ติดตั้ง](https://github.com/Topmoaman/int-helper/blob/main/AI-INSTALL.md)
 
-### 2. Run the one-time installer
+AI แบบแชตอย่างเดียวช่วยอธิบายขั้นตอนได้ แต่ติดตั้งไฟล์ลงเครื่องให้ไม่ได้ คุณต้องมี Codex ที่ใช้งานได้, Chrome, Node.js 20 ขึ้นไป และบัญชีของตัวเองสำหรับเว็บแบบฝึกหัด
 
-Close any active practice tasks, then run this command from the extracted repository folder:
+## ติดตั้งเอง
 
-```sh
-node install.mjs
-```
+1. ดาวน์โหลด source ZIP จากหน้า Release แล้วแตกไฟล์ หรือ clone repository นี้
+2. เปิด terminal ในโฟลเดอร์ที่มี `install.mjs` แล้วรัน:
 
-It installs the plugin through Codex into a stable directory under `~/.local/share/int-helper/install/current/` and prints the extension path. Node.js and the `codex` command must be on PATH. The installer registers the `int-helper-community` marketplace and installs `int-helper`. It does not alter your saved question history.
+   ```sh
+   node install.mjs
+   ```
 
-### 3. Load the installed extension once
+3. เปิด `chrome://extensions` เปิด **Developer mode** แล้วเลือก **Load unpacked**
+4. เลือกโฟลเดอร์ส่วนขยายตาม path เต็มที่ตัวติดตั้งแสดง
+5. รีเฟรชหน้าแบบฝึกหัด แล้วเปิดงาน Codex ใหม่ที่เปิดใช้ **INT Helper**
 
-1. Open Chrome's extension manager (`chrome://extensions`).
-2. Disable the old Practice Bridge extension if you already installed it.
-3. Enable **Developer mode** and choose **Load unpacked**.
-4. Select the exact extension folder printed by the installer, normally `~/.local/share/int-helper/install/current/int-helper/prototype-bridge/extension` (expand `~` to your home directory).
-5. Reload the practice page and open a new Codex task with **INT Helper** enabled. Disable the older INT Practice Helper plugin in that task if it is still installed.
+ตัวติดตั้งต้องเรียกคำสั่ง `node` และ `codex` ได้ ไม่ต้องรัน `npm install` เพราะมีไฟล์พร้อมใช้งานอยู่แล้ว ส่วนขยายต้องโหลดจากโฟลเดอร์ที่ตัวติดตั้งแสดง เพื่อใช้ปุ่มอัปเดตได้ หากมีส่วนขยายหรือปลั๊กอิน INT รุ่นเก่า ให้ปิดรุ่นเก่าก่อนใช้รุ่นนี้
 
-Load the installed folder, not the downloaded source folder, to enable the update button.
+## อัปเดตเวอร์ชัน
 
-## Updates
+ผู้ใช้ที่ติดตั้งด้วยตัวติดตั้งตั้งแต่รุ่น 0.18.0 อัปเดตต่อได้จากส่วนขยาย:
 
-The extension checks public GitHub Releases at startup and approximately every four hours while Chrome is running. A new stable release shows **UP** on the extension icon and **มีรุ่นใหม่** in its popup. You can also press **ตรวจรุ่นใหม่**. Checking never installs an update or sends practice questions to GitHub.
+1. จบงานแบบฝึกหัดและออกจากหน้าข้อสอบ โดยมีงาน Codex ว่างที่เชื่อมกับ INT Helper
+2. เปิด popup ส่วนขยาย กด **ตรวจรุ่นใหม่ → อัปเดตตอนนี้**
+3. เมื่อเสร็จแล้ว รีเฟรชหน้าเว็บและเปิดงาน Codex ใหม่
 
-When an update is available:
+ส่วนขยายตรวจรุ่นใหม่ตอนเริ่มทำงานและประมาณทุก 4 ชั่วโมง แต่จะติดตั้งเมื่อคุณกดเท่านั้น ปุ่มอัปเดตหยุดทำงานระหว่างมีข้อสอบ/งานค้าง และจะไม่เขียนทับไฟล์ที่คุณแก้เอง คลังคำตอบเดิมเก็บแยกจากไฟล์ติดตั้ง
 
-1. Finish the current practice task and leave the exam page. Open an idle Codex task with INT Helper connected if needed.
-2. Click **อัปเดตตอนนี้** in the popup.
-3. The local bridge downloads the release, validates file checksums, keeps a previous copy, installs the new Codex plugin and reloads the extension.
-4. Reload the practice page and open a new Codex task to load the new tools.
+ถ้า Codex ยังอ้าง path ของปลั๊กอินรุ่นเก่าที่หาไม่พบ ให้ปิดแล้วเปิด Codex ใหม่ ไฟสถานะเชื่อมต่อใน Chrome เพียงอย่างเดียวไม่ได้ยืนยันว่าเครื่องมือโหลดในงาน Codex ปัจจุบันแล้ว
 
-The update button requires the one-time installer above and a connected compatible bridge. It stays disabled while a practice scope is unfinished or any supported exam page is open. Internet/installation failures are shown in the popup; an already known update remains visible while offline. Local edits stop an update rather than being overwritten. Failed installation restores the previous files and attempts to restore the previous Codex plugin. Saved history is outside the install directory and is preserved.
+## ข้อมูลของคุณ
 
-This is a user-triggered updater for an unpacked extension, not Chrome Web Store auto-update. Managed 0.18.0 installations can update directly to 0.19.0. Old 0.17 installations need the one-time setup to receive this capability. Merely pushing commits does not notify users: publish a stable GitHub Release containing the update asset.
+Repository นี้ไม่มีบัญชี รหัสผ่าน คลังคำตอบ หรือประวัติงานส่วนตัว แต่ละคนใช้บัญชีเว็บไซต์ของตัวเอง เมื่อเปิดประวัติ ข้อมูลคำถามและเฉลยจะเก็บในเครื่องที่ `~/.local/share/int-practice-helper/history/` และส่งโจทย์ที่อ่านให้ Codex ใช้คิดคำตอบ การตรวจอัปเดตไม่ส่งโจทย์ไป GitHub
 
-The update asset contains the executable runtime, installer and documentation. Development source, fixtures and tests remain in the repository/source ZIP. This keeps updates compatible with the original 0.18.0 installer while allowing separate website adapters in the source tree.
+นี่เป็นโครงการอิสระ ไม่ได้เป็นส่วนหนึ่งของ INT Project หรือ Virtual School ใช้กับแบบฝึกหัดที่คุณได้รับอนุญาตให้ใช้ผู้ช่วยได้ Virtual School บันทึกคำตอบเพื่อนำกลับมาใช้ได้จากเฉลยปลายภาคที่ผูกกับรอบปัจจุบันเท่านั้น เฉลยก่อน/หลังเรียนยังไม่เข้าคลังนี้
 
-## Use
+## มีอะไรใหม่ใน 0.20.0
 
-Start on the course overview for chapter, subject or final-only tasks. Use your own subject name and explicitly state the actions you want.
+- Normal ให้เลือกว่าใครส่งข้อสอบทั้งชุด และจำตัวเลือกเมื่อทำต่อหลายบท/วิชา
+- ตั้งเวลาข้อสุดท้ายให้ตรงกับเป้าหมาย เช่น 60 นาที แทนการตอบครบก่อนเวลาแล้วรอเฉพาะตอนส่ง
+- แก้ Virtual School เปิดเฉลยไม่ได้เมื่อเวลาสอบเปลี่ยนหลังอ่านผล
+- เพิ่มคู่มือติดตั้งสำหรับ AI และปรับคำอธิบายให้อ่านง่าย
 
-Normal example:
+## สำหรับผู้พัฒนา
 
-> ทำปลายภาควิชาที่เปิดอยู่แบบ Normal 1 รอบ อนุญาตให้ตอบ บันทึก และส่งคำตอบ แล้วรายงานคะแนน
-
-INT Loop example:
-
-> ทำปลายภาควิชาที่เปิดอยู่แบบ Loop อนุญาตให้ตอบ บันทึก ส่งคำตอบ อ่านเฉลย และเริ่มรอบใหม่ในวิชาเดิมทุกครั้งจนได้ 50/50 โดยไม่ต้องถามยืนยันซ้ำ
-
-Virtual School Loop example:
-
-> ทำปลายภาค Virtual School วิชาที่เปิดอยู่แบบ Loop อนุญาตให้ตอบ ส่งคำตอบ บันทึกเฉลย และเริ่มรอบใหม่ในวิชาเดิมจนได้คะแนนเต็มตามจำนวนข้อจริง โดยไม่ต้องถามยืนยันซ้ำ
-
-Optional pacing:
-
-> ใช้เวลาอย่างน้อย 60 นาทีต่อรอบ
-
-History is off by default. Ask to enable it if you want questions remembered; enabling a supported final Loop also enables history. This shared edition does not inherit the original author's pretest preferences. Specify whether pretests should be answered or submitted empty.
-
-## Local data and connection
-
-No saved questions, answer banks, browser sessions, credentials or personal task transcripts are included. Each user signs into the practice website in their own Chrome profile.
-
-When enabled, question text/images, answer events and verified review evidence are stored in that user's `~/.local/share/int-practice-helper/history/`. `INT_PRACTICE_HISTORY_DIR` changes this directory. These files are excluded from Git. Disable history through the plugin to stop future recording.
-
-The bridge binds to `127.0.0.1` on ports 17373–17388. This prototype checks Chrome-extension origins but does not pair to one specific extension ID; do not expose the bridge to other machines. Questions and images are returned to the active Codex session for reasoning.
-
-## Update and troubleshoot
-
-- After replacing the extension files, click **Reload** on its Chrome extension card, then reload the practice page.
-- After updating/reinstalling the plugin, open a new Codex task.
-- If Codex still reports a missing old plugin cache path, restart Codex and verify that the registered bridge tools load. A connected extension badge alone does not prove that the current task has those tools.
-- If `node` is missing, install Node.js and restart Codex so it sees the updated PATH.
-- If a question code becomes stale, use the fresh code returned by the bridge; a page reload is only needed for extension/page version mismatch or lost scope.
-- The extension does not independently solve questions or keep an exam running after Codex disconnects.
-
-## Development
+Source ZIP/clone มี source และ tests ครบ ส่วนแพ็กเกจอัปเดตมีเฉพาะไฟล์ที่ใช้รัน เพื่อให้อัปเดตผ่านตัวติดตั้งรุ่น 0.18.0 ได้
 
 ```sh
 cd int-helper/prototype-bridge
@@ -119,18 +111,14 @@ npm run build
 npm run check
 ```
 
-Run these commands from a repository clone/source ZIP, which includes all development files. The managed installation contains only the runtime.
+ชุดตรวจใช้หน้าเว็บจำลองและการเชื่อมต่อ local MCP ไม่ได้ส่งข้อสอบจริง ครอบคลุมทั้งสองเว็บ การบันทึก/ส่งคำตอบ เฉลย เวลา การแยกประวัติ และการอัปเดตจากรุ่นเก่า
 
-The checks use simulated pages and mock extension connections. Coverage includes both website adapters, subject cards, submitted-modal scores, explicit review labels, variable totals, bound-review retry gates, scope/history races, exact answer reuse, stale codes and multiple MCP sessions. The upgrade check runs the frozen public 0.18.0 updater against the new asset and starts its installed MCP runtime without source files or npm dependencies.
+บริดจ์ฟังที่ `127.0.0.1` พอร์ต 17373–17388 ตรวจ origin ส่วนขยาย Chrome แต่ไม่ได้ผูกการใช้งานแบบฝึกหัดกับ extension ID เดียว จึงไม่ควรเปิดพอร์ตออกนอกเครื่อง เปลี่ยนที่เก็บประวัติได้ด้วย `INT_PRACTICE_HISTORY_DIR`
 
-Version 0.19.0 adds Virtual School final review/Loop support, fixes missing submitted scores and explicit correct/wrong-choice parsing, and preserves the managed updater. Third-party dependency notices are in `THIRD_PARTY_NOTICES.md`.
-
-## Publishing a release
-
-Bump the plugin version, the `VERSION` constant in `extension/updates.js`, the extension manifest/content versions and test expectations together. Build and test, then generate the asset from the repository root:
+ดู [ROADMAP](ROADMAP.md) และ [ประกาศไลบรารีที่ใช้](THIRD_PARTY_NOTICES.md) ก่อนพัฒนาต่อ สำหรับออก Release ให้ปรับเวอร์ชัน plugin, `extension/updates.js`, manifest/content และ test expectations ให้ตรงกัน แล้ว build จาก source ก่อนสร้างไฟล์อัปเดต:
 
 ```sh
 node scripts/build-release.mjs release
 ```
 
-Publish a stable tag such as `v0.19.0` with `release/int-helper-update.json` attached. The tag and plugin version must match exactly. Update sources are restricted to this repository; file paths are allowlisted and local pairing credentials are excluded from release packages. Checksums detect damaged content; trust in the publisher comes from GitHub HTTPS and repository ownership, not a separate signing key.
+แนบ `release/int-helper-update.json` ใน stable Release ที่ tag ตรงกับเวอร์ชัน plugin เช่น `v0.20.0` ระบบตรวจ checksum และเส้นทางไฟล์ที่อนุญาต ข้อมูลจับคู่ส่วนขยายและประวัติไม่อยู่ในแพ็กเกจ ความเชื่อถือผู้เผยแพร่อาศัย GitHub HTTPS/repository ownership ไม่ใช่ลายเซ็นแยก

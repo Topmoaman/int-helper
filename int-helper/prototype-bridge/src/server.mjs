@@ -255,18 +255,19 @@ server.registerTool("return_to_subjects", {
 server.registerTool(
   "set_scope",
   {
-    description: "Set an explicit Virtual School or INT Project chapter/subject/final-only scope from the course overview, using its inspected subjectCode verbatim. retryUntilPerfect opts a supported final scope into its review/retry workflow and enables verified-answer history; default false is Normal and an explicit final-only request may retake a completed final once through its enabled link. The supported exam total comes from the observed page; this does not assume 50 for Virtual School. This does not click the page.",
+    description: "Set an explicit Virtual School or INT Project chapter/subject/final-only scope from the course overview, using its inspected subjectCode verbatim. retryUntilPerfect opts a supported final scope into its review/retry workflow and enables verified-answer history; default false is Normal and an explicit final-only request may retake a completed final once through its enabled link. For Normal, ask once before starting whether to submit the whole exam after all answers are complete, unless the user already specified their choice. Carry that choice across the requested subjects: autoSubmit=true permits guarded whole-exam submission; false (default) leaves it to the user. Per-question saving is unaffected. Loop submission is authorized by its explicit loop request. The supported exam total comes from the observed page. This does not click the page.",
     inputSchema: {
       subjectCode: z.string().min(1),
       mode: z.enum(["chapter", "subject", "final"]),
       chapter: z.number().int().positive().optional(),
       allowEmptyPretest: z.boolean().default(false),
       retryUntilPerfect: z.boolean().default(false),
+      autoSubmit: z.boolean().default(false),
     },
     annotations: { readOnlyHint: true },
   },
-  async ({ subjectCode, mode, chapter, allowEmptyPretest, retryUntilPerfect }) => {
-    const result = await requestBrowser("set_scope", { subjectCode, mode, chapter, allowEmptyPretest, retryUntilPerfect });
+  async ({ subjectCode, mode, chapter, allowEmptyPretest, retryUntilPerfect, autoSubmit }) => {
+    const result = await requestBrowser("set_scope", { subjectCode, mode, chapter, allowEmptyPretest, retryUntilPerfect, autoSubmit });
     setHistoryScope(result.scope || null);
     if (retryUntilPerfect) history ||= createHistory(undefined, historyScope);
     return toolResult(result);
@@ -274,8 +275,8 @@ server.registerTool(
 );
 
 server.registerTool("set_exam_pacing", {
-  description: "Set a minimum duration for each supported scoped final: 60 = one hour, 120 = two hours, 0 = off (default). The worker validates the site's observed question total and scope before applying pacing; Virtual School totals are not assumed to be 50. Set after final scope and before entry. Each retry gets its own duration. Changing the value uses the current attempt's original start. On mode=pacing, wait in interruptible chunks up to 60 seconds and retry the same action. Solving or website delays may make completion later. This tool does not sleep or run an exam.",
-  inputSchema: { durationMinutes: z.number().min(0).max(720) }, annotations: { destructiveHint: false },
+  description: "Set a target duration in minutes for a supported scoped final. 0 disables pacing; up to 119 minutes reserves one minute before the 120-minute exam limit. Set after final scope and before entry. Space answers across the chosen duration so the last answer targets that time, in both automatic and manual submission modes; first answer can be immediate. INT requires 50 questions; Virtual uses its observed total. Each retry starts a fresh clock; changing the duration keeps the original attempt start. On mode=pacing, wait until waitUntil in interruptible chunks of at most 60 seconds and retry the same action. Elapsed slots add no extra wait. Website or reasoning delays can overrun the target; exact wall-clock completion is not guaranteed. Does not itself sleep or run an exam.",
+  inputSchema: { durationMinutes: z.number().min(0).max(119) }, annotations: { destructiveHint: false },
 }, async (payload) => toolResult(await requestBrowser("set_exam_pacing", payload)));
 
 server.registerTool(
@@ -402,7 +403,7 @@ server.registerTool(
 server.registerTool(
   "submit_current_exam",
   {
-    description: "Within configured scope, perform one guarded step of submitting the exact current exam. INT verifies saved answers through its answer sheet first; Virtual School uses its scoped answer ledger and known confirmation. Use the examCode returned by each step. Same-attempt codes can follow the site's final-question behavior. mode=resync means nothing was submitted: retry with the returned current examCode in the same scope, without reloading. Inspect each returned action and repeat the required submission steps only for the authorized exam.",
+    description: "Within configured scope, perform one guarded step of submitting the whole exact current exam for grading. Normal course scopes require autoSubmit=true; otherwise returns awaiting_user_submission without clicking. This setting does not block per-question Save. INT verifies saved answers through its answer sheet first; Virtual School uses its scoped answer ledger and known confirmation. Use the examCode returned by each step. Same-attempt codes can follow the site's final-question behavior. mode=resync means nothing was submitted: retry with the returned current examCode in the same scope, without reloading. Inspect each returned action and repeat the required submission steps only for the authorized exam.",
     inputSchema: { examCode: z.string().min(1) },
   },
   async ({ examCode }) => toolResult(await requestBrowser("submit_current_exam", { examCode })),

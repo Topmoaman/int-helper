@@ -20493,6 +20493,8 @@ var check = async () => {
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/virtual-review.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/virtual-history.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/virtual-lifecycle.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/normal-submission.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/target-pacing.mjs"], { stdio: "inherit" });
   const firstBridge = await createBridge("int-helper-bridge-demo-1");
   const secondBridge = await createBridge("int-helper-bridge-demo-2");
   ({ client, transport } = firstBridge);
@@ -20504,6 +20506,7 @@ var check = async () => {
   const listed = await client.listTools();
   for (const name of ["set_scope", "read_subjects", "open_subject", "return_to_subjects", "set_exam_pacing", "answer_known_questions", "get_question_history_stats"]) import_strict.default.ok(listed.tools.find((tool) => tool.name === name));
   import_strict.default.equal((await client.callTool({ name: "set_exam_pacing", arguments: { durationMinutes: -1 } })).isError, true);
+  import_strict.default.equal((await client.callTool({ name: "set_exam_pacing", arguments: { durationMinutes: 120 } })).isError, true);
   import_strict.default.equal((await client.callTool({ name: "open_subject", arguments: { subjectCode: "MATH" } })).isError, true);
   import_strict.default.equal((await client.callTool({ name: "open_subject", arguments: { listToken: "demo", subjectCode: "MATH", cardToken: "VIRTUAL" } })).isError, true);
   import_strict.default.equal((await client.callTool({ name: "open_subject", arguments: { listToken: "demo", cardToken: "VIRTUAL" } })).isError, void 0);
@@ -20516,7 +20519,9 @@ var check = async () => {
   import_strict.default.deepEqual((0, import_node_fs.readdirSync)(historyDirectory), []);
   import_strict.default.equal((await client.callTool({ name: "answer_known_questions", arguments: {} })).isError, true);
   import_strict.default.equal((await client.callTool({ name: "get_question_history_stats", arguments: {} })).isError, true);
-  await client.callTool({ name: "set_scope", arguments: { subjectCode: "ENG", mode: "final" } });
+  import_strict.default.equal(listed.tools.find((tool) => tool.name === "set_scope").inputSchema.properties.autoSubmit.default, false);
+  import_strict.default.equal((await client.callTool({ name: "set_scope", arguments: { subjectCode: "ENG", mode: "final" } })).structuredContent.scope.autoSubmit, false);
+  import_strict.default.equal((await client.callTool({ name: "set_scope", arguments: { subjectCode: "ENG", mode: "final", autoSubmit: true } })).structuredContent.scope.autoSubmit, true);
   await client.callTool({ name: "set_question_history", arguments: { enabled: true } });
   const unknownBatch = await client.callTool({ name: "answer_known_questions", arguments: { maxQuestions: 20 } });
   import_strict.default.equal(unknownBatch.structuredContent.batchStopReason, "needs_reasoning");

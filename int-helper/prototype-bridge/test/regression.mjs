@@ -209,7 +209,7 @@ console.log(`regression passed: ${sourcePath}`);
 // Exercise the actual worker with Chrome/socket boundaries mocked; no live account is touched.
 {
   const sockets = [];
-  let activeTab = 1, version = "0.14.0", handler, popupListener, delayHook, held;
+  let activeTab = 1, version = "0.15.0", handler, popupListener, delayHook, held;
   const sent = [];
   let selectionResult = { examCode: "EXAM:1", selected: 2, saved: null, persistence: "unverified_until_submission" };
   let readResult = () => ({ examCode: "EXAM:2", choices: [], images: [] });
@@ -224,7 +224,7 @@ console.log(`regression passed: ${sourcePath}`);
   let advance = () => ({ mode: "chapter_complete", chapter: 1 });
   const chrome = {
     action: { setBadgeText() {}, setBadgeBackgroundColor() {}, setTitle() {} },
-    runtime: { getManifest: () => ({ version: "0.14.0" }), getURL: (p) => `chrome-extension://test/${p}`, onMessage: { addListener: (fn) => { popupListener = fn; } } },
+    runtime: { getManifest: () => ({ version: "0.15.0" }), getURL: (p) => `chrome-extension://test/${p}`, onMessage: { addListener: (fn) => { popupListener = fn; } } },
     tabs: {
       query: async () => [{ id: activeTab, active: true, url: `${base}/StudyCourse` }],
       sendMessage: async (id, message) => {
@@ -289,7 +289,7 @@ console.log(`regression passed: ${sourcePath}`);
   const before = sent.filter((m) => m.action === "advance_subject").length;
   await assert.rejects(handler("advance_subject", {}, 17373), /reloading/);
   assert.equal(sent.filter((m) => m.action === "advance_subject").length, before);
-  version = "0.14.0";
+  version = "0.15.0";
   advance = () => new Promise((resolve) => { held = resolve; });
   const running = handler("advance_subject", {}, 17373);
   while (!held) await Promise.resolve();
@@ -309,7 +309,7 @@ console.log(`regression passed: ${sourcePath}`);
   assert.equal((await status()).page, "ready");
   version = "0.2.7";
   assert.equal((await status()).page, "reload");
-  version = "0.14.0";
+  version = "0.15.0";
   pageInfo.path = "/StudyCourse";
   await handler("set_scope", { subjectCode: "MATH", mode: "final" }, 17373);
   pageInfo.path = "/Exam";
@@ -334,7 +334,7 @@ console.log(`regression passed: ${sourcePath}`);
   assert.equal(reads, 3, "one-question exam must wait for its save acknowledgement");
   readResult = () => ({ examCode: "SINGLE", saving: true, choices: [] });
   await assert.rejects(handler("answer_and_next", { examCode: "SINGLE", choiceIndex: 1, save: true }, 17373), /Timed out/);
-  await handler("set_scope", { subjectCode: "q294", mode: "final" }, 17373);
+  await handler("set_scope", { subjectCode: "q294", mode: "final", autoSubmit: true }, 17373);
   advance = () => ({ mode: "result", action: "returned", intActivity: { kind: "exam", examType: "F", finalResult: { correct: 3, total: 50, passed: false } } });
   await handler("advance_subject", {}, 17373);
   advance = () => ({ mode: "complete", finalResult: { correct: 3, total: 50, passed: false } });
@@ -358,7 +358,7 @@ console.log(`regression passed: ${sourcePath}`);
   const wait = await handler("answer_and_next", { examCode: "TIMED", choiceIndex: 1, save: true }, 17373);
   assert.equal(wait.mode, "pacing");
   assert.equal(wait.answerApplied, false);
-  assert.ok(wait.waitMs > 1799000 && wait.waitMs <= 1800000);
+  assert.ok(wait.waitMs > 1835000 && wait.waitMs <= 1836735);
   assert.ok(!sent.some(m => m.action === "apply_answer"));
   const submission = await handler("submit_current_exam", { examCode: "TIMED" }, 17373);
   assert.ok(submission.waitMs > 3599000 && submission.waitMs <= 3600000);
@@ -374,12 +374,12 @@ console.log(`regression passed: ${sourcePath}`);
   startedAt = Date.now() - 3600001;
   await handler("advance_subject", {}, 17373);
   assert.equal((await handler("submit_current_exam", { examCode: "TIMED" }, 17373)).action, "confirmed");
-  await handler("set_exam_pacing", { durationMinutes: 120 }, 17373);
+  await handler("set_exam_pacing", { durationMinutes: 119 }, 17373);
   assert.equal((await handler("submit_current_exam", { examCode: "TIMED" }, 17373)).mode, "pacing");
   // A Loop retry resets the deadline, rather than inheriting the elapsed attempt.
   startedAt = Date.now();
   await handler("advance_subject", {}, 17373);
-  assert.ok((await handler("submit_current_exam", { examCode: "TIMED" }, 17373)).waitMs > 7199000);
+  assert.ok((await handler("submit_current_exam", { examCode: "TIMED" }, 17373)).waitMs > 7139000);
   await handler("set_exam_pacing", { durationMinutes: 0 }, 17373);
   assert.equal((await handler("submit_current_exam", { examCode: "TIMED" }, 17373)).action, "confirmed");
   const boundExam = await handler("set_current_exam_scope", { examCode: "SINGLE" }, 17373);

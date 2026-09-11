@@ -70,6 +70,29 @@ assert.equal(submittedResult.score?.correct,45,'live success-modal score must be
 assert.equal(submittedResult.score?.total,50);
 assert.equal(submittedResult.score?.passed,true);
 assert.equal(submittedResult.reviewAvailable,true);
+assert.equal(read(submittedPage).resultToken,submittedResult.resultToken,'reading an unchanged result must keep its token');
+// The live exam clock keeps ticking behind the submitted-result dialog.
+const submittedClock=submittedPage.body.querySelectorAll('div').find(n=>n.innerText.includes('เวลาสอบ'));
+submittedClock.parts=['เวลาสอบ 01:50:31'];
+const afterClockTick=submittedPage.call({action:'open_answer_review',expectedResultToken:submittedResult.resultToken,step:'open',scope});
+assert.equal(afterClockTick.ok,true,`a clock tick must not invalidate the submitted result: ${afterClockTick.error}`);
+for(const clock of ['01:49:59','00:59:59','00:00:00']){
+ submittedClock.parts=[`เวลาสอบ ${clock}`];
+ assert.equal(read(submittedPage).resultToken,submittedResult.resultToken,'clock-only changes preserve the exact submitted result');
+}
+for(const [name,mutate] of [
+ ['score',page=>{page.body.querySelectorAll('strong')[0].parts=['44'];}],
+ ['attempt identity',page=>{page.body.parts.push('รหัสข้อสอบ: DIFFERENT');}],
+ ['result text',page=>{page.body.parts.push('ผลการสอบเปลี่ยนแปลง');}],
+ ['review control',page=>{page.body.querySelector('button').parts=['ไม่มีเฉลย'];}],
+]){
+ const page=start(submitted,'/Exam'),token=read(page).resultToken;
+ mutate(page);
+ const response=page.call({action:'open_answer_review',expectedResultToken:token,step:'open',scope});
+ assert.equal(response.ok,false,`${name} changes must still invalidate a submitted-result token`);
+ assert.equal(page.body.querySelector('button').clicks,0,'a changed result must never navigate');
+}
+
 assert.equal(submittedPage.call({action:'open_answer_review',expectedResultToken:submittedResult.resultToken,step:'open',scope}).result.action,'opened_review');
 assert.equal(read(start(submitted.replace('45</strong>','0</strong>').replace('ผ่านเกณฑ์! เยี่ยมยอดมาก','ไม่ผ่านเกณฑ์'),'/Exam')).score.passed,false);
 assert.equal(read(start(submitted.replace('45</strong>','51</strong>'),'/Exam')).score,null,'invalid score is never accepted');
