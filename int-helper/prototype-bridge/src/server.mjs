@@ -450,9 +450,31 @@ server.registerTool(
 );
 
 const main = async () => {
-  const { port } = await startBridge();
+  const { bridge, port } = await startBridge();
+  let closing = false;
+  const shutdown = async () => {
+    if (closing) return;
+    closing = true;
+    rejectPending("INT Helper MCP connection closed");
+    // The WebSocket listener otherwise keeps Node alive after Codex closes its
+    // stdio pipe. Stop accepting connections and release every browser socket.
+    const closed = new Promise(resolve => bridge.close(resolve));
+    for (const client of bridge.clients) client.terminate();
+    try { await server.close(); } finally { await closed; }
+  };
+  const requestShutdown = () => { void shutdown().catch(error => {
+    console.error(`INT Helper shutdown error: ${error.message}`);
+    process.exitCode = 1;
+  }); };
+  process.stdin.once("end", requestShutdown);
+  process.stdin.once("close", requestShutdown);
+  process.once("SIGTERM", requestShutdown);
+  process.once("SIGINT", requestShutdown);
+  server.server.onclose = requestShutdown;
   console.error(`INT Helper listening on ws://127.0.0.1:${port}`);
-  await server.connect(new StdioServerTransport());
+  try { await server.connect(new StdioServerTransport()); }
+  catch (error) { await shutdown(); throw error; }
+  if (process.stdin.readableEnded || process.stdin.destroyed) await shutdown();
 };
 
 main().catch((error) => {

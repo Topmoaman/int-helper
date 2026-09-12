@@ -62,6 +62,8 @@ On macOS the folder is typically `/Users/<username>/.local/share/int-helper/inst
 
 The current runtime registers 18 tools. Confirm the installed plugin/extension versions, the absolute extension path and whether `inspect_page` succeeded. If a Chrome click or new Codex task still requires the user, say so explicitly instead of marking everything complete.
 
+A startup handshake failure after a restart can also come from old orphan bridge processes occupying the local ports. Public 0.20.1 fixes future shutdown/port release; it cannot remove pre-existing orphans. Inspect the actual error and exact process ownership before any targeted cleanup; do not terminate all Node processes.
+
 ## Future updates
 
 Managed installs starting at 0.18.0 can update in the extension popup: finish active practice work, leave the exam page, keep an idle compatible Codex bridge connected, then click **ตรวจรุ่นใหม่ → อัปเดตตอนนี้**. Reload the practice page and start a new Codex task afterward. The updater preserves separate history and stops on locally modified managed files.

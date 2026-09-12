@@ -20495,6 +20495,7 @@ var check = async () => {
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/virtual-lifecycle.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/normal-submission.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/target-pacing.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/server-shutdown.mjs"], { stdio: "inherit" });
   const firstBridge = await createBridge("int-helper-bridge-demo-1");
   const secondBridge = await createBridge("int-helper-bridge-demo-2");
   ({ client, transport } = firstBridge);

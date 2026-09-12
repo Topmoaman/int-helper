@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "INT Helper",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "description": "Connects supported authorized practice tabs to the local Codex MCP bridge.",
   "minimum_chrome_version": "116",
   "action": {

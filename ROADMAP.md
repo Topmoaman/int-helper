@@ -1,6 +1,6 @@
 # Virtual School status and roadmap
 
-Version 0.20.0 includes separate website adapters, opaque subject-card selection, structured submitted-modal scores, explicit correct-answer extraction, final-only verified history, exact known-answer batches, per-attempt pacing and scoped final review/retry with variable question totals. Combined simulated regressions cover these contracts and preserve INT behavior.
+Version 0.20.1 includes separate website adapters, opaque subject-card selection, structured submitted-modal scores, explicit correct-answer extraction, final-only verified history, exact known-answer batches, per-attempt pacing and scoped final review/retry with variable question totals. Combined simulated regressions cover these contracts and preserve INT behavior.
 
 Remaining work:
 

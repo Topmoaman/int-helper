@@ -315,6 +315,7 @@ const check = async () => {
   execFileSync(process.execPath, ["test/virtual-lifecycle.mjs"], { stdio: "inherit" });
   execFileSync(process.execPath, ["test/normal-submission.mjs"], { stdio: "inherit" });
   execFileSync(process.execPath, ["test/target-pacing.mjs"], { stdio: "inherit" });
+  execFileSync(process.execPath, ["test/server-shutdown.mjs"], { stdio: "inherit" });
   const firstBridge = await createBridge("int-helper-bridge-demo-1");
   const secondBridge = await createBridge("int-helper-bridge-demo-2");
   ({ client, transport } = firstBridge);

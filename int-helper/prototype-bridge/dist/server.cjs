@@ -35870,9 +35870,39 @@ server.registerTool(
   }
 );
 var main = async () => {
-  const { port } = await startBridge();
+  const { bridge, port } = await startBridge();
+  let closing = false;
+  const shutdown = async () => {
+    if (closing) return;
+    closing = true;
+    rejectPending("INT Helper MCP connection closed");
+    const closed = new Promise((resolve) => bridge.close(resolve));
+    for (const client of bridge.clients) client.terminate();
+    try {
+      await server.close();
+    } finally {
+      await closed;
+    }
+  };
+  const requestShutdown = () => {
+    void shutdown().catch((error51) => {
+      console.error(`INT Helper shutdown error: ${error51.message}`);
+      process.exitCode = 1;
+    });
+  };
+  process.stdin.once("end", requestShutdown);
+  process.stdin.once("close", requestShutdown);
+  process.once("SIGTERM", requestShutdown);
+  process.once("SIGINT", requestShutdown);
+  server.server.onclose = requestShutdown;
   console.error(`INT Helper listening on ws://127.0.0.1:${port}`);
-  await server.connect(new StdioServerTransport());
+  try {
+    await server.connect(new StdioServerTransport());
+  } catch (error51) {
+    await shutdown();
+    throw error51;
+  }
+  if (process.stdin.readableEnded || process.stdin.destroyed) await shutdown();
 };
 main().catch((error51) => {
   console.error(`INT Helper MCP error: ${error51.message}`);

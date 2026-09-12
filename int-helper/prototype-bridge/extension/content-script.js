@@ -1,7 +1,7 @@
 (() => {
   // src/web-adapters/content-helpers.mjs
   var text = (element) => (element?.innerText || "").replace(/\s+/gu, " ").trim();
-  var CONTENT_VERSION = "0.15.0";
+  var CONTENT_VERSION = "0.15.1";
   var label = (element) => [element?.getAttribute?.("aria-label"), text(element), element?.title].filter(Boolean).join(" ");
   var visible = (element) => element && !element.disabled && (!element.getClientRects || element.getClientRects().length > 0);
   var pageUrl = (locationLike = globalThis.location) => new URL(locationLike.href);
