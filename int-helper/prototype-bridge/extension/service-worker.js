@@ -727,7 +727,10 @@ const uniqueReviewNumberSet = (reviews, total) => {
     numbers.every(number => Number.isInteger(number) && number >= 1 && number <= total) &&
     Array.from({ length: total }, (_, index) => index + 1).every(number => numbers.includes(number));
 };
-const virtualReviewFailure = (result, reason) => ({ ...result, reviewBound: false, boundAttemptId: null, reviewBindingError: reason });
+const virtualReviewFailure = (result, reason) => ({ ...result, reviewBound: false, boundAttemptId: null, reviewBindingError: reason,
+  reviewPlan: { sheetRead: result.reviewLayout === "all", verifiedCount: 0,
+    remainingCount: result.totalQuestions || result.score?.total || null, done: false,
+    nextStep: result.reviewLayout === "single" ? "sheet" : null } });
 
 // Virtual review URLs have no attempt identifier. Bind only a complete review that the
 // bridge opened after this attempt's submitted marker and whose full question set matches
@@ -783,7 +786,10 @@ const bindVirtualReview = (session, result) => {
     submitted: true, reviewBound: true, reviewComplete: true, reviewAttemptId: activity.attemptId };
   session.scope = { ...session.scope, virtualActivity: nextActivity };
   return { ...result, reviewBound: true, boundAttemptId: activity.attemptId, rejectedReviews,
-    reviewBindingError: null };
+    reviewBindingError: null, reviewPlan: { sheetRead: true, greenCount: computedCorrect,
+      redCount: rejectedReviews.length, verifiedCount: total, remainingCount: 0,
+      correctedQuestionNumbers: rejectedReviews.map(review => review.questionNumber),
+      needsReview: [], nextQuestionNumber: null, nextStep: null, done: true } };
 };
 
 const reviewIsVirtualScope = (scope) => scope?.origin === "https://main.virtualschool.club";
@@ -817,13 +823,14 @@ const readReviewResult = async (tabId, session) => {
 const navigateReview = async (tabId, session, payload, assertSession = () => {}) => {
   assertSession();
   const scoped = session && session.scope.mode !== "exam" ? { scope: session.scope } : {};
-  const navigate = (token) => { assertSession(); return sendToPage(tabId, { action: "open_answer_review", expectedResultToken: token, step: payload.step, questionNumber: payload.questionNumber, ...scoped }); };
+  const navigate = (token, step = payload.step) => { assertSession(); return sendToPage(tabId, { action: "open_answer_review", expectedResultToken: token, step, questionNumber: payload.questionNumber, ...scoped }); };
   let navigation = await navigate(payload.resultToken);
   if (session && reviewIsVirtualScope(session.scope) && payload.step === "open" && session.submitted && navigation.action === "opened_review") {
     session.reviewOpened = { attemptId: session.scope.virtualActivity?.attemptId || null, resultToken: payload.resultToken };
   }
   if (payload.readAfter === false || payload.step === "return" || navigation.done) return navigation;
   let needsJump = payload.step === "question" && navigation.action === "opened_sheet";
+  let openedVirtualSheet = false;
   const verified = [], rejected = [];
   let lastResult;
   const deadline = Date.now() + 8000;
@@ -845,9 +852,16 @@ const navigateReview = async (tabId, session, payload, assertSession = () => {})
       needsJump = false;
       continue;
     }
-    const virtual = session && reviewIsVirtualScope(session.scope);
+    const virtual = reviewIsVirtualScope(session?.scope) || (result.url && new URL(result.url).origin === "https://main.virtualschool.club");
+    // The single view is only the entry point. The site's bulk view contains
+    // explicit answers for greens and reds, so one read can bind the whole set.
+    if (virtual && payload.step === "open" && result.reviewLayout === "single" && result.ready && !openedVirtualSheet) {
+      navigation = await navigate(result.resultToken, "sheet");
+      openedVirtualSheet = true;
+      continue;
+    }
     const ready = virtual
-      ? payload.step === "sheet" ? result.reviewLayout === "all" && result.reviewComplete === true
+      ? payload.step === "sheet" || payload.step === "open" ? result.reviewLayout === "all" && result.reviewComplete === true
       : payload.step === "question" ? result.reviewLayout === "single" && result.ready && result.questionNumber === payload.questionNumber
       : payload.step === "close" ? result.reviewLayout === "single" && !result.sheet?.length
       : result.resultToken !== payload.resultToken && (result.reviewLayout === "single" || result.reviewLayout === "all")

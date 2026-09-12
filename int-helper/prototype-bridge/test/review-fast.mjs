@@ -11,7 +11,7 @@ const sheet = Array.from({length:50},(_,i)=>({questionNumber:i+1,selectedChoiceI
 const session = {submitted:true,attemptAnswers:answers,scope:{retryUntilPerfect:true,intActivity:{examType:'F',finalResult:{correct:40}}}};
 let stall = false;
 runInNewContext(worker.slice(worker.indexOf('const selectiveReview ='),worker.indexOf('const handleRequest ='))+'\nexpose(navigateReview);', {
-  expose: fn=>navigate=fn, Date:{now:()=>now}, delay:async ms=>{now+=ms;},
+  URL, expose: fn=>navigate=fn, Date:{now:()=>now}, delay:async ms=>{now+=ms;},
   sendToPage:async (_id,msg)=>{
     if(msg.action==='open_answer_review'){
       if(msg.expectedResultToken!==state) throw Error('Result changed; read it again');

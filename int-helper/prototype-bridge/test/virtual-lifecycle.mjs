@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createHistory } from "../src/history.mjs";
 import { runInNewContext } from "node:vm";
 
 const root = new URL("../", import.meta.url);
@@ -330,3 +333,72 @@ const virtualScope = { origin: virtualOrigin, subjectCode: "MATH", level: "2", t
 }
 
 console.log("Virtual lifecycle passed: entry/reset, normal capture, confirmation/submission separation, arbitrary totals, retry reset, bound review score and rejection evidence");
+
+// One user-facing review call must read the bulk sheet instead of walking N pages.
+for (const scoped of [true, false]) {
+  let navigate;
+  let now = 0, view = "submitted", token = "result-1";
+  const sent = [];
+  const wrong = new Set([6, 9, 11, 14, 16, 21, 29, 32, 34, 36, 42, 50]);
+  const answer = n => ({ questionNumber: n, questionText: `Question ${n}`, questionImage: null,
+    choices: [{ index: 1, text: `A${n}` }, { index: 2, text: `B${n}` }], selectedChoiceIndex: 1 });
+  const reviews = Array.from({ length: 50 }, (_, i) => ({ ...answer(i + 1),
+    correctChoiceIndex: wrong.has(i + 1) ? 2 : 1, selectionState: "selected",
+    correctness: wrong.has(i + 1) ? "incorrect" : "correct",
+    verificationSource: "Virtual School explicit correct-answer label" }));
+  const session = scoped ? { submitted: true, attemptAnswers: new Map(reviews.map(r => [r.questionNumber, answer(r.questionNumber)])),
+    scope: { origin: virtualOrigin, mode: "final", retryUntilPerfect: true,
+      virtualActivity: { attemptId: "bulk-attempt", totalQuestions: 50 } } } : null;
+  const code = workerSource.slice(workerSource.indexOf("const normalizeReviewText ="), workerSource.indexOf("const handleRequest ="));
+  runInNewContext(code + "\nglobalThis.expose(navigateReview);", {
+    URL, Date: { now: () => now }, expose: fn => { navigate = fn; },
+    delay: async ms => { now += ms; },
+    sendToPage: async (_tab, message) => {
+      sent.push(message);
+      if (message.action === "open_answer_review") {
+        assert.equal(message.expectedResultToken, token, "each internal navigation uses its fresh result token");
+        if (message.step === "open") { view = "single"; token = "single-2"; return { action: "opened_review" }; }
+        assert.equal(message.step, "sheet", "never visit each question or click Next");
+        view = "all"; token = "sheet-3"; return { action: "opened_all_review" };
+      }
+      assert.equal(message.action, "read_exam_result");
+      return { ok: true, url: virtualOrigin + (view === "all" ? "/AllExamAnswers" : "/examanswers"),
+        resultToken: token, reviewLayout: view, ready: true, reviewComplete: view === "all",
+        totalQuestions: 50, score: { correct: 38, total: 50 }, examCode: null,
+        ...(view === "all" ? { verifiedReviews: reviews } : { questionNumber: 1 }) };
+    },
+  });
+  const result = await navigate(1, session, { resultToken: "result-1", step: "open" });
+  assert.equal(result.reviewLayout, "all", "open must continue directly to the bulk answer sheet");
+  assert.equal(result.navigationPending, undefined);
+  assert.equal(result.verifiedReviews.length, 50);
+  assert.equal(sent.filter(m => m.action === "open_answer_review").map(m => m.step).join(","), "open,sheet");
+  assert.ok(now < 1000, "bulk review does not apply question pacing or wait for the timeout");
+  if (scoped) {
+    assert.equal(result.reviewBound, true);
+    assert.equal(result.reviewPlan.done, true);
+    assert.equal(result.reviewPlan.greenCount, 38);
+    assert.equal(result.reviewPlan.redCount, 12);
+    assert.equal(result.reviewPlan.verifiedCount, 50);
+    assert.equal(result.reviewPlan.remainingCount, 0);
+    assert.equal(result.rejectedReviews.map(r => r.questionNumber).join(","), [...wrong].join(","));
+    const folder = mkdtempSync(join(tmpdir(), "bulk-review-history-"));
+    try {
+      const course = { ...virtualScope, subjectName: "Bulk review test" };
+      const history = createHistory(folder, course);
+      for (const review of result.rejectedReviews) history.rejectAnswer(review);
+      for (const review of result.verifiedReviews) history.rememberReview(review);
+      const reopened = createHistory(folder, course);
+      for (const review of reviews) {
+        const shuffled = { ...review, choices: [
+          { ...review.choices[1], index: 1 }, { ...review.choices[0], index: 2 },
+        ] };
+        assert.equal(reopened.lookup(shuffled)?.choiceIndex, wrong.has(review.questionNumber) ? 1 : 2,
+          "both retained greens and corrected reds must survive restart and choice reordering");
+      }
+      assert.equal(reopened.stats().verifiedRecords, 50);
+    } finally { rmSync(folder, { recursive: true, force: true }); }
+
+  } else assert.notEqual(result.reviewBound, true, "read-only historical inspection never creates attempt ownership");
+}
+console.log("Virtual bulk navigation passed: one call, fresh tokens, 50 verified answers/12 corrections, no pacing, scoped and read-only views");

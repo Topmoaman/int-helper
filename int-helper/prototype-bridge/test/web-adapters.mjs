@@ -131,7 +131,7 @@ const makeVirtualPage = () => {
   const virtual = createVirtualSchoolAdapter({ document, location: { ...location, hostname: "main.virtualschool.club" } });
   assert.equal(int.supports(location), true);
   assert.equal(virtual.supports(location), false);
-  assert.equal(int.handle("page_version").contentVersion, "0.15.1");
+  assert.equal(int.handle("page_version").contentVersion, "0.15.2");
 }
 
 {

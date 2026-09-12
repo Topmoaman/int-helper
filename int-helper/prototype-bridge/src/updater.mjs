@@ -24,7 +24,7 @@ export const isNewer = (next, current) => {
 };
 export const allowedPath = path => typeof path === 'string' && !path.includes('\\') &&
   path.split('/').every(part => part && part !== '.' && part !== '..') && path !== EXTENSION_CONFIG &&
-  (/^(README\.md|ROADMAP\.md|THIRD_PARTY_NOTICES\.md|\.gitignore|install\.mjs|scripts\/build-release\.mjs|\.agents\/plugins\/marketplace\.json)$/.test(path) ||
+  (/^(README\.md|THIRD_PARTY_NOTICES\.md|\.gitignore|install\.mjs|scripts\/build-release\.mjs|\.agents\/plugins\/marketplace\.json)$/.test(path) ||
    /^int-helper\/(?:\.codex-plugin\/plugin\.json|\.mcp\.json|skills\/int-helper\/(?:SKILL\.md|agents\/openai\.yaml)|prototype-bridge\/(?:package(?:-lock)?\.json|(?:src|test|demo)\/[\w-]+\.mjs|dist\/[\w-]+\.cjs|extension\/[\w-]+\.(?:js|html|json)))$/.test(path));
 
 export const validatePackage = (payload, expectedVersion) => {

@@ -103,7 +103,7 @@ class Socket {
 }
 const chrome = {
   action: { setBadgeText() {}, setBadgeBackgroundColor() {}, setTitle() {} },
-  runtime: { getManifest: () => ({ version: "0.15.1" }), getURL: (value) => `chrome-extension://test/${value}`, onMessage: { addListener() {} } },
+  runtime: { getManifest: () => ({ version: "0.15.2" }), getURL: (value) => `chrome-extension://test/${value}`, onMessage: { addListener() {} } },
   tabs: {
     query: async () => [{ id: 7, active: true, url: location.href }],
     sendMessage: async (id, message) => {
