@@ -20137,6 +20137,7 @@ var import_node_fs = require("node:fs");
 var import_node_os = require("node:os");
 var import_node_path = require("node:path");
 var root = import_node_process2.default.cwd();
+var mockUpdateStatus;
 var port = 17473;
 var tinyPng = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z2S8AAAAASUVORK5CYII=";
 var demoCourse = { origin: "https://int-project.com", subjectCode: "ENG", subjectName: "\u0E20\u0E32\u0E29\u0E32\u0E2D\u0E31\u0E07\u0E01\u0E24\u0E29", level: "6", term: "2", year: "2026" };
@@ -20218,7 +20219,7 @@ var connectMockExtension = async (targetPort = port) => {
       evidence: "\u0E04\u0E33\u0E15\u0E2D\u0E1A\u0E02\u0E49\u0E2D\u0E17\u0E35\u0E48\u0E16\u0E39\u0E01 2.",
       verifiedReviews: [{ ...questions[1], selectedChoiceIndex: 1, correctChoiceIndex: 1, correctness: "correct", verificationSource: "INT submitted answer-sheet marker", evidence: "Question 2: correct" }]
     } : message.action === "open_answer_review" ? message.payload.step === "question" ? { ...questions[0], resultToken: "after-jump", correctChoiceIndex: 2, selectedChoiceIndex: 1, correctness: "incorrect", verificationSource: "INT explicit correct-answer label", evidence: "combined navigation evidence" } : { ok: true, action: message.payload.step } : message.action === "read_current_question" ? questions[0] : message.action === "advance_subject" ? { ok: true, mode: "overview", action: "opened" } : message.action === "complete_current_lesson" ? { ok: true, mode: "exam", pretest: false, needsAnswers: true, actions: 4 } : message.action === "submit_current_exam" ? { ok: true, mode: "submission", action: "opened" } : { selected: message.payload.choiceIndex, saved: message.payload.save, ...questions[1] };
-    extension2.send(JSON.stringify({ type: "response", id: message.id, ok: true, result }));
+    extension2.send(JSON.stringify({ type: "response", id: message.id, ok: true, result, updateStatus: mockUpdateStatus }));
   });
   extension2.on("close", () => state.extension = "disconnected");
   extensions.push(extension2);
@@ -20532,6 +20533,7 @@ var check = async () => {
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/resync.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/bank-batch.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/updater.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/update-notice.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/upgrade-compat.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/virtual-review.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/virtual-history.mjs"], { stdio: "inherit" });
@@ -20550,6 +20552,17 @@ var check = async () => {
   } catch {
   }
   const listed = await client.listTools();
+  const inspect = () => client.callTool({ name: "inspect_page", arguments: {} });
+  import_strict.default.equal((await inspect()).structuredContent.updateNotice, void 0);
+  mockUpdateStatus = { latest: "0.22.0" };
+  const notification = await inspect();
+  import_strict.default.equal(notification.structuredContent.updateNotice.latest, "0.22.0");
+  import_strict.default.equal(JSON.parse(notification.content[0].text).updateNotice.latest, "0.22.0");
+  import_strict.default.equal((await inspect()).structuredContent.updateNotice, void 0);
+  import_strict.default.equal((await secondBridge.client.callTool({ name: "inspect_page", arguments: {} })).structuredContent.updateNotice.latest, "0.22.0");
+  mockUpdateStatus = { latest: "0.23.0" };
+  import_strict.default.equal((await inspect()).structuredContent.updateNotice.latest, "0.23.0");
+  mockUpdateStatus = void 0;
   for (const name of ["set_scope", "read_subjects", "open_subject", "return_to_subjects", "set_exam_pacing", "answer_known_questions", "get_question_history_stats"]) import_strict.default.ok(listed.tools.find((tool) => tool.name === name));
   import_strict.default.equal((await client.callTool({ name: "set_exam_pacing", arguments: { durationMinutes: -1 } })).isError, true);
   import_strict.default.equal((await client.callTool({ name: "set_exam_pacing", arguments: { durationMinutes: 120 } })).isError, true);

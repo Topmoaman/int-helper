@@ -1,6 +1,6 @@
 {
   "name": "int-helper",
-  "version": "0.21.0",
+  "version": "0.21.1",
   "description": "ให้ Codex ช่วยทำแบบฝึกหัดบน INT Project และ Virtual School ผ่าน Chrome",
   "author": {
     "name": "Local developer"

@@ -5,8 +5,11 @@ import { z } from "zod";
 import { createHistory } from "./history.mjs";
 import { answerKnownQuestions } from "./known-answers.mjs";
 import { createUpdater } from "./updater.mjs";
+import { createUpdateNotice } from "./update-notice.mjs";
+import pluginManifest from "../../.codex-plugin/plugin.json" with { type: "json" };
 
 const updater = createUpdater();
+const updateNotice = createUpdateNotice(pluginManifest.version);
 let updateInFlight = false;
 
 let history = null;
@@ -111,6 +114,7 @@ const attachBridge = (bridge) => bridge.on("connection", (socket) => {
       return;
     }
     if (message.type !== "response" || !pending.has(message.id)) return;
+    if (socket === browser) updateNotice.observe(message.updateStatus);
     const request = pending.get(message.id);
     pending.delete(message.id);
     clearTimeout(request.timer);
@@ -176,6 +180,8 @@ const requestBrowser = (action, payload = {}) =>
 
 const toolResult = (question) => {
   const { images = [], ...data } = question;
+  const notice = updateNotice.take();
+  if (notice) data.updateNotice = notice;
   const content = [{ type: "text", text: JSON.stringify(data) }];
   for (const image of images) {
     content.push({

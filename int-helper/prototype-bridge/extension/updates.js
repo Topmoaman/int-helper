@@ -1,7 +1,7 @@
 // Release checks are read-only. Only a click in this extension's popup starts installation.
 globalThis.createHelperUpdates = ({ chrome, fetcher = fetch, sockets, connectedPorts, isBusy, onChange }) => {
   const REPO = 'Topmoaman/int-helper', ASSET = 'int-helper-update.json';
-  const VERSION = '0.21.0', INTERVAL = 4 * 60 * 60 * 1000;
+  const VERSION = '0.21.1', INTERVAL = 4 * 60 * 60 * 1000;
   const pending = new Map(), capable = new Set();
   let cached = {}, checking = null, busy = false, paired = null;
   const ready = (async () => {
@@ -100,5 +100,8 @@ globalThis.createHelperUpdates = ({ chrome, fetcher = fetch, sockets, connectedP
     if (!await chrome.alarms.get('helper-update-check')) await chrome.alarms.create('helper-update-check', { periodInMinutes: 240 });
     await check();
   })().catch(() => {});
-  return { status, check, install, receive, idle, get busy() { return busy; }, get available() { return newer(cached.latest); } };
+  return { status, check, install, receive, idle,
+    // Minimal public metadata for Codex; no pairing token, network wait or idle query.
+    get notice() { return { latest: cached.latest || null }; },
+    get busy() { return busy; }, get available() { return newer(cached.latest); } };
 };

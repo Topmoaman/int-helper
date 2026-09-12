@@ -117,7 +117,7 @@ const connect = (port) => {
     try {
       const result = await handleBridgeRequest(message.action, message.payload || {}, port, message.historyEnabled === true);
       if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ type: "response", id: message.id, ok: true, result }));
+        socket.send(JSON.stringify({ type: "response", id: message.id, ok: true, result, updateStatus: helperUpdates?.notice }));
       }
     } catch (error) {
       if (socket.readyState === WebSocket.OPEN) {

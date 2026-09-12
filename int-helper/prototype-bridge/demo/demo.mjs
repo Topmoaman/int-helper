@@ -10,6 +10,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const root = process.cwd();
+let mockUpdateStatus;
 const port = 17473;
 const tinyPng = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z2S8AAAAASUVORK5CYII=";
 const demoCourse = { origin: "https://int-project.com", subjectCode: "ENG", subjectName: "ภาษาอังกฤษ", level: "6", term: "2", year: "2026" };
@@ -98,7 +99,7 @@ const connectMockExtension = async (targetPort = port) => {
         : message.action === "submit_current_exam"
           ? { ok: true, mode: "submission", action: "opened" }
           : { selected: message.payload.choiceIndex, saved: message.payload.save, ...questions[1] };
-    extension.send(JSON.stringify({ type: "response", id: message.id, ok: true, result }));
+    extension.send(JSON.stringify({ type: "response", id: message.id, ok: true, result, updateStatus: mockUpdateStatus }));
   });
   extension.on("close", () => (state.extension = "disconnected"));
   extensions.push(extension);
@@ -347,6 +348,7 @@ const check = async () => {
   execFileSync(process.execPath, ["test/resync.mjs"], { stdio: "inherit" });
   execFileSync(process.execPath, ["test/bank-batch.mjs"], { stdio: "inherit" });
   execFileSync(process.execPath, ["test/updater.mjs"], { stdio: "inherit" });
+  execFileSync(process.execPath, ["test/update-notice.mjs"], { stdio: "inherit" });
   execFileSync(process.execPath, ["test/upgrade-compat.mjs"], { stdio: "inherit" });
   execFileSync(process.execPath, ["test/virtual-review.mjs"], { stdio: "inherit" });
   execFileSync(process.execPath, ["test/virtual-history.mjs"], { stdio: "inherit" });
@@ -366,6 +368,17 @@ const check = async () => {
     // Expected before the multi-task port fallback fix.
   }
   const listed = await client.listTools();
+  const inspect = () => client.callTool({ name: "inspect_page", arguments: {} });
+  assert.equal((await inspect()).structuredContent.updateNotice, undefined);
+  mockUpdateStatus = { latest: "0.22.0" };
+  const notification = await inspect();
+  assert.equal(notification.structuredContent.updateNotice.latest, "0.22.0");
+  assert.equal(JSON.parse(notification.content[0].text).updateNotice.latest, "0.22.0");
+  assert.equal((await inspect()).structuredContent.updateNotice, undefined);
+  assert.equal((await secondBridge.client.callTool({ name: "inspect_page", arguments: {} })).structuredContent.updateNotice.latest, "0.22.0");
+  mockUpdateStatus = { latest: "0.23.0" };
+  assert.equal((await inspect()).structuredContent.updateNotice.latest, "0.23.0");
+  mockUpdateStatus = undefined;
   for (const name of ["set_scope", "read_subjects", "open_subject", "return_to_subjects", "set_exam_pacing", "answer_known_questions", "get_question_history_stats"]) assert.ok(listed.tools.find(tool => tool.name === name));
   assert.equal((await client.callTool({ name: "set_exam_pacing", arguments: { durationMinutes: -1 } })).isError, true);
   assert.equal((await client.callTool({ name: "set_exam_pacing", arguments: { durationMinutes: 120 } })).isError, true);

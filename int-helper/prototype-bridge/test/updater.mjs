@@ -102,11 +102,14 @@ service = factory({ chrome, sockets: new Map([[1, socket]]), connectedPorts: () 
 await service.check();
 assert.equal(alarm.periodInMinutes, 240);
 assert.equal((await service.status()).available, true);
+assert.equal(service.notice.latest, '0.22.0');
+assert.deepEqual(Object.keys(service.notice), ['latest'], 'Codex metadata exposes no pairing/configuration data');
 assert.equal((await service.status()).canInstall, false, 'wait for a compatible local bridge');
 service.receive(1, { type: 'pong', updaterProtocol: 1 });
 assert.equal((await service.status()).canInstall, true);
 const count = fetchCount; await service.check(); assert.equal(fetchCount, count, 'cached checks avoid repeated network requests');
 offline = true; await service.check(true); assert.equal((await service.status()).available, true, 'offline does not discard a known update');
+assert.equal(service.notice.latest, '0.22.0', 'Codex keeps a previously validated release while offline');
 offline = false;
 active = true; await assert.rejects(service.install(), /จบงาน/); assert.equal(sent.length, 0);
 active = false; tabs = [{ url: 'https://main.virtualschool.club/Exam?subject=A' }];
