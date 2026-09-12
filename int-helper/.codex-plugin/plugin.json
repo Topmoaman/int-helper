@@ -1,6 +1,6 @@
 {
   "name": "int-helper",
-  "version": "0.20.2",
+  "version": "0.20.3",
   "description": "ให้ AI ใน Codex ช่วยอ่านและทำแบบฝึกหัดบน INT Project และ Virtual School ผ่าน Chrome",
   "author": {
     "name": "Local developer"

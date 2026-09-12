@@ -7,7 +7,7 @@
 
 export const text = (element) => (element?.innerText || "").replace(/\s+/gu, " ").trim();
 
-export const CONTENT_VERSION = "0.15.2";
+export const CONTENT_VERSION = "0.15.3";
 
 export const label = (element) => [element?.getAttribute?.("aria-label"), text(element), element?.title]
   .filter(Boolean)

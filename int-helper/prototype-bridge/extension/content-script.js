@@ -1,7 +1,7 @@
 (() => {
   // src/web-adapters/content-helpers.mjs
   var text = (element) => (element?.innerText || "").replace(/\s+/gu, " ").trim();
-  var CONTENT_VERSION = "0.15.2";
+  var CONTENT_VERSION = "0.15.3";
   var label = (element) => [element?.getAttribute?.("aria-label"), text(element), element?.title].filter(Boolean).join(" ");
   var visible = (element) => element && !element.disabled && (!element.getClientRects || element.getClientRects().length > 0);
   var pageUrl = (locationLike = globalThis.location) => new URL(locationLike.href);
@@ -900,7 +900,12 @@
       const image = available[0];
       const source = virtualImageSource(image);
       const failed = source && image.complete === true && image.naturalWidth === 0 ? 1 : 0;
-      return { image: source, unavailable: images.filter((candidate) => virtualImageHidden(candidate) || !virtualImageSource(candidate)).length, failed };
+      return {
+        image: source,
+        unavailable: images.filter((candidate) => virtualImageHidden(candidate) || !virtualImageSource(candidate)).length,
+        pending: source && image.complete === false ? 1 : 0,
+        failed
+      };
     };
     const readVirtualReviewQuestion = (root, questionNumber, totalQuestions, all = false) => {
       const question = root?.querySelector(".prose");
@@ -908,6 +913,7 @@
       const cards = [...root?.querySelectorAll("div.group") || []];
       let unavailableImageCount = questionImage.unavailable;
       let failedImageCount = questionImage.failed;
+      let pendingImageCount = questionImage.pending;
       const correct = [];
       const selected = [];
       const correctLabels = [];
@@ -928,6 +934,7 @@
         const image = virtualReviewImage(card, 'img[src*="/answers_pic/"]');
         unavailableImageCount += image.unavailable;
         failedImageCount += image.failed;
+        pendingImageCount += image.pending;
         const choice = { index, text: text(card.querySelector(".break-words")), image: image.image, checked: null };
         if (!choice.text && !choice.image) throw new Error("Virtual School review choice content is not ready");
         return choice;
@@ -956,6 +963,7 @@
         evidence: `${correctLabels[0]}: ${["\u0E01", "\u0E02", "\u0E04", "\u0E07", "\u0E08"][correct[0] - 1]}`,
         unavailableImageCount,
         failedImageCount,
+        pendingImageCount,
         url: location2.href
       };
     };
@@ -977,14 +985,24 @@
         const numbers = cards.map((card) => Number((card.id || "").match(/^question-(\d+)$/u)?.[1]));
         if (new Set(numbers).size !== numbers.length) throw new Error("Virtual School review question numbers are ambiguous");
         const reviews = cards.map((card, index) => readVirtualReviewQuestion(card, numbers[index], score.total, true));
-        const complete = reviews.length === score.total && Array.from({ length: score.total }, (_, index) => index + 1).every((number2) => numbers.includes(number2));
-        return { ...base, verifiedReviews: reviews, reviewedQuestionNumbers: numbers, ready: complete, reviewComplete: complete };
+        const pendingImageCount = reviews.reduce((sum, review) => sum + review.pendingImageCount, 0);
+        const failedImageCount = reviews.reduce((sum, review) => sum + review.failedImageCount, 0);
+        const complete = reviews.length === score.total && Array.from({ length: score.total }, (_, index) => index + 1).every((number2) => numbers.includes(number2)) && pendingImageCount === 0 && failedImageCount === 0;
+        return {
+          ...base,
+          verifiedReviews: reviews,
+          reviewedQuestionNumbers: numbers,
+          pendingImageCount,
+          failedImageCount,
+          ready: complete,
+          reviewComplete: complete
+        };
       }
       const root = document2.querySelector("#main-question-area");
       const number = Number(text(root).match(/โจทย์ข้อที่\s*(\d+)/u)?.[1]);
       if (!root || !number) return base;
       const question = readVirtualReviewQuestion(root, number, score.total);
-      return { ...base, ...question, ready: true, reviewedQuestionNumbers: [number] };
+      return { ...base, ...question, ready: question.pendingImageCount === 0 && question.failedImageCount === 0, reviewedQuestionNumbers: [number] };
     };
     const readExamResult = () => {
       const body = text(document2.body);

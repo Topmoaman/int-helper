@@ -302,6 +302,16 @@ const virtualScope = { origin: virtualOrigin, subjectCode: "MATH", level: "2", t
     examCode: null, verifiedReviews: [review(1, 1), review(2, 2), review(3, 2)] });
   assert.equal(result.reviewBound, true);
   assert.equal(result.boundAttemptId, "attempt-1");
+  const mismatchedImage = bind(session, { reviewLayout: "all", reviewComplete: true, totalQuestions: 3,
+    score: { correct: 1, total: 3 }, examCode: null, verifiedReviews: [
+      { ...review(1, 1), questionImage: "https://main.virtualschool.club/question_pic/changed.jpg" },
+      review(2, 2), review(3, 2),
+    ] });
+  assert.equal(mismatchedImage.reviewBound, false, "real image differences must remain blocked");
+  assert.equal(mismatchedImage.reviewMismatch.questionNumber, 1);
+  assert.equal(mismatchedImage.reviewMismatch.mismatches.length, 1);
+  assert.equal(mismatchedImage.reviewMismatch.mismatches[0].field, "questionImage");
+  assert.equal(mismatchedImage.reviewMismatch.mismatches[0].attempt, null);
   assert.equal(result.rejectedReviews.length, 2);
   assert.ok(result.rejectedReviews.every((item) => item.verificationSource === "Virtual School explicit correct-answer label" && item.selectionSource === "bound_attempt_ledger"));
   assert.deepEqual(session.scope.virtualActivity.finalResult, { correct: 1, total: 3 });
@@ -337,7 +347,7 @@ console.log("Virtual lifecycle passed: entry/reset, normal capture, confirmation
 // One user-facing review call must read the bulk sheet instead of walking N pages.
 for (const scoped of [true, false]) {
   let navigate;
-  let now = 0, view = "submitted", token = "result-1";
+  let now = 0, view = "submitted", token = "result-1", bulkReads = 0;
   const sent = [];
   const wrong = new Set([6, 9, 11, 14, 16, 21, 29, 32, 34, 36, 42, 50]);
   const answer = n => ({ questionNumber: n, questionText: `Question ${n}`, questionImage: null,
@@ -362,8 +372,9 @@ for (const scoped of [true, false]) {
         view = "all"; token = "sheet-3"; return { action: "opened_all_review" };
       }
       assert.equal(message.action, "read_exam_result");
+      const pendingImages = view === "all" && ++bulkReads === 1;
       return { ok: true, url: virtualOrigin + (view === "all" ? "/AllExamAnswers" : "/examanswers"),
-        resultToken: token, reviewLayout: view, ready: true, reviewComplete: view === "all",
+        resultToken: token, reviewLayout: view, ready: !pendingImages, reviewComplete: view === "all" && !pendingImages,
         totalQuestions: 50, score: { correct: 38, total: 50 }, examCode: null,
         ...(view === "all" ? { verifiedReviews: reviews } : { questionNumber: 1 }) };
     },
@@ -372,6 +383,7 @@ for (const scoped of [true, false]) {
   assert.equal(result.reviewLayout, "all", "open must continue directly to the bulk answer sheet");
   assert.equal(result.navigationPending, undefined);
   assert.equal(result.verifiedReviews.length, 50);
+  assert.equal(bulkReads, 2, "wait for the pending bulk image to settle before returning complete evidence");
   assert.equal(sent.filter(m => m.action === "open_answer_review").map(m => m.step).join(","), "open,sheet");
   assert.ok(now < 1000, "bulk review does not apply question pacing or wait for the timeout");
   if (scoped) {

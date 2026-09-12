@@ -754,7 +754,14 @@ const bindVirtualReview = (session, result) => {
   for (const review of reviews) {
     const saved = answers.get(review.questionNumber);
     if (!saved || reviewQuestionKey(saved) !== reviewQuestionKey(review)) {
-      return virtualReviewFailure(result, `Virtual review question ${review.questionNumber} does not match this attempt`);
+      const mismatches = saved ? [
+        ["questionText", normalizeReviewText(saved.questionText), normalizeReviewText(review.questionText)],
+        ["questionImage", saved.questionImage || null, review.questionImage || null],
+        ["choices", (saved.choices || []).map(reviewChoiceKey).sort(), (review.choices || []).map(reviewChoiceKey).sort()],
+      ].filter(([, attempt, currentReview]) => JSON.stringify(attempt) !== JSON.stringify(currentReview))
+        .map(([field, attempt, currentReview]) => ({ field, attempt, review: currentReview })) : [{ field: "missingAttemptQuestion" }];
+      return { ...virtualReviewFailure(result, `Virtual review question ${review.questionNumber} does not match this attempt`),
+        reviewMismatch: { questionNumber: review.questionNumber, mismatches } };
     }
     if (!Number.isInteger(saved.selectedChoiceIndex)) {
       return virtualReviewFailure(result, `Virtual attempt answer ${review.questionNumber} is missing its selected choice`);
