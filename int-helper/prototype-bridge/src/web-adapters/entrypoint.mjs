@@ -5,6 +5,7 @@ import { createVirtualSchoolAdapter } from "./virtual-school.mjs";
 (() => {
   if (globalThis.__intPracticeBridgeInstalled) return;
   globalThis.__intPracticeBridgeInstalled = true;
+  const pageInstanceId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
   const wakeBridge = () => chrome.runtime.sendMessage({ action: "keep_bridge_awake" }).catch(() => {});
   wakeBridge();
@@ -20,7 +21,7 @@ import { createVirtualSchoolAdapter } from "./virtual-school.mjs";
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     try {
       if (message.action === "page_version") {
-        sendResponse({ ok: true, result: { contentVersion: CONTENT_VERSION } });
+        sendResponse({ ok: true, result: { contentVersion: CONTENT_VERSION, pageInstanceId, url: location.href } });
         return true;
       }
       const adapter = currentAdapter();

@@ -1,7 +1,7 @@
 {
   "name": "int-helper",
-  "version": "0.20.3",
-  "description": "ให้ AI ใน Codex ช่วยอ่านและทำแบบฝึกหัดบน INT Project และ Virtual School ผ่าน Chrome",
+  "version": "0.21.0",
+  "description": "ให้ Codex ช่วยทำแบบฝึกหัดบน INT Project และ Virtual School ผ่าน Chrome",
   "author": {
     "name": "Local developer"
   },
@@ -9,14 +9,14 @@
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "INT Helper",
-    "shortDescription": "ให้ AI ช่วยทำแบบฝึกหัด INT Project และ Virtual School",
-    "longDescription": "เชื่อม Codex กับ Chrome เพื่ออ่านโจทย์ข้อความและรูปภาพ ทำแบบฝึกหัดตามวิชาหรือบทที่เลือก ตั้งจังหวะการตอบ และเลือกให้ AI ส่งข้อสอบหรือหยุดให้คุณส่งเอง ไม่ต้องใช้ API key เพิ่ม",
+    "shortDescription": "ทำแบบฝึกหัดและอ่านเฉลยกับ Codex",
+    "longDescription": "เลือกวิชาหรือบทที่อยากทำ แล้วให้ Codex อ่านโจทย์ ช่วยตอบ และดูเฉลย เลือกส่งเองหรือให้ส่งให้ได้ ใช้ผ่าน Chrome ไม่ต้องมี API key เพิ่ม",
     "developerName": "Local developer",
     "category": "Education",
     "capabilities": [
       "browser",
       "mcp"
     ],
-    "defaultPrompt": "ช่วยดูหน้าแบบฝึกหัดที่เปิดอยู่และทำเฉพาะงานที่ฉันขอ หากเป็น Normal ให้ถามก่อนเริ่มว่าจะส่งข้อสอบทั้งชุดให้อัตโนมัติหรือให้ฉันตรวจแล้วส่งเอง เว้นแต่ฉันระบุไว้แล้ว"
+    "defaultPrompt": "ช่วยทำแบบฝึกหัดตามที่ฉันขอ ถ้าเป็น Normal ให้ใช้ตัวเลือกส่งเองหรือส่งอัตโนมัติที่ฉันระบุ ถ้ายังไม่ได้บอกให้ถามก่อนเริ่ม ถ้าฉันเลือก Loop ให้ตอบ ส่งตรวจ อ่านเฉลย และทำซ้ำเฉพาะวิชาที่เลือก"
   }
 }

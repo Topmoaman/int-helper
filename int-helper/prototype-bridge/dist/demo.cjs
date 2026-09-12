@@ -20298,6 +20298,7 @@ var runVirtualTransport = async () => {
   let virtualReviewBound = false;
   const batchActions2 = [];
   const actionTrace = [];
+  let questionImagesPending = false;
   const bridge = await createBridge("virtual-practice-bridge-demo", { targetPort: virtualPort, historyDir: virtualHistory });
   const extension2 = new wrapper_default(`ws://127.0.0.1:${virtualPort}`, { origin: "chrome-extension://prototype" });
   await new Promise((resolve, reject) => {
@@ -20312,6 +20313,16 @@ var runVirtualTransport = async () => {
     if (message.action === "set_scope") {
       course = message.payload.subjectCode === "INT" ? intCourse : message.payload.subjectCode === "BIO-22" && batchMode === "named-off" ? virtualCourseWithoutName : virtualCourse;
       result = { scope: { ...course, ...message.payload } };
+    } else if (message.action === "resume_scope") {
+      result = {
+        scope: { ...virtualCourse, mode: "final", retryUntilPerfect: true },
+        resumed: true,
+        resumeToken: message.payload.resumeToken,
+        historyEnabled: message.payload.resumeToken.endsWith("1"),
+        restoredAnswerCount: 2
+      };
+    } else if (message.action === "sync_history_state") {
+      result = { enabled: message.historyEnabled };
     } else if (message.action === "read_exam_result") {
       result = {
         ...q1,
@@ -20346,7 +20357,7 @@ var runVirtualTransport = async () => {
         ]
       };
     } else if (message.action === "open_answer_review") {
-      result = {
+      result = message.payload.step === "return" ? { ok: true, action: "returned", done: false } : {
         ...message.payload.questionNumber === 2 ? q2Shuffled : q1Shuffled,
         scope: course,
         resultToken: "VRESULT",
@@ -20359,7 +20370,7 @@ var runVirtualTransport = async () => {
         evidence: "review destination"
       };
     } else if (message.action === "read_current_question") {
-      result = batchMode === "done" ? q1Shuffled : q1Shuffled;
+      result = { ...q1Shuffled, ...questionImagesPending ? { imagesPending: true, ready: false, imageWarning: "Image request failed (403)", images: [] } : {} };
     } else if (message.action === "answer_and_next") {
       batchActions2.push(message.payload);
       if (batchMode === "unknown") result = { ...q3, selected: message.payload.choiceIndex, saved: null, done: false };
@@ -20393,6 +20404,14 @@ var runVirtualTransport = async () => {
     import_strict.default.equal(remapped.structuredContent.verifiedAnswer.choiceIndex, 1);
     const nav = await bridge.client.callTool({ name: "open_answer_review", arguments: { resultToken: "VRESULT", step: "question", questionNumber: 1 } });
     import_strict.default.equal(nav.structuredContent.action, "question");
+    const beforeReturn = (0, import_node_fs.readFileSync)(historyFile, "utf8");
+    const returned = await bridge.client.callTool({ name: "open_answer_review", arguments: { resultToken: "VRESULT", step: "return" } });
+    import_strict.default.equal(returned.structuredContent.action, "returned");
+    import_strict.default.equal(returned.structuredContent.choices, void 0);
+    import_strict.default.equal(returned.structuredContent.historyWarning, void 0);
+    import_strict.default.equal((0, import_node_fs.readFileSync)(historyFile, "utf8"), beforeReturn, "return acknowledgements do not write or erase answer evidence");
+    const afterReturn = await bridge.client.callTool({ name: "read_current_question", arguments: {} });
+    import_strict.default.equal(afterReturn.structuredContent.verifiedAnswer.choiceIndex, 1, "verified answers remain reusable after leaving review");
     const beforeQuestionRace = (0, import_node_fs.readFileSync)(historyFile, "utf8");
     delayQuestion = true;
     const pendingQuestion = bridge.client.callTool({ name: "read_current_question", arguments: {} });
@@ -20473,6 +20492,30 @@ var runVirtualTransport = async () => {
     await bridge.client.callTool({ name: "set_scope", arguments: { subjectCode: "BIO-22", mode: "final" } });
     const unnamed = await bridge.client.callTool({ name: "read_current_question", arguments: {} });
     import_strict.default.equal(unnamed.structuredContent.verifiedAnswer.choiceIndex, 1, "Virtual display-name changes retain the bank");
+    questionImagesPending = true;
+    const unreadable = await bridge.client.callTool({ name: "read_current_question", arguments: {} });
+    import_strict.default.equal(unreadable.structuredContent.verifiedAnswer, null);
+    import_strict.default.equal(unreadable.structuredContent.historyMatch, "question_incomplete");
+    const beforeImageAnswers = batchActions2.length;
+    const imageBlocked = await bridge.client.callTool({ name: "answer_and_next", arguments: { examCode: "V:1", choiceIndex: 1, save: false } });
+    import_strict.default.equal(imageBlocked.structuredContent.answerApplied, false);
+    const imageBatch = await bridge.client.callTool({ name: "answer_known_questions", arguments: { maxQuestions: 20 } });
+    import_strict.default.equal(imageBatch.structuredContent.batchStopReason, "images_pending");
+    import_strict.default.equal(batchActions2.length, beforeImageAnswers, "history and batches never dispatch an unreadable image answer");
+    questionImagesPending = false;
+    const imageReady = await bridge.client.callTool({ name: "read_current_question", arguments: {} });
+    import_strict.default.equal(imageReady.structuredContent.verifiedAnswer.choiceIndex, 1);
+    const resumed = await bridge.client.callTool({ name: "resume_scope", arguments: { resumeToken: "11111111-1111-4111-8111-111111111111" } });
+    import_strict.default.equal(resumed.structuredContent.restoredAnswerCount, 2);
+    import_strict.default.ok(resumed.structuredContent.historyFile, "resuming restores the scoped history writer before the next read");
+    const reused = await bridge.client.callTool({ name: "read_current_question", arguments: {} });
+    import_strict.default.equal(reused.structuredContent.verifiedAnswer.choiceIndex, 1);
+    const withoutHistory = await bridge.client.callTool({ name: "resume_scope", arguments: { resumeToken: "11111111-1111-4111-8111-111111111112" } });
+    import_strict.default.equal(withoutHistory.structuredContent.historyFile, void 0, "explicitly disabled history remains disabled even in a saved Loop");
+    const historyOff = await bridge.client.callTool({ name: "read_current_question", arguments: {} });
+    import_strict.default.equal(historyOff.structuredContent.historyFile, void 0);
+    await bridge.client.callTool({ name: "set_question_history", arguments: { enabled: false } });
+    import_strict.default.equal(actionTrace.at(-1), "sync_history_state", "history changes update the recovery checkpoint");
   } finally {
     extension2.close();
     await bridge.client.close();
@@ -20496,6 +20539,8 @@ var check = async () => {
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/normal-submission.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/target-pacing.mjs"], { stdio: "inherit" });
   (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/server-shutdown.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/session-recovery.mjs"], { stdio: "inherit" });
+  (0, import_node_child_process.execFileSync)(import_node_process2.default.execPath, ["test/virtual-navigation-recovery.mjs"], { stdio: "inherit" });
   const firstBridge = await createBridge("int-helper-bridge-demo-1");
   const secondBridge = await createBridge("int-helper-bridge-demo-2");
   ({ client, transport } = firstBridge);

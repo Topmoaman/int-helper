@@ -1,7 +1,7 @@
 (() => {
   // src/web-adapters/content-helpers.mjs
   var text = (element) => (element?.innerText || "").replace(/\s+/gu, " ").trim();
-  var CONTENT_VERSION = "0.15.3";
+  var CONTENT_VERSION = "0.16.0";
   var label = (element) => [element?.getAttribute?.("aria-label"), text(element), element?.title].filter(Boolean).join(" ");
   var visible = (element) => element && !element.disabled && (!element.getClientRects || element.getClientRects().length > 0);
   var pageUrl = (locationLike = globalThis.location) => new URL(locationLike.href);
@@ -625,10 +625,13 @@
       };
     };
     const navigateNext = ({ expectedExamCode }) => {
-      const { token } = virtualSchoolMetadata();
+      const { token, number } = virtualSchoolMetadata();
       if (token !== String(expectedExamCode)) throw new Error(`stale exam code: ${token}`);
+      const total = virtualExamTotal();
+      if (number > total) throw new Error("Question number exceeds the observed exam total");
+      if (number === total) return { ok: true, done: true };
       const button = [...document2.querySelectorAll("main button")].find((element) => text(element) === "\u0E02\u0E49\u0E2D\u0E16\u0E31\u0E14\u0E44\u0E1B");
-      if (!button || button.disabled) return { ok: true, done: true };
+      if (!button || button.disabled) return { ok: true, done: false, navigationPending: true, action: "next_not_ready" };
       button.click();
       return { ok: true, done: false };
     };
@@ -1263,6 +1266,7 @@
   (() => {
     if (globalThis.__intPracticeBridgeInstalled) return;
     globalThis.__intPracticeBridgeInstalled = true;
+    const pageInstanceId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const wakeBridge = () => chrome.runtime.sendMessage({ action: "keep_bridge_awake" }).catch(() => {
     });
     wakeBridge();
@@ -1275,7 +1279,7 @@
     chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       try {
         if (message.action === "page_version") {
-          sendResponse({ ok: true, result: { contentVersion: CONTENT_VERSION } });
+          sendResponse({ ok: true, result: { contentVersion: CONTENT_VERSION, pageInstanceId, url: location.href } });
           return true;
         }
         const adapter = currentAdapter();

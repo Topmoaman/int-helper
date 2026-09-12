@@ -12,6 +12,7 @@ let updateInFlight = false;
 let history = null;
 let currentQuestion = null;
 let historyScope = null;
+let lastResumeToken = null;
 const isIntOrigin = (origin) => /^https:\/\/(?:www\.)?int-project\.com$/u.test(String(origin || ""));
 const isVirtualOrigin = (origin) => String(origin || "") === "https://main.virtualschool.club";
 const historyScopeKey = (scope) => {
@@ -43,6 +44,7 @@ const reviewContextStillValid = (context, response) => {
 };
 const setHistoryScope = (scope) => {
   historyScope = scope;
+  if (!scope) lastResumeToken = null;
   currentQuestion = null;
   if (history) history = createHistory(undefined, historyScope);
 };
@@ -52,7 +54,9 @@ const rememberQuestion = (question, writer = history, scope = historyScope) => {
   const { examCode, questionNumber, totalQuestions, questionText, questionImage, choices, images = [] } = question;
   const record = { examCode, questionNumber, totalQuestions, questionText, questionImage, choices, images };
   writer.append({ type: "question", scope, question: record });
-  currentQuestion = record;
+  currentQuestion = { ...record, ...(question.imagesPending ? { imagesPending: true } : {}) };
+  if (question.imagesPending) return { ...question, historyFile: writer.file,
+    verifiedAnswer: null, historyMatch: "question_incomplete" };
   const match = writer.lookupDetailed(question);
   return { ...question, historyFile: writer.file, verifiedAnswer: match.answer, historyMatch: match.reason };
 };
@@ -166,8 +170,8 @@ const requestBrowser = (action, payload = {}) =>
       pending.delete(id);
       reject(new Error(`Chrome extension timed out while running ${action}`));
     }, action === "complete_current_lesson" ? 90_000 : 15_000);
-    pending.set(id, { resolve, reject, timer });
-    browser.send(JSON.stringify({ type: "request", id, action, payload }));
+    pending.set(id, { resolve: result => { if (result?.resumeToken) lastResumeToken = result.resumeToken; resolve(result); }, reject, timer });
+    browser.send(JSON.stringify({ type: "request", id, action, payload, historyEnabled: history !== null }));
   });
 
 const toolResult = (question) => {
@@ -195,9 +199,20 @@ server.registerTool(
   async ({ enabled }) => {
     history = enabled ? history || createHistory(undefined, historyScope) : null;
     currentQuestion = null;
+    if (lastResumeToken) await requestBrowser("sync_history_state");
     return toolResult({ enabled, ...(history ? { historyFile: history.file } : {}) });
   },
 );
+
+server.registerTool("resume_scope", {
+  description: "Restore this task's exact saved scope after MCP reconnect/restart using its earlier resumeToken. Restores Loop/Normal choice, pacing, captured answers, submission/review binding and history preference without clicking or submitting. Requires the same browser tab, page instance and current question; never infer a token from the active page or use another task's token. If recoveryPending is present, inspect the uncertain outcome and do not replay the action. Use before further work instead of replacing a lost Loop with set_current_exam_scope. Browser/extension or page reloads may invalidate recovery; no historical ledger is invented.",
+  inputSchema: { resumeToken: z.string().uuid() }, annotations: { destructiveHint: false },
+}, async ({ resumeToken }) => {
+  const result = await requestBrowser("resume_scope", { resumeToken });
+  setHistoryScope(result.scope);
+  history = result.historyEnabled ? createHistory(undefined, historyScope) : null;
+  return toolResult({ ...result, ...(history ? { historyFile: history.file, historyStats: history.stats() } : {}) });
+});
 
 server.registerTool(
   "read_current_question",
@@ -255,7 +270,7 @@ server.registerTool("return_to_subjects", {
 server.registerTool(
   "set_scope",
   {
-    description: "Set an explicit Virtual School or INT Project chapter/subject/final-only scope from the course overview, using its inspected subjectCode verbatim. retryUntilPerfect opts a supported final scope into its review/retry workflow and enables verified-answer history; default false is Normal and an explicit final-only request may retake a completed final once through its enabled link. For Normal, ask once before starting whether to submit the whole exam after all answers are complete, unless the user already specified their choice. Carry that choice across the requested subjects: autoSubmit=true permits guarded whole-exam submission; false (default) leaves it to the user. Per-question saving is unaffected. Loop submission is authorized by its explicit loop request. The supported exam total comes from the observed page. This does not click the page.",
+    description: "Set an explicit Virtual School or INT Project chapter/subject/final-only scope from the course overview, using its inspected subjectCode verbatim. retryUntilPerfect opts a supported final scope into its review/retry workflow and enables verified-answer history; default false is Normal and an explicit final-only request may retake a completed final once through its enabled link. For Normal, ask once before starting whether to submit the whole exam after all answers are complete, unless the user already specified their choice. Carry that choice across the requested subjects: autoSubmit=true permits guarded whole-exam submission; false (default) leaves it to the user. Per-question saving is unaffected. An explicit Loop request includes whole-exam submission for grading and its recorded result; announce this before entry rather than asking a Normal-only preference question. autoSubmit is the Normal preference: its default false does not cancel an explicit Loop request. Independent platform approval remains applicable. The supported exam total comes from the observed page. This does not click the page.",
     inputSchema: {
       subjectCode: z.string().min(1),
       mode: z.enum(["chapter", "subject", "final"]),
@@ -270,6 +285,7 @@ server.registerTool(
     const result = await requestBrowser("set_scope", { subjectCode, mode, chapter, allowEmptyPretest, retryUntilPerfect, autoSubmit });
     setHistoryScope(result.scope || null);
     if (retryUntilPerfect) history ||= createHistory(undefined, historyScope);
+    if (retryUntilPerfect && lastResumeToken) await requestBrowser("sync_history_state");
     return toolResult(result);
   },
 );
@@ -286,6 +302,7 @@ server.registerTool(
     const result = await requestBrowser("set_exam_loop", { enabled });
     setHistoryScope(result.scope || null);
     if (enabled) history ||= createHistory(undefined, historyScope);
+    if (enabled && lastResumeToken) await requestBrowser("sync_history_state");
     return toolResult({ ...result, ...(history ? { historyFile: history.file } : {}) });
   },
 );
@@ -308,6 +325,12 @@ const answerOne = async ({ choiceIndex, examCode, save }) => {
     const context = captureHistoryContext();
     const writer = context.writer;
     if (!writer) return toolResult(await requestBrowser("answer_and_next", { choiceIndex, examCode, save }));
+    if (currentQuestion?.imagesPending) {
+      const question = await requestBrowser("read_current_question");
+      if (!historyContextStillValid(context)) return toolResult(historyWarning(question, { answerApplied: false }));
+      return toolResult({ ...rememberQuestion(question, writer, context.scope), mode: "image_read_required", answerApplied: false,
+        recovery: "No answer was applied. Inspect these question images before choosing an answer; read again if imagesPending remains true." });
+    }
     let refreshed;
     if (currentQuestion?.examCode !== examCode) {
       const question = await requestBrowser("read_current_question");
@@ -328,7 +351,7 @@ const answerOne = async ({ choiceIndex, examCode, save }) => {
     const result = await requestBrowser("answer_and_next", { choiceIndex, examCode, save });
     if (!historyContextStillValid(context)) return toolResult(historyWarning(result));
     if (result.mode === "pacing") return toolResult({ ...result, historyFile: writer.file });
-    if (result.mode === "resync") return toolResult(rememberQuestion(result, writer, context.scope));
+    if (["resync", "image_read_required"].includes(result.mode)) return toolResult(rememberQuestion(result, writer, context.scope));
     try {
       writer.append({ type: "answer_returned", examCode, selected: result.selected, saved: result.saved ?? null, correctness: "unverified" });
       const next = !result.done ? rememberQuestion(result, writer, context.scope) : result;
@@ -403,7 +426,7 @@ server.registerTool(
 server.registerTool(
   "submit_current_exam",
   {
-    description: "Within configured scope, perform one guarded step of submitting the whole exact current exam for grading. Normal course scopes require autoSubmit=true; otherwise returns awaiting_user_submission without clicking. This setting does not block per-question Save. INT verifies saved answers through its answer sheet first; Virtual School uses its scoped answer ledger and known confirmation. Use the examCode returned by each step. Same-attempt codes can follow the site's final-question behavior. mode=resync means nothing was submitted: retry with the returned current examCode in the same scope, without reloading. Inspect each returned action and repeat the required submission steps only for the authorized exam.",
+    description: "Within configured scope, perform one guarded step of submitting the whole exact current exam for grading; this records the website result. An explicit user request for Loop authorizes this step as part of its answer-submit-review-retry cycle, so do not add a new conversational confirmation after the answers. Normal must obtain its automatic/manual choice before answering. Respect an actual platform approval rejection; this tool does not override it. Normal course scopes require autoSubmit=true; otherwise returns awaiting_user_submission without clicking. This setting does not block per-question Save. INT verifies saved answers through its answer sheet first; Virtual School uses its scoped answer ledger and known confirmation. Use the examCode returned by each step. Same-attempt codes can follow the site's final-question behavior. mode=resync means nothing was submitted: retry with the returned current examCode in the same scope, without reloading. Inspect each returned action and repeat the required submission steps only for the authorized exam.",
     inputSchema: { examCode: z.string().min(1) },
   },
   async ({ examCode }) => toolResult(await requestBrowser("submit_current_exam", { examCode })),

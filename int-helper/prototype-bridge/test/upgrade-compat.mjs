@@ -64,10 +64,10 @@ try {
   await rpc(1, 'initialize', { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'upgrade-test', version: '1.0.0' } });
   child.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
   const { tools } = await rpc(2, 'tools/list', {});
-  for (const name of ['inspect_page', 'read_exam_result', 'open_answer_review', 'answer_known_questions', 'set_exam_loop']) assert.ok(tools.some(tool => tool.name === name));
-  assert.equal(tools.length, 18);
+  for (const name of ['inspect_page', 'resume_scope', 'read_exam_result', 'open_answer_review', 'answer_known_questions', 'set_exam_loop']) assert.ok(tools.some(tool => tool.name === name));
+  assert.equal(tools.length, 19);
   lines.close();
-  console.log('Upgrade compatibility passed: original 0.18.0 updater accepts/applies this payload; installed runtime starts 18 MCP tools without source/dependencies; pairing/history preserved');
+  console.log('Upgrade compatibility passed: original 0.18.0 updater accepts/applies this payload; installed runtime starts 19 MCP tools without source/dependencies; pairing/history preserved');
 } finally {
   if (child && child.exitCode === null) {
     const stopped = once(child, 'exit');

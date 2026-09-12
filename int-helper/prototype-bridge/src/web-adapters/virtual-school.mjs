@@ -107,10 +107,13 @@ export const createVirtualSchoolAdapter = ({ document, location }) => {
   };
 
   const navigateNext = ({ expectedExamCode }) => {
-    const { token } = virtualSchoolMetadata();
+    const { token, number } = virtualSchoolMetadata();
     if (token !== String(expectedExamCode)) throw new Error(`stale exam code: ${token}`);
+    const total = virtualExamTotal();
+    if (number > total) throw new Error("Question number exceeds the observed exam total");
+    if (number === total) return { ok: true, done: true };
     const button = [...document.querySelectorAll("main button")].find((element) => text(element) === "ข้อถัดไป");
-    if (!button || button.disabled) return { ok: true, done: true };
+    if (!button || button.disabled) return { ok: true, done: false, navigationPending: true, action: "next_not_ready" };
     button.click();
     return { ok: true, done: false };
   };

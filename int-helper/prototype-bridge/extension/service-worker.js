@@ -9,6 +9,8 @@ const reconnectTimers = new Map();
 const heartbeats = new Map();
 const sessions = new Map();
 const subjectLists = new Map();
+const sessionRequests = new Set();
+const closedSessionPorts = new Set();
 // ponytail: one mutation at a time across tabs; use per-tab locks if parallel courses are needed.
 let mutationInFlight = false;
 if (typeof importScripts === "function") importScripts("updates.js");
@@ -113,7 +115,7 @@ const connect = (port) => {
     }
     if (message.type !== "request") return;
     try {
-      const result = await handleRequest(message.action, message.payload || {}, port);
+      const result = await handleBridgeRequest(message.action, message.payload || {}, port, message.historyEnabled === true);
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({ type: "response", id: message.id, ok: true, result }));
       }
@@ -127,11 +129,13 @@ const connect = (port) => {
     if (sockets.get(port) === socket) {
       sockets.delete(port);
       heartbeats.delete(port);
+      // An in-flight command must finish checkpointing its outcome before its
+      // session is detached. A stale socket must never delete a newer session.
+      if (sessionRequests.has(port)) closedSessionPorts.add(port);
+      else { sessions.delete(port); subjectLists.delete(port); }
+      updateBadge();
+      reconnectTimers.set(port, setTimeout(() => connect(port), 1_000));
     }
-    sessions.delete(port);
-    subjectLists.delete(port);
-    updateBadge();
-    reconnectTimers.set(port, setTimeout(() => connect(port), 1_000));
   };
   socket.onerror = () => socket.close();
 };
@@ -214,7 +218,7 @@ const sendScoped = async (session, message) => {
 
 const configuredSession = (port) => {
   const session = sessions.get(port);
-  if (!session) throw new Error("Set automation scope before changing a practice page");
+  if (!session) throw new Error("Set automation scope before changing a practice page. If continuing a task, use resume_scope with its earlier resumeToken; do not replace a lost Loop with current-exam scope.");
   return session;
 };
 
@@ -409,6 +413,7 @@ const setCurrentExamScope = async (port, { examCode, allowSubmit }) => {
   if (mutationInFlight) throw new Error("Cannot change scope during a running action");
   if (typeof examCode !== "string" || !examCode) throw new Error("Read the current question to obtain examCode first");
   const { tab } = await inspectActivePage();
+  await protectSavedFinal(port, tab.id);
   const scope = await sendToPage(tab.id, { action: "bind_current_exam", expectedExamCode: examCode, examBinding: crypto.randomUUID(), allowSubmit: allowSubmit === true });
   const session = { scope, tabId: tab.id, port };
   resetAttemptState(session);
@@ -469,28 +474,44 @@ const fetchImage = async (url, role, choiceIndex) => {
 };
 
 const hydrateImages = async (question) => {
+  // Navigation acknowledgements (return, readAfter=false, terminal Next) carry
+  // no question. Preserve that result without treating it as question content.
+  if (!question.questionImage && question.choices == null) return question;
   const jobs = [];
   if (question.questionImage) jobs.push(fetchImage(question.questionImage, "question"));
-  for (const choice of question.choices) {
+  for (const choice of question.choices ?? []) {
     if (choice.image) jobs.push(fetchImage(choice.image, "choice", choice.index));
   }
   return { ...question, images: await Promise.all(jobs) };
+};
+
+// The browser can have confirmed an answer and reached the next question before
+// its image transport fails. Preserve those facts; only the image read is pending.
+const hydrateQuestion = async (question) => {
+  try { return await hydrateImages(question); }
+  catch (error) {
+    return { ...question, images: [], imagesPending: true, ready: false,
+      imageWarning: `Question images could not be read: ${error.message}`,
+      imageRecovery: "Read the current question again once images are available. Do not replay the previous answer or answer from missing images." };
+  }
 };
 
 const readCurrent = async (port) => {
   const session = sessions.get(port);
   const tab = session ? { id: session.tabId } : await findTab(SUBJECT_URLS, "Open a supported signed-in practice page in Chrome");
   await requireCurrentPage(tab.id);
-  return hydrateImages(await (session ? sendScoped(session, { action: "read_question" }) : sendToPage(tab.id, { action: "read_question" })));
+  return hydrateQuestion(await (session ? sendScoped(session, { action: "read_question" }) : sendToPage(tab.id, { action: "read_question" })));
 };
 
 const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 const navigateNext = async (session, examCode) => {
   let navigation;
-  for (let attempt = 0; attempt < 5; attempt += 1) {
+  for (let attempt = 0; attempt < 40; attempt += 1) {
     navigation = await sendScoped(session, { action: "navigate_next", expectedExamCode: examCode });
+    if (navigation.navigationPending) { await delay(150); continue; }
     if (!navigation.done) return navigation;
+    if (isVirtualScope(session.scope) || attempt >= 4) return navigation;
     await delay(100);
   }
   return navigation;
@@ -501,7 +522,7 @@ const waitForNext = async (session, previousExamCode, allowSame = false) => {
     await delay(150);
     try {
       const question = await sendScoped(session, { action: "read_question" });
-      if (!question.saving && (question.examCode !== previousExamCode || allowSame)) return hydrateImages(question);
+      if (!question.saving && (question.examCode !== previousExamCode || allowSame)) return hydrateQuestion(question);
     } catch (error) {
       if (/scope|reload|version/iu.test(error.message)) throw error;
       // Navigation can briefly unload the content script.
@@ -542,13 +563,16 @@ const pacingWait = async (session, examCode, submitting = false) => {
 
 const isStaleQuestion = (error) => /^(?:stale exam code:|Stale exam code;|Stale question before saving)/u.test(error.message);
 const resyncQuestion = async (session, nextAction) => ({
-  ...(await hydrateImages(await sendScoped(session, { action: "read_question" }))),
+  ...(await hydrateQuestion(await sendScoped(session, { action: "read_question" }))),
   ok: true, mode: "resync", action: "question_refreshed", answerApplied: false, submissionApplied: false,
   done: false, nextAction, recovery: "Use this fresh question and examCode to continue in the same scope. Do not reload or reuse an old choice without checking the question.",
 });
 
 const answerAndNext = async ({ choiceIndex, examCode, save }, port) => {
   const session = configuredSession(port);
+  if (session.pendingImageExamCode === examCode) return { ...await readCurrent(port),
+    mode: "image_read_required", answerApplied: false, done: false,
+    recovery: "No answer was applied. Inspect the returned question images before choosing an answer; read again if imagesPending remains true." };
   let waiting;
   try { waiting = await pacingWait(session, examCode); }
   catch (error) { if (isStaleQuestion(error)) return resyncQuestion(session, "answer_and_next"); throw error; }
@@ -559,7 +583,15 @@ const answerAndNext = async ({ choiceIndex, examCode, save }, port) => {
     ? await sendScoped(session, { action: "read_question" }) : null;
   if (question && question.examCode !== examCode) return resyncQuestion(session, "answer_and_next");
   let selected;
-  try { selected = await sendScoped(session, {
+  const captured = question && session.attemptAnswers?.get(question.questionNumber);
+  const alreadySelected = session.scope?.origin === "https://main.virtualschool.club" && captured?.examCode === examCode &&
+    captured.selectedChoiceIndex === choiceIndex && captured.questionText === question.questionText &&
+    captured.questionImage === question.questionImage &&
+    captured.choices?.length === question.choices.length && captured.choices.every((choice, index) =>
+      choice.index === question.choices[index].index && choice.text === question.choices[index].text && choice.image === question.choices[index].image) &&
+    question.choices.some(choice => choice.index === choiceIndex && choice.checked);
+  try { selected = alreadySelected ? { ok: true, examCode, selected: choiceIndex, saved: null,
+    selectionVerified: true, selectionReused: true, persistence: "unverified_until_submission" } : await sendScoped(session, {
     action: "apply_answer",
     choiceIndex,
     expectedExamCode: examCode,
@@ -584,6 +616,9 @@ const answerAndNext = async ({ choiceIndex, examCode, save }, port) => {
     return { ...next, ...answered, done: selected.lastQuestion === true };
   }
   const navigation = await navigateNext(session, examCode);
+  if (navigation.navigationPending) return { ...(await readCurrent(port)), ...answered, done: false,
+    navigationPending: true, answerApplied: !alreadySelected, action: "next_not_ready",
+    recovery: "The selected answer is retained. Wait briefly, then retry answer_and_next with this same examCode and choice; it will only advance the verified selection. Do not submit an incomplete exam." };
   if (navigation.done) return { ok: true, ...answered, examCode, done: true, images: [] };
   return { ...(await waitForNext(session, examCode)), ...answered };
 };
@@ -641,6 +676,15 @@ const submitCurrentExam = async ({ examCode }, port) => {
     }
   }
   const current = await sendScoped(session, { action: "read_question" });
+  if (virtual && session.scope.virtualActivity?.examType === "F") {
+    const total = Number(current.totalQuestions);
+    if (!Number.isInteger(total) || total < 1 || total > 1000) throw new Error("Virtual School question total is missing or invalid");
+    const missing = Array.from({ length: total }, (_, index) => index + 1)
+      .filter(number => !session.attemptAnswers?.has(number));
+    if (missing.length) return { ...await hydrateQuestion(current), mode: "exam_incomplete", done: false,
+      submissionApplied: false, missingQuestionNumbers: missing,
+      recovery: "Continue the remaining questions in this scope. If the current answer is already selected, retry answer_and_next with that same verified choice to advance; do not submit yet." };
+  }
   let submittedCode = examCode;
   if (current.examCode !== examCode) {
     // Only bridge-issued question codes from this exact attempt can follow a final wrap.
@@ -1032,6 +1076,141 @@ const handleRequest = async (action, payload, port) => {
     }
   }
   throw new Error(`Unknown bridge action: ${action}`);
+};
+
+// Checkpoints are browser-session data, not reusable answer history. Tokens are
+// capabilities returned only to the task that established the scope.
+const checkpointPrefix = "practice-resume-v1:";
+const checkpointMemory = new Map();
+const restoringTokens = new Set();
+const checkpointTTL = 24 * 60 * 60 * 1000;
+const checkpointWrite = async (token, record) => {
+  if (chrome.storage?.session) await chrome.storage.session.set({ [checkpointPrefix + token]: record });
+  else checkpointMemory.set(token, record);
+};
+const checkpointRead = async (token) => chrome.storage?.session
+  ? (await chrome.storage.session.get(checkpointPrefix + token))[checkpointPrefix + token]
+  : checkpointMemory.get(token);
+const checkpointRecords = async () => chrome.storage?.session
+  ? Object.entries(await chrome.storage.session.get(null)).filter(([key]) => key.startsWith(checkpointPrefix)).map(([, value]) => value)
+  : [...checkpointMemory.values()];
+const sameCheckpointPage = (left, right) => ["pageInstanceId", "url", "examCode"]
+  .every(key => left?.[key] === right?.[key]);
+const checkpointPage = async (session) => {
+  const page = await sendToPage(session.tabId, { action: "page_version" });
+  if (page.contentVersion !== chrome.runtime.getManifest().version || !page.pageInstanceId || !page.url) {
+    throw new Error("Resume requires the current bundled page script; inspect the page version before continuing");
+  }
+  let examCode = null;
+  try { examCode = (await sendToPage(session.tabId, { action: "read_question", scope: session.scope })).examCode || null; }
+  catch (error) {
+    // Review/overview pages have no active question. Never bypass a missing
+    // receiver: the version/document check above is still mandatory.
+    if (/reload|scope|version/iu.test(error.message)) throw error;
+  }
+  return { pageInstanceId: page.pageInstanceId, url: page.url, examCode };
+};
+const saveCheckpoint = async (session, historyEnabled, pendingAction = session.recoveryPending || null) => {
+  if (!session.resumeToken) {
+    for (const old of await checkpointRecords()) {
+      if (Date.now() - old.savedAt > checkpointTTL) {
+        if (chrome.storage?.session) await chrome.storage.session.remove(checkpointPrefix + old.resumeToken);
+        else checkpointMemory.delete(old.resumeToken);
+      }
+    }
+  }
+  session.resumeToken ||= crypto.randomUUID();
+  session.historyEnabled = historyEnabled;
+  const page = await checkpointPage(session);
+  const record = { schema: 1, resumeToken: session.resumeToken, savedAt: Date.now(), page,
+    scope: session.scope, tabId: session.tabId, historyEnabled, pendingAction,
+    attemptAnswers: [...(session.attemptAnswers || new Map())],
+    submitted: session.submitted === true, submissionConfirmed: session.submissionConfirmed === true,
+    pendingImageExamCode: session.pendingImageExamCode || null,
+    submissionExamCode: session.submissionExamCode || null, submittedMarker: session.submittedMarker || null,
+    reviewOpened: session.reviewOpened || null, reviewSheet: session.reviewSheet || null,
+    rejectedQuestions: [...(session.rejectedQuestions || new Set())],
+    subjectList: subjectLists.get(session.port) || null };
+  await checkpointWrite(session.resumeToken, record);
+  return record;
+};
+const resumeScope = async (port, token) => {
+  if (typeof token !== "string" || !/^[a-f0-9-]{36}$/iu.test(token)) throw new Error("Use the exact resumeToken returned to this task; never infer one from a tab or port");
+  if (restoringTokens.has(token)) throw new Error("This saved scope is already being restored on another connection");
+  restoringTokens.add(token);
+  try {
+  const record = await checkpointRead(token);
+  if (!record || record.schema !== 1 || Date.now() - record.savedAt > checkpointTTL) throw new Error("Saved scope is missing or expired; its original attempt ledger cannot be recreated from a score");
+  if (sessions.get(port) && sessions.get(port).resumeToken !== token) throw new Error("This connection already owns a different scope");
+  for (const [owner, active] of sessions) {
+    if (owner !== port && active.resumeToken === token && (sockets.get(owner)?.readyState === WebSocket.OPEN || sessionRequests.has(owner))) {
+      throw new Error("This saved scope is still active on another connection; wait for its action to finish");
+    }
+  }
+  const candidate = { ...record, port, attemptAnswers: new Map(record.attemptAnswers),
+    rejectedQuestions: new Set(record.rejectedQuestions), recoveryPending: record.pendingAction };
+  const page = await checkpointPage(candidate);
+  if (!sameCheckpointPage(page, record.page)) {
+    const changed = ["pageInstanceId", "url", "examCode"].filter(key => page[key] !== record.page?.[key]);
+    throw new Error(`Saved scope no longer matches the same tab, page instance and question (${changed.join(", ")}). Do not downgrade Loop or replay a submission`);
+  }
+  sessions.set(port, candidate);
+  if (record.subjectList) subjectLists.set(port, record.subjectList);
+  return { scope: candidate.scope, tabId: candidate.tabId, resumeToken: token, resumed: true,
+    historyEnabled: record.historyEnabled, restoredAnswerCount: candidate.attemptAnswers.size,
+    submitted: candidate.submitted, recoveryPending: candidate.recoveryPending,
+    loopMode: candidate.scope.retryUntilPerfect ? (isVirtualScope(candidate.scope) ? "loop_until_full" : "loop_until_50") : "normal" };
+  } finally { restoringTokens.delete(token); }
+};
+const protectSavedFinal = async (port, tabId) => {
+  if (sessions.get(port)?.scope.mode === "final") throw new Error("Keep the existing final/Loop scope; current-exam scope would discard its ledger");
+  const records = await checkpointRecords();
+  for (const record of records) {
+    if (record.tabId !== tabId || record.scope?.mode !== "final" || Date.now() - record.savedAt > checkpointTTL) continue;
+    const page = await checkpointPage({ tabId, scope: record.scope });
+    if (sameCheckpointPage(page, record.page)) {
+      throw new Error("A saved final scope exists for this tab. Use resume_scope with the original task's resumeToken instead of replacing it with current-exam scope");
+    }
+  }
+};
+const checkpointMutations = new Set(["answer_and_next", "submit_current_exam", "advance_subject", "complete_current_lesson", "open_answer_review", "open_subject", "return_to_subjects"]);
+const handleBridgeRequest = async (action, payload, port, historyEnabled = false) => {
+  if (sessionRequests.has(port)) throw new Error("Another request for this session is still running");
+  sessionRequests.add(port);
+  let started = false;
+  try {
+    if (action === "resume_scope") return await resumeScope(port, payload.resumeToken);
+    const before = sessions.get(port);
+    if (before?.recoveryPending && checkpointMutations.has(action)) {
+      throw new Error(`Previous ${before.recoveryPending} has an uncertain outcome. Inspect the page before any further mutation; do not replay it`);
+    }
+    if (before && checkpointMutations.has(action)) {
+      await saveCheckpoint(before, historyEnabled, action);
+      before.recoveryPending = action;
+      started = true;
+    }
+    const result = action === "sync_history_state" ? { enabled: historyEnabled } : await handleRequest(action, payload, port);
+    const session = sessions.get(port);
+    if (session) {
+      if (result?.examCode && Array.isArray(result.choices) &&
+          ["read_current_question", "answer_and_next"].includes(action)) {
+        session.pendingImageExamCode = result.imagesPending ? result.examCode : null;
+      }
+      if (started) session.recoveryPending = null;
+      try { await saveCheckpoint(session, historyEnabled); }
+      catch (error) {
+        // Keep the live connection blocked too, not just a future restored
+        // checkpoint. A successful page action must not be replayed on retry.
+        session.recoveryPending ||= started ? action : "checkpoint_failure";
+        return { ...result, resumeToken: session.resumeToken, recoveryWarning: `The browser action completed but its recovery checkpoint failed: ${error.message}. Do not replay the action.` };
+      }
+      return { ...result, resumeToken: session.resumeToken };
+    }
+    return result;
+  } finally {
+    sessionRequests.delete(port);
+    if (closedSessionPorts.delete(port)) { sessions.delete(port); subjectLists.delete(port); }
+  }
 };
 
 updateBadge();

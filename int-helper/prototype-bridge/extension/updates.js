@@ -1,7 +1,7 @@
 // Release checks are read-only. Only a click in this extension's popup starts installation.
 globalThis.createHelperUpdates = ({ chrome, fetcher = fetch, sockets, connectedPorts, isBusy, onChange }) => {
   const REPO = 'Topmoaman/int-helper', ASSET = 'int-helper-update.json';
-  const VERSION = '0.20.3', INTERVAL = 4 * 60 * 60 * 1000;
+  const VERSION = '0.21.0', INTERVAL = 4 * 60 * 60 * 1000;
   const pending = new Map(), capable = new Set();
   let cached = {}, checking = null, busy = false, paired = null;
   const ready = (async () => {

@@ -30,7 +30,21 @@ const batch=await answerKnownQuestions({read:async()=>known(1),answer:async payl
 assert.equal(batch.knownAnswersApplied,3);assert.equal(batch.batchStopReason,'needs_reasoning');assert.deepEqual(calls.map(c=>c.examCode),['Q1','Q2','Q3']);
 const pace=await answerKnownQuestions({read:async()=>known(1),answer:async()=>({mode:'pacing',answerApplied:false,waitMs:10})});assert.equal(pace.knownAnswersApplied,0);
 const sync=await answerKnownQuestions({read:async()=>known(1),answer:async()=>({mode:'resync',answerApplied:false})});assert.equal(sync.knownAnswersApplied,0);
+for(const reused of [false,true]) {
+ let navigations=0;
+ const waiting=await answerKnownQuestions({read:async()=>known(35),answer:async()=>{
+  navigations++;return {...known(35),selected:1,done:false,navigationPending:true,selectionReused:reused};
+ }});
+ assert.equal(navigations,1);assert.equal(waiting.batchStopReason,'navigation_pending');
+ assert.equal(waiting.knownAnswersApplied,reused?0:1);
+}
 const end=await answerKnownQuestions({read:async()=>known(50),answer:async()=>({done:true,examCode:'Q1',selected:1})});assert.equal(end.knownAnswersApplied,1);assert.equal(end.batchStopReason,'exam_answered');
 let count=0;const capped=await answerKnownQuestions({maxQuestions:2,read:async()=>known(1),answer:async()=>({...known(++count+1),selected:1})});assert.equal(capped.knownAnswersApplied,2);
 await assert.rejects(answerKnownQuestions({read:async()=>known(1),answer:async()=>{throw Error('should not run');},stillAuthorized:()=>false}),/scope changed/);
 console.log('Bank and batch passed: legacy dedup, no new duplicates, cross-writer correction/conflict, only exact known answers, unknown/pacing/resync/done/scope/limit stops');
+
+let imageAnswers=0;
+const unreadable=await answerKnownQuestions({read:async()=>({...known(16),imagesPending:true}),answer:async()=>{imageAnswers++;}});
+assert.equal(unreadable.batchStopReason,'images_pending');assert.equal(imageAnswers,0);
+const nextUnreadable=await answerKnownQuestions({read:async()=>known(15),answer:async()=>({...known(16),selected:1,imagesPending:true})});
+assert.equal(nextUnreadable.knownAnswersApplied,1);assert.equal(nextUnreadable.batchStopReason,'images_pending');
