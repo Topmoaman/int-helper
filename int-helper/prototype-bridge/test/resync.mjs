@@ -4,10 +4,10 @@ import { runInNewContext } from 'node:vm';
 const source=readFileSync(process.argv[2] || new URL('../extension/service-worker.js',import.meta.url),'utf8');
 const session={scope:{retryUntilPerfect:true,intActivity:{}},attemptAnswers:new Map([[1,{examCode:'FIRST'}],[50,{examCode:'LAST'}]])};
 let current={examCode:'FIRST',questionNumber:1,totalQuestions:50,choices:[]}, calls=[],fail='',answer,submit;
-runInNewContext(source.slice(source.indexOf('const pacingWait ='),source.indexOf('const advanceSubject ='))+source.slice(source.indexOf('const submitCurrentExam ='),source.indexOf('// Only join sheet'))+'\nexpose(answerAndNext,submitCurrentExam);',{
+runInNewContext(source.slice(source.indexOf('const pacingWait ='),source.indexOf('const advanceSubject ='))+source.slice(source.indexOf('const hasSubmittedIntFinal ='),source.indexOf('// Only join sheet'))+'\nexpose(answerAndNext,submitCurrentExam);',{
  expose:(a,s)=>{answer=a;submit=s;},configuredSession:()=>session,hydrateImages:async q=>q,hydrateQuestion:async q=>q,
  sendScoped:async (_session,msg)=>{calls.push(msg);if(msg.action==='read_question')return current;if(fail)throw Error(fail);return {action:'confirmed',selected:1};},
- navigateNext:async()=>({done:true}),Date,
+ navigateNext:async()=>({done:true}),Date,isVirtualScope:scope=>scope?.origin==='https://main.virtualschool.club',
 });
 const stale=await answer({examCode:'LAST',choiceIndex:5,save:true},1);
 assert.equal(stale.mode,'resync');assert.equal(stale.examCode,'FIRST');assert.equal(stale.answerApplied,false);assert.ok(!calls.some(m=>m.action==='apply_answer'));

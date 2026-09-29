@@ -7,6 +7,7 @@ import {
   text,
   visible,
 } from "./content-helpers.mjs";
+import { readIntTimer } from "./int-timer.mjs";
 
 const INT_HOST = /^(?:www\.)?int-project\.com$/u;
 const INT_OVERVIEW = /^\/student\/virtual_school\/(?:index\.php)?$/u;
@@ -47,6 +48,7 @@ export const createIntProjectAdapter = ({ document, location }) => {
       ok: true,
       questionNumber: number,
       totalQuestions: intExamTotal(),
+      examTimer: readIntTimer(document),
       saving: !!pendingIntSave && document.querySelector("#save_exam") === pendingIntSave,
       examCode: code,
       questionText: text(question),

@@ -73,7 +73,25 @@ export const createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR |
 
   const append = (record) => {
     mkdirSync(journalDirectory, { recursive: true, mode: 0o700 });
-    appendFileSync(file, JSON.stringify({ ...record, subject, subjectKey, recordedAt: new Date().toISOString(), version: 2 }) + "\n", { encoding: "utf8", mode: 0o600 });
+    const entry = { ...record, subject, subjectKey, recordedAt: new Date().toISOString(), version: 2 };
+    const line = JSON.stringify(entry) + '\n';
+    const cached = cache.get(file);
+    const before = cached && statSync(file, { throwIfNoEntry: false });
+    appendFileSync(file, line, { encoding: "utf8", mode: 0o600 });
+    // Our own non-evidence append cannot change the answer index. Update its
+    // observation counters without reparsing previous images on every question.
+    // External changes and verification/rejection evidence still use refresh().
+    if (cached && before && cached.signature === fileSignature(before) &&
+        !['verified_answer', 'rejected_answer'].includes(entry.type)) {
+      const after = statSync(file);
+      if (after.ino === before.ino && after.size === before.size + Buffer.byteLength(line)) {
+        if (sameCourse(entry.subject, subject, virtual) && acceptedRecord(entry, virtual)) {
+          cached.types[entry.type] = (cached.types[entry.type] || 0) + 1;
+          if (entry.type === 'question' && entry.question?.choices?.length) cached.observed.add(questionKey(entry.question));
+        }
+        cached.signature = fileSignature(after);
+      }
+    }
   };
 
   const rememberReview = (review) => {
@@ -122,6 +140,7 @@ export const createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR |
 
   const bankFile = join(journalDirectory, "answer-bank.json");
   const cache = new Map();
+  const fileSignature = stat => `${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}`;
   let index = null;
   let stems = new Set();
   let evidenceTotals = {};
@@ -182,7 +201,7 @@ export const createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR |
     let changed = !index;
     for (const path of files) {
       const stat = statSync(path);
-      const signature = `${stat.size}:${stat.mtimeMs}`;
+      const signature = fileSignature(stat);
       if (cache.get(path)?.signature === signature) continue;
       const records = [], types = {}, observed = new Set(), digest = createHash("sha256");
       for (const line of readFileSync(path, "utf8").split("\n")) {

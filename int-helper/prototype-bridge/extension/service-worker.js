@@ -31,6 +31,7 @@ const updateBadge = () => {
 
 const isVirtualScope = (scope) => scope?.origin === "https://main.virtualschool.club";
 const resetAttemptState = (session) => {
+  session.scope = { ...session.scope, countdownAnchor: null };
   session.attemptAnswers = new Map();
   session.submitted = false;
   session.submissionConfirmed = false;
@@ -165,11 +166,14 @@ const sendToPage = async (tabId, message) => {
   return response.result;
 };
 
+const pageCapabilities = new Map();
 const requireCurrentPage = async (tabId) => {
   const page = await sendToPage(tabId, { action: "page_version" });
   if (page.contentVersion !== chrome.runtime.getManifest().version) {
+    pageCapabilities.delete(tabId);
     throw new Error("Practice page needs reloading before it can be used");
   }
+  pageCapabilities.set(tabId, page.capabilities || []);
 };
 
 const sendScoped = async (session, message) => {
@@ -177,14 +181,18 @@ const sendScoped = async (session, message) => {
     if (sessions.get(session.port) !== session) throw new Error("Scope expired; set it again before continuing");
   };
   ensureSession();
-  await requireCurrentPage(session.tabId);
+  if (!pageCapabilities.get(session.tabId)?.includes('scoped_envelope')) await requireCurrentPage(session.tabId);
   ensureSession();
   const scopedMessage = { ...message };
   if (message.action === "advance_subject" && isVirtualScope(session.scope) && !scopedMessage.virtualAttemptId) {
     scopedMessage.virtualAttemptId = crypto.randomUUID();
     scopedMessage.virtualAttemptEnteredAt = Date.now();
   }
-  let result = await sendToPage(session.tabId, { ...scopedMessage, scope: session.scope });
+  const envelope = { ...scopedMessage, scope: session.scope, expectedContentVersion: chrome.runtime.getManifest().version };
+  // A distinct action makes an old content script refuse before mutation,
+  // even if a full navigation replaced a previously capable document.
+  let result = await sendToPage(session.tabId, pageCapabilities.get(session.tabId)?.includes('scoped_envelope')
+    ? { action: 'scoped_action', request: envelope, expectedContentVersion: envelope.expectedContentVersion } : envelope);
   ensureSession();
   if (isVirtualScope(session.scope) && (result.submittedMarker || (result.submitted && result.terminalStatus))) {
     markVirtualSubmitted(session, result.marker || result.submittedMarker);
@@ -192,6 +200,7 @@ const sendScoped = async (session, message) => {
   if (message.action === "advance_subject" && result.intActivity) {
     if (result.intActivity.enteredAt && result.intActivity.enteredAt !== session.scope.intActivity?.enteredAt) {
       resetAttemptState(session);
+      session.scope = { ...session.scope, countdownAnchor: null };
     }
     session.scope = { ...session.scope, intActivity: result.intActivity };
   }
@@ -462,15 +471,22 @@ const bytesToBase64 = (bytes) => {
   return btoa(binary);
 };
 
+// Coalesce simultaneous identical reads only. Completed bytes are not cached:
+// a later question may reuse a URL with different content.
+const imageRequests = new Map();
 const fetchImage = async (url, role, choiceIndex) => {
-  const response = await fetch(url, { credentials: "include" });
-  if (!response.ok) throw new Error(`Image request failed (${response.status}): ${url}`);
-  return {
-    role,
-    choiceIndex,
-    mimeType: response.headers.get("content-type") || "image/jpeg",
-    data: bytesToBase64(new Uint8Array(await response.arrayBuffer())),
-  };
+  let pending = imageRequests.get(url);
+  if (!pending) {
+    pending = (async () => {
+      const response = await fetch(url, { credentials: "include" });
+      if (!response.ok) throw new Error(`Image request failed (${response.status}): ${url}`);
+      return { mimeType: response.headers.get("content-type") || "image/jpeg",
+        data: bytesToBase64(new Uint8Array(await response.arrayBuffer())) };
+    })();
+    if (imageRequests.size < 32) imageRequests.set(url, pending);
+  }
+  try { return { role, choiceIndex, ...await pending }; }
+  finally { if (imageRequests.get(url) === pending) imageRequests.delete(url); }
 };
 
 const hydrateImages = async (question) => {
@@ -499,7 +515,7 @@ const hydrateQuestion = async (question) => {
 const readCurrent = async (port) => {
   const session = sessions.get(port);
   const tab = session ? { id: session.tabId } : await findTab(SUBJECT_URLS, "Open a supported signed-in practice page in Chrome");
-  await requireCurrentPage(tab.id);
+  if (!session) await requireCurrentPage(tab.id);
   return hydrateQuestion(await (session ? sendScoped(session, { action: "read_question" }) : sendToPage(tab.id, { action: "read_question" })));
 };
 
@@ -518,8 +534,11 @@ const navigateNext = async (session, examCode) => {
 };
 
 const waitForNext = async (session, previousExamCode, allowSame = false) => {
+  if (pageCapabilities.get(session.tabId)?.includes('wait_question')) {
+    return hydrateQuestion(await sendScoped(session, { action: 'wait_question', previousExamCode, allowSame }));
+  }
   for (let attempt = 0; attempt < 40; attempt += 1) {
-    await delay(150);
+    if (attempt) await delay(150);
     try {
       const question = await sendScoped(session, { action: "read_question" });
       if (!question.saving && (question.examCode !== previousExamCode || allowSame)) return hydrateQuestion(question);
@@ -534,7 +553,8 @@ const waitForNext = async (session, previousExamCode, allowSame = false) => {
 // Each final entry (including retries) supplies its own start timestamp.
 const pacingWait = async (session, examCode, submitting = false) => {
   const minutes = session.scope.durationMinutes || 0;
-  if (!minutes) return null;
+  const target = session.scope.finishAtRemaining;
+  if (!minutes && !target) return null;
   const question = await sendScoped(session, { action: "read_question" });
   if (question.examCode !== examCode) throw new Error("Stale exam code; read the current question again");
   const virtual = session.scope?.origin === "https://main.virtualschool.club";
@@ -549,6 +569,33 @@ const pacingWait = async (session, examCode, submitting = false) => {
   if (virtual && activity.totalQuestions && activity.totalQuestions !== total) throw new Error("Virtual School question total changed during this attempt");
   if (virtual && !activity.totalQuestions) {
     session.scope = { ...session.scope, virtualActivity: { ...activity, totalQuestions: total } };
+  }
+  if (target) {
+    const blocked = reason => ({ ok: true, mode: "pacing", action: reason, answerApplied: false,
+      submissionApplied: false, done: false, examCode, questionNumber: question.questionNumber,
+      finishAtRemaining: target, examTimer: question.examTimer,
+      message: "No action applied. Read the displayed timer again; do not substitute a local clock or change the target without the user." });
+    const remaining = question.examTimer?.remainingSeconds;
+    const timingSource = virtual ? 'virtual_school_display' : 'int_project_display';
+    if (question.examTimer?.source !== timingSource || question.examTimer?.available !== true ||
+        !Number.isInteger(remaining) || remaining < 0 || remaining > (virtual ? 359999 : 7200)) return blocked("timer_unavailable");
+    const targetSeconds = target.split(":").reduce((sum, part) => sum * 60 + Number(part), 0);
+    let anchor = session.scope.countdownAnchor;
+    if (!anchor || anchor.enteredAt !== startedAt) {
+      if (remaining <= targetSeconds) return blocked("timer_target_already_passed");
+      anchor = { enteredAt: startedAt, remainingSeconds: remaining, questionNumber: question.questionNumber, lastRemaining: remaining };
+    }
+    if (remaining > anchor.lastRemaining) return blocked("timer_increased");
+    session.scope = { ...session.scope, countdownAnchor: { ...anchor, lastRemaining: remaining } };
+    const fraction = submitting || total === anchor.questionNumber ? 1 :
+      Math.max(0, (question.questionNumber - anchor.questionNumber) / (total - anchor.questionNumber));
+    const dueRemaining = anchor.remainingSeconds - (anchor.remainingSeconds - targetSeconds) * fraction;
+    const waitMs = Math.max(0, Math.ceil((remaining - dueRemaining) * 1000));
+    // Local time only schedules a short wakeup. Every retry re-reads the website.
+    return waitMs ? { ok: true, mode: "pacing", action: "waiting", answerApplied: false, submissionApplied: false,
+      done: false, examCode, questionNumber: question.questionNumber, finishAtRemaining: target,
+      timingSource, examTimer: question.examTimer, dueRemainingSeconds: dueRemaining,
+      waitMs: Math.min(waitMs, 60000), waitUntil: new Date(Date.now() + Math.min(waitMs, 60000)).toISOString() } : null;
   }
   const durationMs = minutes * 60_000;
   // Anchor the last answer to the requested finish time, including manual-submit
@@ -657,9 +704,36 @@ const completeCurrentLesson = async (port) => {
   throw new Error(`Stopped after the lesson action limit; trace=[${trace.join(",")}]; page=${JSON.stringify(page)}`);
 };
 
+// Only a captured submission for this INT final can short-circuit a repeat.
+// Fresh final entry clears submitted via resetAttemptState; a score alone does not set it.
+const hasSubmittedIntFinal = session => session?.submitted === true &&
+  /^https:\/\/(?:www\.)?int-project\.com$/u.test(session.scope?.origin || "") &&
+  session.scope.intActivity?.examType === "F";
+const hasSubmittedVirtualFinal = session => isVirtualScope(session?.scope) &&
+  session.scope.virtualActivity?.examType === 'F' &&
+  (session.submitted === true || session.submissionConfirmed === true);
+
 const submitCurrentExam = async ({ examCode }, port) => {
   if (typeof examCode !== "string" || !examCode) throw new Error("An exact examCode is required for submission");
   const session = configuredSession(port);
+  if (hasSubmittedIntFinal(session)) return {
+    ok: true, mode: "result", action: "already_submitted", submitted: true, submissionApplied: false,
+    examCode: session.submissionExamCode || examCode, nextAction: "read_exam_result",
+    message: "This attempt already returned submission confirmation. Read the current result, then follow the authorized review/Loop workflow. Do not submit again.",
+  };
+  if (hasSubmittedVirtualFinal(session)) {
+    // Confirmation is a receipt, even if the website has not rendered its
+    // submitted marker yet. Observe it without opening another mutation.
+    if (!session.submitted) {
+      const status = await sendScoped(session, { action: 'read_submission_status' });
+      if (status.submitted) markVirtualSubmitted(session, status.marker);
+    }
+    return { ok: true, mode: session.submitted ? 'result' : 'submission',
+      action: session.submitted ? 'already_submitted' : 'confirmation_pending',
+      submitted: session.submitted === true, submissionApplied: false,
+      ownedAttempt: session.submitted === true,
+      examCode: session.submissionExamCode || examCode, nextAction: 'read_exam_result' };
+  }
   if (session.scope.mode !== "exam" && !session.scope.retryUntilPerfect && session.scope.autoSubmit !== true) {
     return { ok: true, mode: "awaiting_user_submission", action: "manual_submission_required", submitted: false,
       examCode, autoSubmit: false, message: "Automatic whole-exam submission is disabled. Let the user review and submit, then read the result before continuing." };
@@ -704,7 +778,7 @@ const submitCurrentExam = async ({ examCode }, port) => {
       session.submissionConfirmed = true;
       session.submissionExamCode = submittedCode;
     }
-    else session.submitted = true;
+    else { session.submitted = true; session.submissionExamCode = submittedCode; }
   }
   if (result.submitted || result.action === "already_submitted") {
     if (virtual) {
@@ -886,12 +960,12 @@ const navigateReview = async (tabId, session, payload, assertSession = () => {})
   let lastResult;
   const deadline = Date.now() + 8000;
   while (Date.now() < deadline) {
-    await delay(150);
+    if (lastResult) await delay(150);
     assertSession();
     let result;
     try { result = await readReviewResult(tabId, session); }
     catch (error) {
-      if (/needs reloading|explicit correct answer is not ready|Open the submitted result/u.test(error.message)) continue;
+      if (/needs reloading|explicit correct answer is not ready|Open the submitted result/u.test(error.message)) { await delay(150); continue; }
       throw error;
     }
     assertSession();
@@ -1038,11 +1112,20 @@ const handleRequest = async (action, payload, port) => {
     if (mutationInFlight) throw new Error("Cannot change pacing during a running action");
     const session = configuredSession(port);
     const durationMinutes = payload.durationMinutes;
-    if (!Number.isFinite(durationMinutes) || durationMinutes < 0 || durationMinutes > 119) throw new Error("durationMinutes must be between 0 and 119; the exam limit is 120 minutes, with one minute reserved for submission");
+    const finishAtRemaining = payload.finishAtRemaining;
+    if ((durationMinutes !== undefined) === (finishAtRemaining !== undefined)) throw new Error("Choose exactly one: durationMinutes or finishAtRemaining. Ask the user when their timing intent is ambiguous.");
+    if (finishAtRemaining !== undefined && !/^(?:00|01):[0-5]\d:[0-5]\d$/u.test(finishAtRemaining)) throw new Error("finishAtRemaining must be HH:MM:SS below 02:00:00");
+    if (finishAtRemaining !== undefined && finishAtRemaining < "00:01:00") throw new Error("Leave at least 00:01:00 for submission");
+    if (durationMinutes !== undefined && (!Number.isFinite(durationMinutes) || durationMinutes < 0 || durationMinutes > 119)) throw new Error("durationMinutes must be between 0 and 119; the exam limit is 120 minutes, with one minute reserved for submission");
     const intFinal = session.scope.mode === "final" && /^https:\/\/(?:www\.)?int-project\.com$/u.test(session.scope.origin);
     const virtualFinal = isVirtualScope(session.scope) && session.scope.mode === "final";
     if (durationMinutes && !intFinal && !virtualFinal) throw new Error("Timed pacing requires a supported final-only scope");
-    session.scope = { ...session.scope, durationMinutes };
+    if (finishAtRemaining !== undefined && !intFinal && !virtualFinal) throw new Error("Displayed countdown pacing requires a supported final-only scope");
+    const preserveAnchor = finishAtRemaining && finishAtRemaining === session.scope.finishAtRemaining;
+    session.scope = { ...session.scope, durationMinutes: durationMinutes || 0, finishAtRemaining: finishAtRemaining || null,
+      countdownAnchor: preserveAnchor ? session.scope.countdownAnchor : null };
+    if (finishAtRemaining) return { scope: session.scope, finishAtRemaining, timingSource: virtualFinal ? 'virtual_school_display' : 'int_project_display',
+      timing: "Space unanswered questions from the first observed display to the remaining-time target. Each retry reads a fresh timer. On timer_* actions do not sleep blindly or replace with duration mode. Review is unpaced; completion may be late." };
     return { scope: session.scope, durationMinutes, examLimitMinutes: 120,
       timing: "Space answers from final entry so the last answer targets the requested duration. Do not add a fresh delay after every answer; late actions skip elapsed waits. Website and reasoning delays can overrun the target." };
   }
@@ -1097,6 +1180,14 @@ const checkpointRecords = async () => chrome.storage?.session
 const sameCheckpointPage = (left, right) => ["pageInstanceId", "url", "examCode"]
   .every(key => left?.[key] === right?.[key]);
 const checkpointPage = async (session) => {
+  if (pageCapabilities.get(session.tabId)?.includes('page_identity')) {
+    const page = await sendToPage(session.tabId, { action: 'page_identity', scope: session.scope,
+      expectedContentVersion: chrome.runtime.getManifest().version });
+    if (page.contentVersion !== chrome.runtime.getManifest().version || !page.pageInstanceId || !page.url) {
+      throw new Error('Resume requires the current bundled page script; inspect the page version before continuing');
+    }
+    return { pageInstanceId: page.pageInstanceId, url: page.url, examCode: page.examCode || null };
+  }
   const page = await sendToPage(session.tabId, { action: "page_version" });
   if (page.contentVersion !== chrome.runtime.getManifest().version || !page.pageInstanceId || !page.url) {
     throw new Error("Resume requires the current bundled page script; inspect the page version before continuing");
@@ -1184,7 +1275,10 @@ const handleBridgeRequest = async (action, payload, port, historyEnabled = false
     if (before?.recoveryPending && checkpointMutations.has(action)) {
       throw new Error(`Previous ${before.recoveryPending} has an uncertain outcome. Inspect the page before any further mutation; do not replay it`);
     }
-    if (before && checkpointMutations.has(action)) {
+    // A known duplicate is a read-only acknowledgement, not a new uncertain mutation.
+    // Keep the recoveryPending guard above: unrelated/real uncertainty is never cleared here.
+    const acknowledgedSubmit = action === "submit_current_exam" && (hasSubmittedIntFinal(before) || hasSubmittedVirtualFinal(before));
+    if (before && checkpointMutations.has(action) && !acknowledgedSubmit) {
       await saveCheckpoint(before, historyEnabled, action);
       before.recoveryPending = action;
       started = true;

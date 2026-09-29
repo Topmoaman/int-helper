@@ -1,7 +1,7 @@
 (() => {
   // src/web-adapters/content-helpers.mjs
   var text = (element) => (element?.innerText || "").replace(/\s+/gu, " ").trim();
-  var CONTENT_VERSION = "0.16.1";
+  var CONTENT_VERSION = "0.17.0";
   var label = (element) => [element?.getAttribute?.("aria-label"), text(element), element?.title].filter(Boolean).join(" ");
   var visible = (element) => element && !element.disabled && (!element.getClientRects || element.getClientRects().length > 0);
   var pageUrl = (locationLike = globalThis.location) => new URL(locationLike.href);
@@ -16,6 +16,17 @@
     return values[0] || null;
   };
   var examCode = (root, bodyText = text(root)) => bodyText.match(/รหัสข้อสอบ\s*:\s*([^\s|]+)/u)?.[1] || null;
+
+  // src/web-adapters/int-timer.mjs
+  var readIntTimer = (document2) => {
+    const timers = [...document2.querySelectorAll(".timer")].filter(visible);
+    if (timers.length !== 1) return { available: false, reason: "timer_missing_or_ambiguous" };
+    const values = [".jst-hours", ".jst-minutes", ".jst-seconds"].map((selector) => text(timers[0].querySelector(selector)).replace(/:\s*$/u, "").trim());
+    if (!values.every((value) => /^\d{2}$/u.test(value))) return { available: false, reason: "timer_unreadable" };
+    const [h, m, s] = values.map(Number);
+    if (m > 59 || s > 59 || h * 3600 + m * 60 + s > 7200) return { available: false, reason: "timer_invalid" };
+    return { available: true, remainingSeconds: h * 3600 + m * 60 + s, display: values.join(":"), source: "int_project_display" };
+  };
 
   // src/web-adapters/int-project.mjs
   var INT_HOST = /^(?:www\.)?int-project\.com$/u;
@@ -53,6 +64,7 @@
         ok: true,
         questionNumber: number,
         totalQuestions: intExamTotal(),
+        examTimer: readIntTimer(document2),
         saving: !!pendingIntSave && document2.querySelector("#save_exam") === pendingIntSave,
         examCode: code,
         questionText: text(question),
@@ -535,6 +547,20 @@
     return { supports, inspect: inspectPage, handle };
   };
 
+  // src/web-adapters/virtual-timer.mjs
+  var readVirtualTimer = (document2, location2) => {
+    if (String(singleQueryValue(pageUrl(location2).searchParams, "examtype")).toUpperCase() !== "F") {
+      return { available: false, reason: "not_final_countdown" };
+    }
+    const labels = [...document2.querySelectorAll("div")].filter((el) => visible(el) && text(el) === "\u0E40\u0E27\u0E25\u0E32\u0E2A\u0E2D\u0E1A");
+    const timers = labels.map((el) => el.nextElementSibling).filter((el) => el?.tagName === "P" && visible(el));
+    if (timers.length !== 1) return { available: false, reason: "timer_missing_or_ambiguous" };
+    const display = text(timers[0]);
+    if (!/^\d{2}:[0-5]\d:[0-5]\d$/u.test(display)) return { available: false, reason: "timer_unreadable" };
+    const remainingSeconds = display.split(":").reduce((value, part) => value * 60 + Number(part), 0);
+    return { available: true, remainingSeconds, display, source: "virtual_school_display" };
+  };
+
   // src/web-adapters/virtual-school.mjs
   var COURSE_PATH = /^\/Course\/?$/iu;
   var STUDY_COURSE_PATH = /^\/StudyCourse\/?$/iu;
@@ -599,6 +625,7 @@
         ok: true,
         questionNumber: number,
         totalQuestions: virtualExamTotal(),
+        examTimer: readVirtualTimer(document2, location2),
         examCode: token,
         questionText: text(question),
         questionImage: image,
@@ -1262,6 +1289,44 @@
     return { supports, inspect: inspectPage, handle };
   };
 
+  // src/web-adapters/readiness.mjs
+  var waitForReady = ({
+    read,
+    ready,
+    document: document2,
+    timeoutMs = 6e3,
+    Observer = globalThis.MutationObserver,
+    intervalMs = 150
+  }) => new Promise((resolve, reject) => {
+    let observer, poll, deadline, settled = false;
+    const finish = (error, value) => {
+      if (settled) return;
+      settled = true;
+      observer?.disconnect();
+      clearInterval(poll);
+      clearTimeout(deadline);
+      error ? reject(error) : resolve(value);
+    };
+    const check = () => {
+      if (settled) return;
+      try {
+        const value = read();
+        if (ready(value)) finish(null, value);
+      } catch (error) {
+        if (/scope|reload|version|unsupported|current exam changed/iu.test(error.message)) finish(error);
+      }
+    };
+    check();
+    if (settled) return;
+    if (Observer && document2.documentElement) {
+      observer = new Observer(check);
+      observer.observe(document2.documentElement, { subtree: true, childList: true, characterData: true, attributes: true });
+    }
+    poll = setInterval(check, intervalMs);
+    deadline = setTimeout(() => finish(new Error("Timed out waiting for the next question")), timeoutMs);
+    check();
+  });
+
   // src/web-adapters/entrypoint.mjs
   (() => {
     if (globalThis.__intPracticeBridgeInstalled) return;
@@ -1276,14 +1341,45 @@
       createVirtualSchoolAdapter({ document, location })
     ];
     const currentAdapter = () => adapters.find((adapter) => adapter.supports(location));
+    const pageIdentity = () => ({ contentVersion: CONTENT_VERSION, pageInstanceId, url: location.href, capabilities: ["scoped_envelope", "page_identity", "wait_question"] });
     chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       try {
+        if (message.expectedContentVersion && message.expectedContentVersion !== CONTENT_VERSION) {
+          throw new Error("Practice page needs reloading before it can be used");
+        }
+        if (message.action === "scoped_action") {
+          if (message.expectedContentVersion !== CONTENT_VERSION || !message.request?.scope || message.request.expectedContentVersion !== CONTENT_VERSION || message.request.action === "scoped_action") {
+            throw new Error("Invalid scoped version envelope");
+          }
+          message = message.request;
+        }
         if (message.action === "page_version") {
-          sendResponse({ ok: true, result: { contentVersion: CONTENT_VERSION, pageInstanceId, url: location.href } });
+          sendResponse({ ok: true, result: pageIdentity() });
           return true;
         }
         const adapter = currentAdapter();
         if (!adapter) throw new Error("Unsupported practice origin");
+        if (message.action === "page_identity") {
+          let examCode2 = null;
+          try {
+            examCode2 = adapter.handle("read_question", message).examCode || null;
+          } catch (error) {
+            if (/reload|scope|version/iu.test(error.message)) throw error;
+          }
+          sendResponse({ ok: true, result: { ...pageIdentity(), examCode: examCode2 } });
+          return true;
+        }
+        if (message.action === "wait_question") {
+          waitForReady({
+            document,
+            read: () => {
+              if (currentAdapter() !== adapter) throw new Error("Unsupported practice origin after navigation");
+              return adapter.handle("read_question", message);
+            },
+            ready: (question) => !question.saving && (question.examCode !== message.previousExamCode || message.allowSame === true)
+          }).then((result2) => sendResponse({ ok: true, result: result2 }), (error) => sendResponse({ ok: false, error: error.message }));
+          return true;
+        }
         const result = adapter.handle(message.action, message);
         if (result === null || result === void 0) return false;
         sendResponse({ ok: true, result });

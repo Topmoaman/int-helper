@@ -1,3 +1,4 @@
+import { readVirtualTimer } from './virtual-timer.mjs';
 import {
   CONTENT_VERSION,
   aliasQueryValue,
@@ -79,6 +80,7 @@ export const createVirtualSchoolAdapter = ({ document, location }) => {
       ok: true,
       questionNumber: number,
       totalQuestions: virtualExamTotal(),
+      examTimer: readVirtualTimer(document, location),
       examCode: token,
       questionText: text(question),
       questionImage: image,

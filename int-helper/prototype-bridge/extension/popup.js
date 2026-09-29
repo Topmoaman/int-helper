@@ -42,7 +42,7 @@ const refresh = async () => {
         const total = Number(s.virtualActivity?.totalQuestions);
         const fullScore = virtual ? (Number.isInteger(total) && total > 0 ? `วนจนได้ ${total}/${total}` : "วนจนได้คะแนนเต็ม") : site === "INT Project" ? "วนจนได้ 50/50" : "โหมดวนซ้ำไม่พร้อมใช้";
         const mode = s.mode === "final" ? `ปลายภาค · ${s.retryUntilPerfect ? fullScore : "ทำหนึ่งรอบ"}` : s.mode === "chapter" ? `บทที่ ${s.chapter}` : s.mode === "exam" ? `ข้อสอบนี้ · ${s.submissionAllowed ? "ส่งได้" : "ตอบเท่านั้น"}` : "ทั้งวิชา";
-        return `${site ? `${site} · ` : ""}${mode}` + (s.durationMinutes ? ` · ${s.durationMinutes} นาที/รอบ` : "");
+        return `${site ? `${site} · ` : ""}${mode}` + (s.finishAtRemaining ? ` · จบเมื่อเหลือ ${s.finishAtRemaining}` : s.durationMinutes ? ` · ${s.durationMinutes} นาที/รอบ` : "");
       }).join(" / "));
     } else {
       show("scope", status.page === "unsupported" ? "เลือกแท็บแบบฝึกหัด" : "แท็บนี้ยังไม่มีขอบเขตงาน", "warning");

@@ -35017,7 +35017,21 @@ var createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR || (0, imp
   const file2 = (0, import_node_path.join)(journalDirectory, `${(/* @__PURE__ */ new Date()).toISOString().replaceAll(":", "-")}-${(0, import_node_crypto.randomUUID)()}.jsonl`);
   const append = (record2) => {
     (0, import_node_fs.mkdirSync)(journalDirectory, { recursive: true, mode: 448 });
-    (0, import_node_fs.appendFileSync)(file2, JSON.stringify({ ...record2, subject, subjectKey, recordedAt: (/* @__PURE__ */ new Date()).toISOString(), version: 2 }) + "\n", { encoding: "utf8", mode: 384 });
+    const entry = { ...record2, subject, subjectKey, recordedAt: (/* @__PURE__ */ new Date()).toISOString(), version: 2 };
+    const line = JSON.stringify(entry) + "\n";
+    const cached2 = cache.get(file2);
+    const before = cached2 && (0, import_node_fs.statSync)(file2, { throwIfNoEntry: false });
+    (0, import_node_fs.appendFileSync)(file2, line, { encoding: "utf8", mode: 384 });
+    if (cached2 && before && cached2.signature === fileSignature(before) && !["verified_answer", "rejected_answer"].includes(entry.type)) {
+      const after = (0, import_node_fs.statSync)(file2);
+      if (after.ino === before.ino && after.size === before.size + Buffer.byteLength(line)) {
+        if (sameCourse(entry.subject, subject, virtual) && acceptedRecord(entry, virtual)) {
+          cached2.types[entry.type] = (cached2.types[entry.type] || 0) + 1;
+          if (entry.type === "question" && entry.question?.choices?.length) cached2.observed.add(questionKey(entry.question));
+        }
+        cached2.signature = fileSignature(after);
+      }
+    }
   };
   const rememberReview = (review) => {
     append({ type: "review_evidence", result: review });
@@ -35080,6 +35094,7 @@ var createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR || (0, imp
   };
   const bankFile = (0, import_node_path.join)(journalDirectory, "answer-bank.json");
   const cache = /* @__PURE__ */ new Map();
+  const fileSignature = (stat) => `${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}`;
   let index = null;
   let stems = /* @__PURE__ */ new Set();
   let evidenceTotals = {};
@@ -35151,7 +35166,7 @@ var createHistory = (directory = process.env.INT_PRACTICE_HISTORY_DIR || (0, imp
     let changed = !index;
     for (const path of files) {
       const stat = (0, import_node_fs.statSync)(path);
-      const signature = `${stat.size}:${stat.mtimeMs}`;
+      const signature = fileSignature(stat);
       if (cache.get(path)?.signature === signature) continue;
       const records2 = [], types = {}, observed = /* @__PURE__ */ new Set(), digest2 = (0, import_node_crypto.createHash)("sha256");
       for (const line of (0, import_node_fs.readFileSync)(path, "utf8").split("\n")) {
@@ -35461,7 +35476,7 @@ var createUpdateNotice = (current) => {
 // ../.codex-plugin/plugin.json
 var plugin_default = {
   name: "int-helper",
-  version: "0.21.1",
+  version: "0.22.0",
   description: "\u0E43\u0E2B\u0E49 Codex \u0E0A\u0E48\u0E27\u0E22\u0E17\u0E33\u0E41\u0E1A\u0E1A\u0E1D\u0E36\u0E01\u0E2B\u0E31\u0E14\u0E1A\u0E19 INT Project \u0E41\u0E25\u0E30 Virtual School \u0E1C\u0E48\u0E32\u0E19 Chrome",
   author: {
     name: "Local developer"
@@ -35764,8 +35779,8 @@ server.registerTool(
   }
 );
 server.registerTool("set_exam_pacing", {
-  description: "Set a target duration in minutes for a supported scoped final. 0 disables pacing; up to 119 minutes reserves one minute before the 120-minute exam limit. Set after final scope and before entry. Space answers across the chosen duration so the last answer targets that time, in both automatic and manual submission modes; first answer can be immediate. INT requires 50 questions; Virtual uses its observed total. Each retry starts a fresh clock; changing the duration keeps the original attempt start. On mode=pacing, wait until waitUntil in interruptible chunks of at most 60 seconds and retry the same action. Elapsed slots add no extra wait. Website or reasoning delays can overrun the target; exact wall-clock completion is not guaranteed. Does not itself sleep or run an exam.",
-  inputSchema: { durationMinutes: external_exports.number().min(0).max(119) },
+  description: "Choose exactly one timing mode: durationMinutes means elapsed minutes from entry (existing behavior); finishAtRemaining is a website displayed countdown target HH:MM:SS, e.g. 01:50:00 means finish with 110 minutes LEFT, not work for 110 minutes. Ask before configuring if the user is ambiguous. Countdown mode supports INT Project and Virtual School final exams, reads their actual visible timer, spaces remaining questions mid-attempt and resets each Loop attempt. Virtual School uses the blue \u0E40\u0E27\u0E25\u0E32\u0E2A\u0E2D\u0E1A card; its non-final elapsed timer is never a countdown. For pacing action=waiting retry after its bounded waitUntil; timer_* actions are non-mutating blockers: inspect the timer, never silently substitute elapsed time. Set a target duration in minutes for a supported scoped final. 0 disables pacing; up to 119 minutes reserves one minute before the 120-minute exam limit. Set after final scope and before entry. Space answers across the chosen duration so the last answer targets that time, in both automatic and manual submission modes; first answer can be immediate. INT requires 50 questions; Virtual uses its observed total. Each retry starts a fresh clock; changing the duration keeps the original attempt start. On mode=pacing, wait until waitUntil in interruptible chunks of at most 60 seconds and retry the same action. Elapsed slots add no extra wait. Website or reasoning delays can overrun the target; exact wall-clock completion is not guaranteed. Does not itself sleep or run an exam.",
+  inputSchema: { durationMinutes: external_exports.number().min(0).max(119).optional(), finishAtRemaining: external_exports.string().regex(/^(?:00|01):[0-5]\d:[0-5]\d$/u).optional() },
   annotations: { destructiveHint: false }
 }, async (payload) => toolResult(await requestBrowser("set_exam_pacing", payload)));
 server.registerTool(
@@ -35911,7 +35926,7 @@ server.registerTool(
 server.registerTool(
   "submit_current_exam",
   {
-    description: "Within configured scope, perform one guarded step of submitting the whole exact current exam for grading; this records the website result. An explicit user request for Loop authorizes this step as part of its answer-submit-review-retry cycle, so do not add a new conversational confirmation after the answers. Normal must obtain its automatic/manual choice before answering. Respect an actual platform approval rejection; this tool does not override it. Normal course scopes require autoSubmit=true; otherwise returns awaiting_user_submission without clicking. This setting does not block per-question Save. INT verifies saved answers through its answer sheet first; Virtual School uses its scoped answer ledger and known confirmation. Use the examCode returned by each step. Same-attempt codes can follow the site's final-question behavior. mode=resync means nothing was submitted: retry with the returned current examCode in the same scope, without reloading. Inspect each returned action and repeat the required submission steps only for the authorized exam.",
+    description: "Within configured scope, perform one guarded step of submitting the whole exact current exam for grading; this records the website result. An explicit user request for Loop authorizes this step as part of its answer-submit-review-retry cycle, so do not add a new conversational confirmation after the answers. Normal must obtain its automatic/manual choice before answering. Respect an actual platform approval rejection; this tool does not override it. Normal course scopes require autoSubmit=true; otherwise returns awaiting_user_submission without clicking. This setting does not block per-question Save. INT verifies saved answers through its answer sheet first; Virtual School uses its scoped answer ledger and known confirmation. Use the examCode returned by each step. Same-attempt codes can follow the site's final-question behavior. mode=resync means nothing was submitted: retry with the returned current examCode in the same scope, without reloading. Inspect each returned action and repeat only unfinished submission steps for the authorized exam. confirmed and already_submitted end submission: call read_exam_result next, never submit again for that attempt. An INT final already_submitted acknowledgement performs no submission and does not block review.",
     inputSchema: { examCode: external_exports.string().min(1) }
   },
   async ({ examCode }) => toolResult(await requestBrowser("submit_current_exam", { examCode }))
